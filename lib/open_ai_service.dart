@@ -8,7 +8,7 @@ var openAIApiKey = dotenv.env[
 
 class OpenAiService {
   var assistant;
-  var thread;
+  var threadId;
 
   // declaring a messages List to maintain chat history
   final List<Map<String, String>> messages = [
@@ -22,24 +22,29 @@ class OpenAiService {
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
     //if no thread, create a thread
-    thread ??= createThread().then((value) => {
+    if (threadId == null) {
+      threadId = await createThread();
+    }
+    /*threadId ??= await createThread().then((value) => {
           // ignore: avoid_print
-          //print(value)
+          threadId = value,
           //return value
           //return value
-        });
+        });*/
 
     //attach message(s) to thread as user
+
+    debugPrint(threadId);
 
     //run assistnat on the thread
 
     //poll thread every 500ms until completed then dispose
     //Timer.periodic(Duration(seconds: 1), (_) => loadUser());
 
-    return thread;
+    return threadId;
   }
 
-  Future createThread() async {
+  Future<String> createThread() async {
     // post the prompt to the API and receive response
     //try {
     final res = await http.post(
