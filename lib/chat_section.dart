@@ -73,7 +73,7 @@ class _ChatSectionState extends State<ChatSection> {
                             ),
                             child: Text(
                               chatSpeech == ""
-                                  ? "HEY ! How may I help you?"
+                                  ? "Patient enters the room and says 'Hello'"
                                   : chatSpeech,
                               style: const TextStyle(
                                 //color: Pallete.borderColor,
@@ -150,9 +150,11 @@ class _ChatSectionState extends State<ChatSection> {
                       showLoader = true;
                     },
                   );
-                  final speech = await openAiService.chatGPTApi(prompt);
+                  //final speech = await openAiService.chatGPTApi(prompt);
+                  final speech = await openAiService
+                      .getAssistantResponseFromMessage(prompt);
                   setState(() {
-                    chatSpeech = speech;
+                    //chatSpeech = speech;
                     showLoader = false;
                   });
                   // print(speech);

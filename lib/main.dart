@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'homepage.dart';
+import 'package:flutter_ai_chat/homepage.dart';
 
 // the main function is made async. This enables us to use await keyword with dotenv inside.
 Future<void> main() async {
