@@ -154,7 +154,7 @@ class _ChatSectionState extends State<ChatSection> {
                   final speech = await openAiService
                       .getAssistantResponseFromMessage(prompt);
                   setState(() {
-                    //chatSpeech = speech;
+                    chatSpeech = speech;
                     showLoader = false;
                   });
                   // print(speech);

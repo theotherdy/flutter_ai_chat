@@ -92,7 +92,7 @@ class OpenAiService {
         debugPrint(messages.toString());
       }
     });
-    return _threadId;
+    return messages;
   }
 
   /// Creates a thread.
