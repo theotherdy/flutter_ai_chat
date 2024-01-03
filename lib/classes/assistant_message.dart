@@ -1,4 +1,5 @@
-//Written by ChatGPT!
+//Written by ChatGPT, with a hbit of help around deadling with potentially null values of class proprties ie ? if they really will be null or required if they won't
+//see: https://platform.openai.com/docs/api-reference/messages/object
 class MessageText {
   String value;
   List<dynamic> annotations;

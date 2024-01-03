@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'open_ai_service.dart';
+import 'package:flutter_ai_chat/classes/local_message.dart';
+import 'services/open_ai_service.dart';
 
 class ChatSection extends StatefulWidget {
   const ChatSection({super.key});
@@ -151,10 +152,11 @@ class _ChatSectionState extends State<ChatSection> {
                     },
                   );
                   //final speech = await openAiService.chatGPTApi(prompt);
-                  final speech = await openAiService
-                      .getAssistantResponseFromMessage(prompt);
+                  Future<List<LocalMessage>> localMessagesFuture =
+                      await openAiService
+                          .getAssistantResponseFromMessage(prompt);
                   setState(() {
-                    chatSpeech = speech;
+                    //chatSpeech = speech;
                     showLoader = false;
                   });
                   // print(speech);

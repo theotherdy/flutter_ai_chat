@@ -4,50 +4,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dot_env package
 import 'package:http/http.dart' as http; // http package
 
-import 'assistant_message.dart';
+import '../classes/assistant_message.dart';
+import '../classes/local_message.dart';
 
 var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 
 class OpenAiService {
-  String _assistantId = "asst_oLP6zXce2HxRuR4dDPBDt3IM";
+  String _assistantId =
+      "asst_oLP6zXce2HxRuR4dDPBDt3IM"; //set to existing asistant - will need to work out how to link with different scenarios on home page
   String _threadId = "";
   String _lastMessageId = "";
 
-  // declaring a messages List to maintain chat history
-  final List<Map<String, String>> messages = [
-    {
-      "role": "user",
-      "content": "Ensure all responses within 200 words",
-    },
-  ];
-
   /// Gets a response from the assistant for a message.
   ///
-  /// Returns a [?] or an error message
+  /// Returns a <List<LocalMessage>> of messages recieved from the Assistant AI
 
   Future getAssistantResponseFromMessage(String message) async {
+    // declaring a messages List to collate chat history
+    final List<LocalMessage> messages = [];
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
     //if no thread, create a thread
     if (_threadId == "") {
       _threadId = await _createThread();
     }
-    //debugPrint(_threadId);
 
     //attach message(s) to thread as user
     var messageId;
     if (_threadId != "" && message != "") {
       messageId = await _addMesageToThread(message, _threadId);
     }
-    //debugPrint(messageId);
 
     //run assistant on the thread
     var runId;
     if (_assistantId != "" && _threadId != "") {
       runId = await _runAssistantOnThread(_assistantId, _threadId);
     }
-    //debugPrint(runId);
 
     //poll thread every 500ms until completed then dispose
     Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -57,15 +50,11 @@ class OpenAiService {
         (runComplete, statusText) =
             await _isRunOnThreadComplete(runId, _threadId);
       }
-      //debugPrint(runComplete.toString());
-      //debugPrint(statusText);
       if (runComplete == true) {
         timer.cancel();
         //Now that we know the run has completed, return the new messages
         List<dynamic>? returnedMessages;
-        //String statusText = "";
         if (_threadId != "") {
-          //debugPrint("About to read messages");
           if (_lastMessageId != "") {
             (returnedMessages, statusText) =
                 await _getMessagesFromThread(_threadId, _lastMessageId);
@@ -74,19 +63,21 @@ class OpenAiService {
                 await _getMessagesFromThread(_threadId);
           }
         }
-        //debugPrint(returnedMessages.toString());
-        //debugPrint(statusText);
-        //now pull messages out into the messages Map, and update the last loaded message so we don't have to work out where we had got to...
+        //now pull messages out into the messages List
         if (returnedMessages != null) {
           for (var returnedMessage in returnedMessages) {
             final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-            //debugPrint(returnedMessage.toString());
             debugPrint(assistantMessage.toString());
-            messages.add({
-              'role': assistantMessage.role,
-              'content': assistantMessage.content[0].text.value,
-            });
-            _lastMessageId = assistantMessage.id;
+            if (assistantMessage.role != "user") {
+              //discard role:user messages
+              messages.add(//{
+                  LocalMessage(
+                      time: DateTime.now(),
+                      role: assistantMessage.role,
+                      content: assistantMessage.content[0].text.value));
+            }
+            _lastMessageId = assistantMessage
+                .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
           }
         }
         debugPrint(messages.toString());
