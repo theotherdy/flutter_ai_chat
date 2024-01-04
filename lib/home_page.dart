@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'chat_section.dart';
 import 'widgets/gradient_text.dart';
 
 class HomePage extends StatelessWidget {
@@ -91,17 +90,18 @@ class HomePage extends StatelessWidget {
                       ),
                       const Padding(
                         padding: EdgeInsets.only(left: 16.0),
-                        child: DecoratedBox(
+                        child: /*DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage("assets/images/icon.png"),
                                 fit: BoxFit.cover),
                           ),
-                          child: SizedBox(
-                            height: 150,
-                            width: 150,
-                          ),
+                          child: */
+                            SizedBox(
+                          height: 150,
+                          width: 150,
                         ),
+                        //),
                       )
                     ],
                   ),

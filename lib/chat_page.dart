@@ -143,14 +143,19 @@ class _ChatPageState extends State<ChatPage> {
                         _scrollController.jumpTo(
                           _scrollController.position.maxScrollExtent,
                         );
-                        List<LocalMessage> aiResponses =
-                            await openAiService.getAssistantResponseFromMessage(
-                                tempChatHistoryContent);
-                        for (var aiResponse in aiResponses) {
-                          setState(() {
-                            _chatHistory.add(aiResponse);
-                          });
-                        }
+                        openAiService
+                            .getAssistantResponseFromMessage(
+                                tempChatHistoryContent)
+                            .then((aiResponses) {
+                          debugPrint("checking I'm here");
+                          debugPrint(aiResponses.toString());
+                          for (var aiResponse in aiResponses) {
+                            debugPrint(aiResponse.content);
+                            setState(() {
+                              _chatHistory.add(aiResponse);
+                            });
+                          }
+                        });
                       }
                     },
                     shape: RoundedRectangleBorder(
