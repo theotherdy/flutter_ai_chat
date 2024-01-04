@@ -52,7 +52,7 @@ class OpenAiService {
 
     //get messages from completed run
     if (_runComplete && _threadId != "") {
-      messages = await _getCompletedResponse(_threadId, _lastMessageId);
+      messages = await _getCompletedResponse(_threadId);
     }
 
     return messages;
@@ -240,12 +240,11 @@ class OpenAiService {
     }
   }
 
-  /// Chcek for completion of run with [runId] from a thread with [threadId], with optionally, a [afterMessageId] to specify message after which to return messages.
+  /// Chcek for completion of run with [runId] from a thread with [threadId]
   ///
   /// Returns a <List<LocalMessage>> of the the messages
 
-  Future<List<LocalMessage>> _getCompletedResponse(threadId,
-      [afterMessageId]) async {
+  Future<List<LocalMessage>> _getCompletedResponse(threadId) async {
     List<LocalMessage> messages = [];
 
     //Now that we know the run has completed, return the new messages

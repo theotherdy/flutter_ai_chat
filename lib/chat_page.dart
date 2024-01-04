@@ -140,9 +140,18 @@ class _ChatPageState extends State<ChatPage> {
                           _chatController.clear();
                         });
 
-                        _scrollController.jumpTo(
-                          _scrollController.position.maxScrollExtent,
-                        );
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(seconds: 1),
+                            curve: Curves.fastOutSlowIn,
+                          );
+                        });
+
+                        /*_scrollController.jumpTo(
+                            _scrollController.position.maxScrollExtent,
+                          );*/
+
                         openAiService
                             .getAssistantResponseFromMessage(
                                 tempChatHistoryContent)
@@ -155,6 +164,13 @@ class _ChatPageState extends State<ChatPage> {
                               _chatHistory.add(aiResponse);
                             });
                           }
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _scrollController.animateTo(
+                              _scrollController.position.maxScrollExtent,
+                              duration: const Duration(seconds: 1),
+                              curve: Curves.fastOutSlowIn,
+                            );
+                          });
                         });
                       }
                     },
