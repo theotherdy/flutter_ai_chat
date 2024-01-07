@@ -25,7 +25,7 @@ class TextMessage extends StatelessWidget {
       decoration: BoxDecoration(
         color: kPrimaryColor
             .withOpacity(message!.role == LocalMessageRole.user ? 1 : 0.1),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         message!.text
@@ -35,6 +35,7 @@ class TextMessage extends StatelessWidget {
               ? Colors.white
               : Theme.of(context).textTheme.bodyLarge!.color,
         ),
+        //softWrap: true,
       ),
     );
   }

@@ -34,9 +34,10 @@ class Message extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
       child: Row(
-        mainAxisAlignment: message.role == "user"
+        mainAxisAlignment: message.role == LocalMessageRole.user
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
         children: [
           if (message.role != LocalMessageRole.user) ...[
             const CircleAvatar(
@@ -45,8 +46,7 @@ class Message extends StatelessWidget {
             ),
             const SizedBox(width: kDefaultPadding / 2),
           ],
-          messageContent(message),
-          //if (message.role == "user") MessageStatusDot(status: message.messageStatus)*/
+          Flexible(child: messageContent(message)),
         ],
       ),
     );

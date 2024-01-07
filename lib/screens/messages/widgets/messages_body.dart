@@ -26,18 +26,26 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   @override
   Widget build(BuildContext context) {
+    //return Column(
+    //  children: [
+    //    Expanded(
+    //      child: Padding(
+
     return Column(
       children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-            child: ListView.builder(
-              itemCount: _chatHistory.length,
-              controller: _scrollController,
-              itemBuilder: (context, index) =>
-                  Message(message: _chatHistory[index]),
-            ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+          //get max height
+          height: MediaQuery.of(context).size.height - 160,
+          child: ListView.builder(
+            itemCount: _chatHistory.length,
+            shrinkWrap: false,
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            itemBuilder: (context, index) =>
+                Message(message: _chatHistory[index]),
           ),
+          //),
         ),
         //todo - move this out into a separate chat_input widget
         Container(
@@ -71,14 +79,6 @@ class _MessagesBodyState extends State<MessagesBody> {
                     ),
                     child: Row(
                       children: [
-                        /*Icon(
-                          Icons.sentiment_satisfied_alt_outlined,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .color!
-                              .withOpacity(0.64),
-                        ),*/
                         const SizedBox(width: kDefaultPadding / 4),
                         Expanded(
                           child: TextField(
@@ -141,23 +141,6 @@ class _MessagesBodyState extends State<MessagesBody> {
                             });
                           },
                         ),
-                        /*Icon(
-                          Icons.attach_file,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .color!
-                              .withOpacity(0.64),
-                        ),*/
-                        /*const SizedBox(width: kDefaultPadding / 4),
-                        Icon(
-                          Icons.camera_alt_outlined,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .color!
-                              .withOpacity(0.64),
-                        ),*/
                       ],
                     ),
                   ),
