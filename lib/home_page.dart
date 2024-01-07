@@ -60,7 +60,7 @@ class HomePage extends StatelessWidget {
                                 top: 8.0, left: 16.0, bottom: 16.0),
                             child: (TextButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/chat');
+                                  Navigator.pushNamed(context, '/messages');
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:

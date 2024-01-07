@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dot_env package
 import 'package:http/http.dart' as http; // http package
 
-import '../classes/assistant_message.dart';
-import '../classes/local_message.dart';
+import '../models/assistant_message.dart';
+import '../models/local_message.dart';
 
 var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
@@ -270,8 +270,9 @@ class OpenAiService {
           messages.add(//{
               LocalMessage(
                   time: DateTime.now(),
-                  role: assistantMessage.role,
-                  content: assistantMessage.content[0].text.value));
+                  role: LocalMessageRole.ai,
+                  type: LocalMessageType.text,
+                  text: assistantMessage.content[0].text.value));
         }
         _lastMessageId = assistantMessage
             .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
@@ -280,90 +281,4 @@ class OpenAiService {
     debugPrint(messages.toString());
     return messages;
   }
-
-  /*Future<List<LocalMessage>?> _getCompletedResponse(runId, threadId,
-      [afterMessageId]) async {
-    List<LocalMessage> messages = [];
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      bool? runComplete = false;
-      String statusText = "";
-      if (runId != null) {
-        (runComplete, statusText) =
-            await _isRunOnThreadComplete(runId, _threadId);
-      }
-      if (runComplete == true) {
-        timer.cancel();
-        //Now that we know the run has completed, return the new messages
-        List<dynamic>? returnedMessages;
-        if (_threadId != "") {
-          if (_lastMessageId != "") {
-            (returnedMessages, statusText) =
-                await _getMessagesFromThread(_threadId, _lastMessageId);
-          } else {
-            (returnedMessages, statusText) =
-                await _getMessagesFromThread(_threadId);
-          }
-        }
-        //now pull messages out into the messages List
-        if (returnedMessages != null) {
-          for (var returnedMessage in returnedMessages) {
-            final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-            debugPrint(assistantMessage.toString());
-            if (assistantMessage.role != "user") {
-              //discard role:user messages
-              messages.add(//{
-                  LocalMessage(
-                      time: DateTime.now(),
-                      role: assistantMessage.role,
-                      content: assistantMessage.content[0].text.value));
-            }
-            _lastMessageId = assistantMessage
-                .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
-          }
-        }
-        debugPrint(messages.toString());
-        if (messages.length > 0) {
-          return messages;
-        } else {
-          return;
-        }
-      }
-    });
-  }*/
-
-  /// Checks whether a run with [runId] on thread with [threadId] has status = complete.
-  ///
-  /// Returns a record of with (true or false, message)
-
-  /*Future<(bool?, String)> _isRunOnThreadComplete(runId, threadId) async {
-    try {
-      final res = await http.get(
-        Uri.parse("$openAIApiAssistantsEndpoint$threadId/runs/$runId"),
-        headers: {
-          "Authorization": "Bearer $openAIApiKey",
-          "OpenAI-Beta": "assistants=v1",
-        },
-      );
-
-      if (res.statusCode == 200) {
-        // decode the JSON response
-        Map<String, dynamic> response = jsonDecode(res.body);
-        if (response['status'] == "completed") {
-          return (true, "No problems");
-        } else {
-          return (false, "No problems");
-        }
-      } else {
-        var statusCode = res.statusCode.toString();
-        return (
-          null,
-          "OOPS! An Error occured in checking the completion of $runId on the thread $threadId. Status code: $statusCode"
-        );
-      }
-    } catch (error) {
-      return (null, error.toString());
-    }
-  }*/
 }
-
-//}

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'home_page.dart';
-import 'chat_page.dart';
+import 'theme.dart';
+import 'screens/messages/MessagesScreen.dart';
 
 // the main function is made async. This enables us to use await keyword with dotenv inside.
 Future<void> main() async {
@@ -18,17 +19,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Patients Comms Skills Practicer',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
-        useMaterial3: true,
-      ),
-      //home: const HomePage(
-      //  title: 'Patient Chat',
-      //),
+      theme: lightThemeData(context),
+      darkTheme: darkThemeData(context),
+      themeMode: ThemeMode.light,
       initialRoute: HomePage.routeName,
       routes: {
         HomePage.routeName: (context) => const HomePage(),
-        ChatPage.routeName: (context) => const ChatPage(),
+        MessagesScreen.routeName: (context) => const MessagesScreen(),
       },
     );
   }
