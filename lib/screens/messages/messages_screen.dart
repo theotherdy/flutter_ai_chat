@@ -8,30 +8,34 @@ import 'package:flutter_ai_chat/screens/messages/widgets/messages_body.dart';
 //import 'classes/local_message.dart';
 
 class MessagesScreen extends StatelessWidget {
-  const MessagesScreen({Key? key}) : super(key: key);
+  const MessagesScreen({super.key});
   static const routeName = '/messages';
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    String assistantId = args['assistantId'];
+    debugPrint(assistantId);
     return Scaffold(
       appBar: buildAppBar(),
-      body: const MessagesBody(),
+      body: MessagesBody(assistantId: assistantId),
     );
   }
 
   AppBar buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Row(
+      title: const Row(
         children: [
-          const BackButton(),
-          const CircleAvatar(
-            backgroundImage: AssetImage("assets/images/back_pain.png"),
+          BackButton(),
+          CircleAvatar(
+            backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
           ),
-          const SizedBox(width: kDefaultPadding * 0.75),
+          SizedBox(width: kDefaultPadding * 0.75),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 "Patient with back pain",
                 style: TextStyle(fontSize: 16),
@@ -44,8 +48,8 @@ class MessagesScreen extends StatelessWidget {
           )
         ],
       ),
-      actions: [
-        IconButton(
+      actions: const [
+        /*IconButton(
           icon: const Icon(Icons.local_phone),
           onPressed: () {},
         ),
@@ -53,7 +57,7 @@ class MessagesScreen extends StatelessWidget {
           icon: const Icon(Icons.videocam),
           onPressed: () {},
         ),
-        const SizedBox(width: kDefaultPadding / 2),
+        const SizedBox(width: kDefaultPadding / 2),*/
       ],
     );
   }

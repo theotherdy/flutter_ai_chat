@@ -24,9 +24,12 @@ class OpenAiService {
   ///
   /// Returns a <List<LocalMessage>> of messages recieved from the Assistant AI
 
-  Future getAssistantResponseFromMessage(String message) async {
+  Future getAssistantResponseFromMessage(String message, assistantId) async {
     // declaring a messages List to collate chat history
     List<LocalMessage> messages = [];
+    _assistantId = assistantId;
+
+    debugPrint(message);
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
     //if no thread, create a thread
@@ -35,7 +38,7 @@ class OpenAiService {
     }
 
     //attach message(s) to thread as user
-    var messageId;
+    String messageId;
     if (_threadId != "" && message != "") {
       messageId = await _addMesageToThread(message, _threadId);
     }
@@ -94,6 +97,7 @@ class OpenAiService {
   /// Returns a [messageId] or an error message
 
   Future<String> _addMesageToThread(message, threadId) async {
+    debugPrint(message);
     try {
       final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/messages"),
@@ -171,7 +175,7 @@ class OpenAiService {
     int attempt = 0;
 
     while (!isComplete && attempt < maxAttempts) {
-      debugPrint('$openAIApiAssistantsEndpoint/$threadId/runs/$runId');
+      //debugPrint('$openAIApiAssistantsEndpoint/$threadId/runs/$runId');
       final response = await http.get(
         Uri.parse('$openAIApiAssistantsEndpoint/$threadId/runs/$runId'),
         headers: {
@@ -251,6 +255,7 @@ class OpenAiService {
     List<dynamic>? returnedMessages;
     String statusText = "";
     if (_threadId != "") {
+      //debugPrint("going in $_lastMessageId");
       if (_lastMessageId != "") {
         (returnedMessages, statusText) =
             await _getMessagesFromThread(_threadId, _lastMessageId);
@@ -259,12 +264,12 @@ class OpenAiService {
             await _getMessagesFromThread(_threadId);
       }
     }
-    debugPrint(statusText);
+    //debugPrint(statusText);
     //now pull messages out into the messages List
     if (returnedMessages != null) {
       for (var returnedMessage in returnedMessages) {
         final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-        debugPrint(assistantMessage.toString());
+        debugPrint(assistantMessage.content[0].text.value);
         if (assistantMessage.role != "user") {
           //discard role:user messages
           messages.add(//{
@@ -276,9 +281,10 @@ class OpenAiService {
         }
         _lastMessageId = assistantMessage
             .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
+        //debugPrint("coming out $_lastMessageId");
       }
     }
-    debugPrint(messages.toString());
+    //debugPrint(messages.toString());
     return messages;
   }
 }

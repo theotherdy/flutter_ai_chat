@@ -7,7 +7,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 class AudioMessage extends StatelessWidget {
   final LocalMessage? message;
 
-  const AudioMessage({Key? key, this.message}) : super(key: key);
+  const AudioMessage({super.key, this.message});
   @override
   Widget build(BuildContext context) {
     return Container(

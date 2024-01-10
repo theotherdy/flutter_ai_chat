@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'home_page.dart';
+//import 'home_page.dart';
 import 'theme.dart';
-import 'screens/messages/MessagesScreen.dart';
+
+import 'package:flutter_ai_chat/screens/chats/chats_screen.dart';
+import 'package:flutter_ai_chat/screens/messages/messages_screen.dart';
 
 // the main function is made async. This enables us to use await keyword with dotenv inside.
 Future<void> main() async {
@@ -22,9 +24,9 @@ class MyApp extends StatelessWidget {
       theme: lightThemeData(context),
       darkTheme: darkThemeData(context),
       themeMode: ThemeMode.light,
-      initialRoute: HomePage.routeName,
+      initialRoute: ChatsScreen.routeName,
       routes: {
-        HomePage.routeName: (context) => const HomePage(),
+        ChatsScreen.routeName: (context) => const ChatsScreen(),
         MessagesScreen.routeName: (context) => const MessagesScreen(),
       },
     );

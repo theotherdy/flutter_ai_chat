@@ -5,14 +5,15 @@ import '../../../constants.dart';
 import 'package:flutter_ai_chat/models/local_message.dart';
 
 //import 'audio_message.dart';
-import 'text_message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/text_message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/loading_message.dart';
 //import 'video_message.dart';
 
 class Message extends StatelessWidget {
   const Message({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final LocalMessage message;
 
@@ -22,6 +23,8 @@ class Message extends StatelessWidget {
       switch (message.type) {
         case LocalMessageType.text:
           return TextMessage(message: message);
+        case LocalMessageType.loading:
+          return LoadingMessage(message: message);
         /*case LocalMessageType.audio:
           return AudioMessage(message: message);
         case LocalMessageType.video:
@@ -42,7 +45,7 @@ class Message extends StatelessWidget {
           if (message.role != LocalMessageRole.user) ...[
             const CircleAvatar(
               radius: 12,
-              backgroundImage: AssetImage("assets/images/back_pain.png"),
+              backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
             ),
             const SizedBox(width: kDefaultPadding / 2),
           ],

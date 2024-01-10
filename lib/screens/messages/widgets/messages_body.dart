@@ -10,7 +10,8 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 
 class MessagesBody extends StatefulWidget {
-  const MessagesBody({Key? key}) : super(key: key);
+  final String assistantId;
+  const MessagesBody({Key? super.key, this.assistantId = ''});
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();
@@ -22,7 +23,7 @@ class _MessagesBodyState extends State<MessagesBody> {
   final OpenAiService openAiService = OpenAiService();
 
   String tempChatHistoryContent = '';
-  List<LocalMessage> _chatHistory = [];
+  final List<LocalMessage> _chatHistory = [];
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +67,8 @@ class _MessagesBodyState extends State<MessagesBody> {
           child: SafeArea(
             child: Row(
               children: [
+                const Icon(Icons.videocam, color: kPrimaryColor),
+                const SizedBox(width: kDefaultPadding),
                 const Icon(Icons.mic, color: kPrimaryColor),
                 const SizedBox(width: kDefaultPadding),
                 Expanded(
@@ -82,7 +85,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                         const SizedBox(width: kDefaultPadding / 4),
                         Expanded(
                           child: TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: "Type message",
                               border: InputBorder.none,
                             ),
@@ -103,6 +106,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                           onPressed: () {
                             setState(() {
                               tempChatHistoryContent = _chatController.text;
+                              debugPrint(tempChatHistoryContent);
                               _chatHistory.add(LocalMessage(
                                   time: DateTime.now(),
                                   type: LocalMessageType.text,
@@ -119,14 +123,31 @@ class _MessagesBodyState extends State<MessagesBody> {
                               );
                             });
 
+                            setState(() {
+                              _chatHistory.add(LocalMessage(
+                                  time: DateTime.now(),
+                                  type: LocalMessageType.loading,
+                                  role: LocalMessageRole.ai,
+                                  text: "..."));
+                            });
+
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              _scrollController.animateTo(
+                                _scrollController.position.maxScrollExtent,
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.fastOutSlowIn,
+                              );
+                            });
+
                             openAiService
                                 .getAssistantResponseFromMessage(
-                                    tempChatHistoryContent)
+                                    tempChatHistoryContent, widget.assistantId)
                                 .then((aiResponses) {
-                              debugPrint("checking I'm here");
-                              debugPrint(aiResponses.toString());
+                              //debugPrint("checking I'm here");
+                              //debugPrint(aiResponses.toString());
                               for (var aiResponse in aiResponses) {
                                 debugPrint(aiResponse.text);
+                                _chatHistory.removeLast(); //our loading message
                                 setState(() {
                                   _chatHistory.add(aiResponse);
                                 });

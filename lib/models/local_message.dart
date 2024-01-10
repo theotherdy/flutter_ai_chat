@@ -1,4 +1,4 @@
-enum LocalMessageType { text, audio, image, video }
+enum LocalMessageType { text, audio, image, video, loading }
 
 enum LocalMessageRole { user, ai }
 
