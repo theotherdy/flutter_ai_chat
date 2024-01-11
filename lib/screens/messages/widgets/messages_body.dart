@@ -11,7 +11,7 @@ import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 
 class MessagesBody extends StatefulWidget {
   final String assistantId;
-  const MessagesBody({Key? super.key, this.assistantId = ''});
+  const MessagesBody({super.key, this.assistantId = ''});
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_ai_chat/models/chats_data.dart';
+import 'package:flutter_ai_chat/screens/chats/widgets/difficulty_indicator.dart';
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
@@ -44,7 +45,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Patient Chats'),
+        title: const Text('Patient Chats'),
       ),
       body: Column(
         children: [
@@ -55,7 +56,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButton<SortOption>(
                   value: sortOption,
-                  items: [
+                  items: const [
                     DropdownMenuItem<SortOption>(
                       value: SortOption.titleAscending,
                       child: Text('Sort by Title (Ascending)'),
@@ -99,19 +100,22 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     backgroundImage: AssetImage(chats[index].avatar),
                   ),
                   title: Text(chats[index].title),
-                  subtitle: Row(
-                    children: [
-                      Text(chats[index].subTitle),
-                      SizedBox(width: 10),
-                      if (chats[index].attempts > 0)
-                        Text('(${chats[index].attempts} attempts)'),
-                    ],
-                  ),
-                  trailing: Icon(
-                    chats[index].attempts > 0
-                        ? Icons.check
-                        : Icons.check_box_outline_blank,
-                  ),
+                  subtitle:
+                      DifficultyIndicator(difficulty: chats[index].difficulty),
+                  trailing: () {
+                    //todo extract to a widget
+                    if (chats[index].attempts == 1) {
+                      return const Icon(Icons.check, color: Colors.green);
+                    } else if (chats[index].attempts > 1) {
+                      return Badge.count(
+                        count: chats[index].attempts,
+                        backgroundColor: Colors.blue,
+                        child: const Icon(Icons.check, color: Colors.green),
+                      );
+                    } else {
+                      return const Icon(Icons.check, color: Colors.grey);
+                    }
+                  }(),
                   onTap: () {
                     Navigator.pushNamed(
                       context,
