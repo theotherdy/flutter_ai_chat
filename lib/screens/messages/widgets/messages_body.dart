@@ -35,23 +35,22 @@ class _MessagesBodyState extends State<MessagesBody> {
       builder: (BuildContext context) {
         return Container(
           padding: EdgeInsets.all(16.0),
-          child: CameraModal(onVideoRecorded: (path) {
+          child: CameraModal(onVideoRecorded: (filePath) {
             // Callback function when file is selected in CameraModal
-            debugPrint('I have file path in MessagesBody $path');
+            debugPrint('I have file path in MessagesBody $filePath');
             setState(() {
-              _cameraFilePath = path;
+              //add video message to list of messages
+               _chatHistory.add(LocalMessage(
+                  time: DateTime.now(),
+                  type: LocalMessageType.video,
+                  role: LocalMessageRole.user,
+                  text: filePath));
+              //_cameraFilePath = path;
             });
           })
         );
       },
     );
-    // Handle the result (file path) returned from CameraModal
-    if (filePath.toString() != "cancelled") {
-      setState(() {
-        _cameraFilePath = filePath.toString();
-        debugPrint(_cameraFilePath);
-      });
-    }
   }
 
   @override
