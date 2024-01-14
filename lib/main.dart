@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Patients Comms Skills Practicer',
       theme: lightThemeData(context),
       darkTheme: darkThemeData(context),
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
       initialRoute: ChatsScreen.routeName,
       routes: {
         ChatsScreen.routeName: (context) => const ChatsScreen(),
