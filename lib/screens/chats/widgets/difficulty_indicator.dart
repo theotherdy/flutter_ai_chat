@@ -21,7 +21,7 @@ class DifficultyIndicator extends StatelessWidget {
 
     return Row(children: <Widget>[
       Icon(Icons.circle, color: _getIconColor(), size: 15),
-      SizedBox(width: kDefaultPadding * 0.25),
+      const SizedBox(width: kDefaultPadding * 0.25),
       Text(_getText()),
     ]);
   }
