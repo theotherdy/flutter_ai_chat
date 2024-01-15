@@ -6,6 +6,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 
 //import 'audio_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/text_message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/video_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/loading_message.dart';
 //import 'video_message.dart';
 
@@ -26,9 +27,10 @@ class Message extends StatelessWidget {
         case LocalMessageType.loading:
           return LoadingMessage(message: message);
         /*case LocalMessageType.audio:
-          return AudioMessage(message: message);
+          return AudioMessage(message: message);*/
         case LocalMessageType.video:
-          return const VideoMessage();*/
+          debugPrint(message.filePath.toString());
+          return VideoMessage(message: message);
         default:
           return const SizedBox();
       }

@@ -7,11 +7,13 @@ class LocalMessage {
   LocalMessageRole role;
   LocalMessageType type;
   String? text = '';
+  String? filePath = '';
 
   LocalMessage({
     required this.time,
     required this.role,
     required this.type,
     this.text,
+    this.filePath,
   });
 }

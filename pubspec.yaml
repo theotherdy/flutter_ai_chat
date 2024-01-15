@@ -35,7 +35,7 @@ dependencies:
   # allows us to easily use any of the 977 fonts from fonts.google.com
   google_fonts: ^6.1.0
   jumping_dot: ^0.0.6
-  camera: ^0.9.4+3
+  camera: ^0.10.5+9
   video_player: ^2.2.6
 
 

@@ -8,6 +8,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 
 //import 'package:chat/models/ChatMessage.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/camera_modal.dart';
 
 class MessagesBody extends StatefulWidget {
   final String assistantId;
@@ -24,6 +25,33 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
+
+  //String _cameraFilePath = ''; // Store the file path received from CameraModal
+
+  void _showCameraModal(BuildContext context) async {
+    showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true, // Set to true for full-screen modal
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: CameraModal(onVideoRecorded: (filePath) {
+            // Callback function when file is selected in CameraModal
+            debugPrint('I have file path in MessagesBody $filePath');
+            setState(() {
+              //add video message to list of messages
+               _chatHistory.add(LocalMessage(
+                  time: DateTime.now(),
+                  type: LocalMessageType.video,
+                  role: LocalMessageRole.user,
+                  filePath: filePath));
+              //_cameraFilePath = path;
+            });
+          })
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +95,21 @@ class _MessagesBodyState extends State<MessagesBody> {
           child: SafeArea(
             child: Row(
               children: [
-                const Icon(Icons.videocam, color: kPrimaryColor),
+                IconButton(
+                  icon: Icon(
+                    Icons.videocam,
+                    color: kPrimaryColor,
+                  ),
+                  // the method which is called
+                  // when button is pressed
+                  onPressed: () {
+                    _showCameraModal(context);
+                  }
+                ),
+                //const Icon(Icons.videocam, color: kPrimaryColor),
                 const SizedBox(width: kDefaultPadding),
-                const Icon(Icons.mic, color: kPrimaryColor),
-                const SizedBox(width: kDefaultPadding),
+                /*const Icon(Icons.mic, color: kPrimaryColor),
+                const SizedBox(width: kDefaultPadding),*/
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
