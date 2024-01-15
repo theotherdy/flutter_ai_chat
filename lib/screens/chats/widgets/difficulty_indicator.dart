@@ -9,7 +9,7 @@ class DifficultyIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> iconList = [];
+    //List<Widget> iconList = [];
 
     /*for (int i = 0; i < 3; i++) {
       if (i < difficulty) {

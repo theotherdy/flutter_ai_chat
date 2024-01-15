@@ -15,13 +15,13 @@ class _CameraModalState extends State<CameraModal> {
   bool _isLoading = true;
   bool _isRecording = false;
   late CameraController _cameraController;
-  
+
   @override
   void initState() {
     super.initState();
     _initCamera();
   }
-  
+
   @override
   void dispose() {
     _cameraController.dispose();
@@ -75,7 +75,8 @@ class _CameraModalState extends State<CameraModal> {
 
   _initCamera() async {
     final cameras = await availableCameras();
-    final front = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front);
+    final front = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.front);
     _cameraController = CameraController(front, ResolutionPreset.max);
     await _cameraController.initialize();
     setState(() => _isLoading = false);
