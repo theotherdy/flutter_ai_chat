@@ -9,15 +9,16 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 
 
 class VideoPlayerWrapper extends StatefulWidget {
-  final LocalMessage? message = null;
-
-  const VideoPlayerWrapper({super.key, required message});
+  LocalMessage? message;
+  VideoPlayerWrapper({super.key, required this.message});  //don't forget to add this. before passed parameters!!!
 
   @override
   State<VideoPlayerWrapper> createState() => _VideoPlayerWrapperState();
 }
 
 class _VideoPlayerWrapperState extends State<VideoPlayerWrapper> {
+  //
+
   late VideoPlayerController _videoPlayerController;
 
   @override
@@ -27,8 +28,10 @@ class _VideoPlayerWrapperState extends State<VideoPlayerWrapper> {
   }
 
   Future _initVideoPlayer() async {
-    String filePath = '';
-    if(widget.message?.filePath.toString() != '') {
+    String filePath;
+    debugPrint('Im in _initVideoPLayer');
+    debugPrint(widget.message!.filePath);
+    if(widget.message != null && widget.message!.filePath.toString() != '') {
       filePath = widget.message!.filePath.toString();
       _videoPlayerController = VideoPlayerController.file(File(filePath));
       await _videoPlayerController.initialize();

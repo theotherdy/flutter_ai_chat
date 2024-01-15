@@ -6,11 +6,19 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/video_player_wrapper.dart';
 
 class VideoMessage extends StatelessWidget {
-  final LocalMessage? message = null;
-  const VideoMessage({super.key, message});
+  LocalMessage? message;
+  
+  VideoMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Im in VideoMessage');
+    if(message != null){
+      String videoMessageFilePath = message!.filePath.toString();
+      debugPrint('Im in VideoMessage $videoMessageFilePath');
+      
+    }
+    
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45, // 45% of total width
       child: AspectRatio(

@@ -26,10 +26,10 @@ class _MessagesBodyState extends State<MessagesBody> {
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
 
-  String _cameraFilePath = ''; // Store the file path received from CameraModal
+  //String _cameraFilePath = ''; // Store the file path received from CameraModal
 
   void _showCameraModal(BuildContext context) async {
-    final filePath = showModalBottomSheet<String>(
+    showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true, // Set to true for full-screen modal
       builder: (BuildContext context) {
@@ -44,7 +44,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                   time: DateTime.now(),
                   type: LocalMessageType.video,
                   role: LocalMessageRole.user,
-                  text: filePath));
+                  filePath: filePath));
               //_cameraFilePath = path;
             });
           })

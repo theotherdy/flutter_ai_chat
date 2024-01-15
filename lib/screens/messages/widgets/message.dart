@@ -29,7 +29,8 @@ class Message extends StatelessWidget {
         /*case LocalMessageType.audio:
           return AudioMessage(message: message);*/
         case LocalMessageType.video:
-          return const VideoMessage();
+          debugPrint(message.filePath.toString());
+          return VideoMessage(message: message);
         default:
           return const SizedBox();
       }

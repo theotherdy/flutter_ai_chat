@@ -36,6 +36,7 @@ class _CameraModalState extends State<CameraModal> {
       // Pass the file path back to the caller
       // Use the callback to pass the file path back to the parent
       widget.onVideoRecorded(file.path);
+      Navigator.pop(context);
     } else {
       await _cameraController.prepareForVideoRecording();
       await _cameraController.startVideoRecording();
