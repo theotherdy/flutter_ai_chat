@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 //import 'package:flutter_ai_chat/constants.dart';
 import 'package:flutter_ai_chat/models/local_message.dart';
 
-import 'package:flutter_ai_chat/screens/messages/widgets/video_player_wrapper.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/video_thumnail.dart';
 
 class VideoMessage extends StatelessWidget {
   final LocalMessage? message;
@@ -20,7 +20,7 @@ class VideoMessage extends StatelessWidget {
 
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45, // 45% of total width
-      child: VideoPlayerWrapper(message: message),
+      child: VideoThumbnail(message: message),
       /*child: AspectRatio(
           aspectRatio: 1.6, child: VideoPlayerWrapper(message: message)
           child: Stack(
