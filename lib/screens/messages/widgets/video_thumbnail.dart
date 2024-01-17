@@ -1,7 +1,62 @@
 //Adapted from: https://github.com/bettercoding-dev/flutter-video/blob/master/lib/video_page.dart
 //but developed with a lot of help from ChatGPT
+//import 'dart:io';
+//import 'dart:math';
 
-import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:flutter_ai_chat/constants.dart';
+
+import 'package:flutter_ai_chat/screens/messages/video_utils.dart';
+//import 'package:flutter_ai_chat/screens/messages/widgets/video_dialog.dart';
+
+class VideoThumbnail extends StatelessWidget {
+  final VideoPlayerController controller;
+
+  const VideoThumbnail({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    double maxWidth = MediaQuery.of(context).size.width * 0.45;
+    double aspectRatio =
+        16 / 9; // Desired aspect ratio - always a landscape shape
+
+    double rectWidth = maxWidth;
+    double rectHeight = rectWidth / aspectRatio;
+
+    double videoWidth =
+        VideoUtils.calculateVideoDimensions(controller, rectWidth, rectHeight)
+            .width;
+    double videoHeight =
+        VideoUtils.calculateVideoDimensions(controller, rectWidth, rectHeight)
+            .height;
+
+    return Container(
+      width: rectWidth,
+      height: rectHeight,
+      decoration: BoxDecoration(
+        color: kPrimaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: videoWidth,
+            height: videoHeight,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: VideoPlayer(controller),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/*import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -209,4 +264,28 @@ class __VideoPlayerState extends State<_VideoPlayer> {
     _controller.dispose();
     super.dispose();
   }
-}
+}*/
+
+//Replacement from ChatGPT
+
+/*void main() {
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Video Player Demo'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Display video thumbnail
+              VideoThumbnail(filePath: 'path_to_your_video.mp4'),
+              // ... Add more widgets as needed
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}*/
