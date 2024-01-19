@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:flutter_ai_chat/screens/messages/video_utils.dart';
+import 'package:flutter_ai_chat/screens/messages/utils/video_utils.dart';
 
 class VideoPlayerControls extends StatefulWidget {
   final VideoPlayerController controller;

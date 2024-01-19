@@ -8,7 +8,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:flutter_ai_chat/constants.dart';
 
-import 'package:flutter_ai_chat/screens/messages/video_utils.dart';
+import 'package:flutter_ai_chat/screens/messages/utils/video_utils.dart';
 //import 'package:flutter_ai_chat/screens/messages/widgets/video_dialog.dart';
 
 class VideoThumbnail extends StatelessWidget {
