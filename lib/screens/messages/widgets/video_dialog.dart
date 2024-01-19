@@ -150,10 +150,11 @@ class _VideoPlayer extends StatelessWidget {
     return Container(
       width: videoDimensions.width,
       height: videoDimensions.height,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
+        //mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
+          Center(
+              child: SizedBox(
             width: videoDimensions.width,
             height: videoDimensions.height,
             child: controller.value.isInitialized
@@ -162,7 +163,7 @@ class _VideoPlayer extends StatelessWidget {
                     child: VideoPlayer(controller),
                   )
                 : Container(),
-          ),
+          )),
           VideoPlayerControls(
             controller: controller,
             play: () {
