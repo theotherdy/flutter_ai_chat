@@ -10,6 +10,9 @@ class VideoUtils {
     double videoWidth = min(maxWidth, controller.value.size.width);
     double videoHeight = min(maxHeight, videoWidth / aspectRatio);
 
+    debugPrint('Pre-width: $videoWidth');
+    debugPrint('Pre-height: $videoHeight');
+
     bool heightLimiting = false;
     bool widthLimiting = false;
 
@@ -19,8 +22,27 @@ class VideoUtils {
       videoHeight = videoWidth / aspectRatio;
     }
 
-    if(videoWidth > maxWidth) heightLimiting = true;
-    if(videoHeight > maxHeight) widthLimiting = true;
+    if (videoWidth > maxWidth) {
+      widthLimiting = true;
+      debugPrint('Width limiting: $widthLimiting');
+    }
+    if (videoHeight > maxHeight) {
+      heightLimiting = true;
+      debugPrint('Height limiting: $heightLimiting');
+    }
+
+    if (widthLimiting == true) {
+      //portrait
+      videoWidth = min(videoWidth, videoHeight * aspectRatio);
+      videoHeight = videoWidth / aspectRatio;
+    } else if (heightLimiting == true) {
+      //landscape
+      videoHeight = min(videoHeight, videoWidth / aspectRatio);
+      videoWidth = videoHeight * aspectRatio;
+    }
+
+    debugPrint('Post-width: $videoWidth');
+    debugPrint('Post-height: $videoHeight');
 
     return Size(videoWidth, videoHeight);
   }
