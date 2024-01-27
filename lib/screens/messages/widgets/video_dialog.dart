@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -11,7 +10,7 @@ class VideoPlayerControls extends StatefulWidget {
   final VoidCallback replay;
   final VoidCallback close;
 
-  VideoPlayerControls({
+  const VideoPlayerControls({super.key, 
     required this.controller,
     required this.play,
     required this.pause,
@@ -66,7 +65,7 @@ class _VideoPlayerControlsState extends State<VideoPlayerControls> {
                   widget.play();
                 }
               : null,
-          child: Icon(Icons.play_arrow),
+          child: const Icon(Icons.play_arrow),
         ),
         ElevatedButton(
           onPressed: (currentPosition < totalDuration && !_isPaused)
@@ -77,15 +76,15 @@ class _VideoPlayerControlsState extends State<VideoPlayerControls> {
                   widget.pause();
                 }
               : null,
-          child: Icon(Icons.pause),
+          child: const Icon(Icons.pause),
         ),
         ElevatedButton(
           onPressed: currentPosition > Duration.zero ? widget.replay : null,
-          child: Icon(Icons.replay),
+          child: const Icon(Icons.replay),
         ),
         ElevatedButton(
           onPressed: widget.close,
-          child: Icon(Icons.close),
+          child: const Icon(Icons.close),
         ),
       ],
     );
@@ -107,7 +106,7 @@ class VideoDialog extends StatelessWidget {
         screenHeight * 0.9; //dialogWidth / (16 / 9); // Aspect ratio 16:9
 
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: dialogWidth,
         height: dialogHeight,
         child: _VideoPlayer(
@@ -124,7 +123,7 @@ class _VideoPlayer extends StatelessWidget {
   final double containerWidth;
   final double containerHeight;
 
-  _VideoPlayer({
+  const _VideoPlayer({
     required this.controller,
     required this.containerWidth,
     required this.containerHeight,
@@ -132,14 +131,7 @@ class _VideoPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool _isPlaying = false;
-
-    if (controller == null) {
-      // Handle the case where the controller is null (perhaps an error occurred during initialization)
-      return Center(
-        child: Text("Error loading video"),
-      );
-    }
+    bool isPlaying = false;
 
     Size videoDimensions = VideoUtils.calculateVideoDimensions(
       controller,
@@ -147,7 +139,7 @@ class _VideoPlayer extends StatelessWidget {
       containerHeight,
     );
 
-    return Container(
+    return SizedBox(
       width: videoDimensions.width,
       height: videoDimensions.height,
       child: Stack(
@@ -168,16 +160,16 @@ class _VideoPlayer extends StatelessWidget {
             controller: controller,
             play: () {
               controller.play();
-              _isPlaying = true;
+              isPlaying = true;
             },
             pause: () {
               controller.pause();
-              _isPlaying = false;
+              isPlaying = false;
             },
             replay: () {
               controller.seekTo(Duration.zero);
               controller.play();
-              _isPlaying = true;
+              isPlaying = true;
             },
             close: () {
               controller.pause();

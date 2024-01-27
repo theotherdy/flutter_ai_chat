@@ -52,12 +52,12 @@ class VideoMessage extends StatelessWidget {
                     builder: (context) => VideoDialog(controller: controller),
                   );
                 },
-                child: Text("Open Video"),
+                child: const Text("Open Video"),
               ),
             ],
           );
         } else {
-          return CircularProgressIndicator(); // or other loading indicator
+          return const CircularProgressIndicator(); // or other loading indicator
         }
       },
     );

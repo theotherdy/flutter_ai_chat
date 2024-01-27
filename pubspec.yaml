@@ -37,9 +37,6 @@ dependencies:
   jumping_dot: ^0.0.6
   camera: ^0.10.5+9
   video_player: ^2.2.6
-  flutter_sound: 9.2.13
-  speech_to_text: ^5.1.0
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

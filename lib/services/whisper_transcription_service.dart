@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // dot_env package
 
 class TranscriptionText {
   final String text;
@@ -12,19 +15,19 @@ class TranscriptionText {
   }
 }
 
-class WhisperTranscription {
-  final String apiKey;
-  final String apiEndpoint;
+class WhisperTranscriptionService {
+  //final String apiKey;
+  //final String apiEndpoint;
   final String model;
   final String language;
   final String prompt;
   final String responseFormat;
   final double temperature;
 
-  WhisperTranscription({
-    required this.apiKey,
-    required this.apiEndpoint,
-    required this.model,
+  WhisperTranscriptionService({
+    //required this.apiKey,
+    //required this.apiEndpoint,
+    this.model = 'whisper-1',
     this.language = 'en',
     this.prompt = '',
     this.responseFormat = 'json',
@@ -32,7 +35,13 @@ class WhisperTranscription {
   });
 
   Future<TranscriptionText?> transcribeVideo(String filePath) async {
-    final Uri uri = Uri.parse('$apiEndpoint/v1/audio/transcriptions');
+
+    var openAIApiKey = dotenv.env[
+        'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+    var whisperApiEndpoint = dotenv.env[
+        'WHISPER_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+
+    final Uri uri = Uri.parse(whisperApiEndpoint.toString());
     final File file = File(filePath);
 
     try {
@@ -45,7 +54,7 @@ class WhisperTranscription {
       };
 
       final request = http.MultipartRequest('POST', uri)
-        ..headers['Authorization'] = 'Bearer $apiKey'
+        ..headers['Authorization'] = 'Bearer $openAIApiKey'
         ..fields.addAll(requestFields)
         ..files.add(http.MultipartFile(
           'file',
@@ -60,12 +69,12 @@ class WhisperTranscription {
         final Map<String, dynamic> data = jsonDecode(response.body);
         return TranscriptionText.fromJson(data);
       } else {
-        print('Error: ${response.statusCode}');
-        print(response.body);
+        debugPrint('Error: ${response.statusCode}');
+        debugPrint(response.body);
         return null;
       }
     } catch (error) {
-      print('Error: $error');
+      debugPrint('Error: $error');
       return null;
     }
   }
@@ -73,22 +82,22 @@ class WhisperTranscription {
 
 // Example usage:
 void main() async {
-  final apiKey = 'YOUR_OPENAI_API_KEY';
-  final apiEndpoint = 'https://api.openai.com';
-  final model = 'whisper-1';
+  //final apiKey = 'YOUR_OPENAI_API_KEY';
+  //final apiEndpoint = 'https://api.openai.com';
+  const model = 'whisper-1';
 
-  final whisperTranscription = WhisperTranscription(
-    apiKey: apiKey,
-    apiEndpoint: apiEndpoint,
+  final whisperTranscriptionService = WhisperTranscriptionService(
+    //apiKey: apiKey,
+    //apiEndpoint: apiEndpoint,
     model: model,
   );
 
-  final filePath = '/path/to/your/video/file.mp4';
-  final transcription = await whisperTranscription.transcribeVideo(filePath);
+  const filePath = '/path/to/your/video/file.mp4';
+  final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
 
   if (transcription != null) {
-    print('Transcription: ${transcription.text}');
+    debugPrint('Transcription: ${transcription.text}');
   } else {
-    print('Failed to transcribe video.');
+    debugPrint('Failed to transcribe video.');
   }
 }

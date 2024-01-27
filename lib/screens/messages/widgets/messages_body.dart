@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ai_chat/constants.dart';
 
 import 'package:flutter_ai_chat/services/open_ai_service.dart';
+import 'package:flutter_ai_chat/services/whisper_transcription_service.dart';
 
 import 'package:flutter_ai_chat/models/local_message.dart';
 
@@ -34,8 +35,8 @@ class _MessagesBodyState extends State<MessagesBody> {
       isScrollControlled: true, // Set to true for full-screen modal
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16.0),
-          child: CameraModal(onVideoRecorded: (filePath) {
+          padding: const EdgeInsets.all(16.0),
+          child: CameraModal(onVideoRecorded: (filePath) async {
             // Callback function when file is selected in CameraModal
             debugPrint('I have file path in MessagesBody $filePath');
             setState(() {
@@ -47,6 +48,21 @@ class _MessagesBodyState extends State<MessagesBody> {
                   filePath: filePath));
               //_cameraFilePath = path;
             });
+            //now send video off to whisper for transcription
+            final whisperTranscriptionService = WhisperTranscriptionService(
+              //apiKey: apiKey,
+              //apiEndpoint: apiEndpoint,
+              //model: model,
+            );
+
+            //final filePath = '/path/to/your/video/file.mp4';
+            final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
+
+            if (transcription != null) {
+              debugPrint('Transcription: ${transcription.text}');
+            } else {
+              debugPrint('Failed to transcribe video.');
+            }
           })
         );
       },
@@ -96,7 +112,7 @@ class _MessagesBodyState extends State<MessagesBody> {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.videocam,
                     color: kPrimaryColor,
                   ),
