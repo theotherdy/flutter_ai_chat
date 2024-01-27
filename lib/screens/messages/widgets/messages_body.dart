@@ -23,11 +23,54 @@ class _MessagesBodyState extends State<MessagesBody> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final OpenAiService openAiService = OpenAiService();
+  final WhisperTranscriptionService whisperTranscriptionService = WhisperTranscriptionService();
 
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
 
   //String _cameraFilePath = ''; // Store the file path received from CameraModal
+
+  /// Shows a loading message of [role] by adding to end of [_chatHistory] and scrolling down.
+  ///
+  /// 
+  void _showLoadingMessage(LocalMessageRole role) {
+    setState(() {
+      _chatHistory.add(LocalMessage(
+          time: DateTime.now(),
+          type: LocalMessageType.loading,
+          role: role,
+          text: "..."));
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn,
+      );
+    });  
+  }
+
+  /// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
+  ///
+  /// 
+  void _showTextMessage(LocalMessageRole role, String text) {
+    setState(() {
+      _chatHistory.add(LocalMessage(
+          time: DateTime.now(),
+          type: LocalMessageType.text,
+          role: role,
+          text: text));
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn,
+      );
+    });  
+  }
 
   void _showCameraModal(BuildContext context) async {
     showModalBottomSheet<String>(
@@ -48,18 +91,20 @@ class _MessagesBodyState extends State<MessagesBody> {
                   filePath: filePath));
               //_cameraFilePath = path;
             });
-            //now send video off to whisper for transcription
-            final whisperTranscriptionService = WhisperTranscriptionService(
-              //apiKey: apiKey,
-              //apiEndpoint: apiEndpoint,
-              //model: model,
-            );
 
+            //now show a loading message whiole awaiting transcript
+            _showLoadingMessage(LocalMessageRole.user);
+            
             //final filePath = '/path/to/your/video/file.mp4';
             final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
 
+            _chatHistory.removeLast(); //our loading message
+
             if (transcription != null) {
               debugPrint('Transcription: ${transcription.text}');
+              _showTextMessage(LocalMessageRole.user, transcription.text); //show user what video transcript says
+              _sendTextMessageAndShowTextResponse(transcription.text); //send off to chat api to respond to
+              
             } else {
               debugPrint('Failed to transcribe video.');
             }
@@ -67,6 +112,37 @@ class _MessagesBodyState extends State<MessagesBody> {
         );
       },
     );
+  }
+
+  void _sendTextMessageAndShowTextResponse(String text) {
+    _showLoadingMessage(LocalMessageRole.ai);
+
+    openAiService
+        .getAssistantResponseFromMessage(
+            text, widget.assistantId)
+        .then((aiResponses) {
+      //debugPrint("checking I'm here");
+      //debugPrint(aiResponses.toString());
+
+
+      _chatHistory.removeLast(); //remove our loading message
+
+      for (var aiResponse in aiResponses) {
+        debugPrint(aiResponse.text);
+        
+        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+        //setState(() {
+        //  _chatHistory.add(aiResponse);
+        //});
+      }
+      /*WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(seconds: 1),
+          curve: Curves.fastOutSlowIn,
+        );
+      });*/
+    });
   }
 
   @override
@@ -159,40 +235,12 @@ class _MessagesBodyState extends State<MessagesBody> {
                           // the method which is called
                           // when button is pressed
                           onPressed: () {
-                            setState(() {
-                              tempChatHistoryContent = _chatController.text;
-                              debugPrint(tempChatHistoryContent);
-                              _chatHistory.add(LocalMessage(
-                                  time: DateTime.now(),
-                                  type: LocalMessageType.text,
-                                  role: LocalMessageRole.user,
-                                  text: _chatController.text));
-                              _chatController.clear();
-                            });
+                            tempChatHistoryContent = _chatController.text; //hold on to this even afetr we've cleared input
+                            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+                            _chatController.clear();
 
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              _scrollController.animateTo(
-                                _scrollController.position.maxScrollExtent,
-                                duration: const Duration(seconds: 1),
-                                curve: Curves.fastOutSlowIn,
-                              );
-                            });
-
-                            setState(() {
-                              _chatHistory.add(LocalMessage(
-                                  time: DateTime.now(),
-                                  type: LocalMessageType.loading,
-                                  role: LocalMessageRole.ai,
-                                  text: "..."));
-                            });
-
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              _scrollController.animateTo(
-                                _scrollController.position.maxScrollExtent,
-                                duration: const Duration(seconds: 1),
-                                curve: Curves.fastOutSlowIn,
-                              );
-                            });
+                            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+                            /*_showLoadingMessage(LocalMessageRole.ai);
 
                             openAiService
                                 .getAssistantResponseFromMessage(
@@ -200,12 +248,17 @@ class _MessagesBodyState extends State<MessagesBody> {
                                 .then((aiResponses) {
                               //debugPrint("checking I'm here");
                               //debugPrint(aiResponses.toString());
+
+
+                              _chatHistory.removeLast(); //remove our loading message
+
                               for (var aiResponse in aiResponses) {
                                 debugPrint(aiResponse.text);
-                                _chatHistory.removeLast(); //our loading message
-                                setState(() {
-                                  _chatHistory.add(aiResponse);
-                                });
+                               
+                                _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+                                //setState(() {
+                                //  _chatHistory.add(aiResponse);
+                                //});
                               }
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 _scrollController.animateTo(
@@ -214,7 +267,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                                   curve: Curves.fastOutSlowIn,
                                 );
                               });
-                            });
+                            });*/
                           },
                         ),
                       ],

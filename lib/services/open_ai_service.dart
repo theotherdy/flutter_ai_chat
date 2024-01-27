@@ -255,13 +255,15 @@ class OpenAiService {
     List<dynamic>? returnedMessages;
     String statusText = "";
     if (_threadId != "") {
-      //debugPrint("going in $_lastMessageId");
+      debugPrint("going in $_lastMessageId");
       if (_lastMessageId != "") {
         (returnedMessages, statusText) =
             await _getMessagesFromThread(_threadId, _lastMessageId);
+            debugPrint('Im using $_lastMessageId');
       } else {
         (returnedMessages, statusText) =
             await _getMessagesFromThread(_threadId);
+            debugPrint('Im not using a last message Id');
       }
     }
     //debugPrint(statusText);
@@ -281,7 +283,7 @@ class OpenAiService {
         }
         _lastMessageId = assistantMessage
             .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
-        //debugPrint("coming out $_lastMessageId");
+        debugPrint("coming out $_lastMessageId");
       }
     }
     //debugPrint(messages.toString());

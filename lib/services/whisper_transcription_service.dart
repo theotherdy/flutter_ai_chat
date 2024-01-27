@@ -60,7 +60,7 @@ class WhisperTranscriptionService {
           'file',
           file.readAsBytes().asStream(),
           file.lengthSync(),
-          filename: 'audio.${file.path.split('.').last}',
+          filename: 'audio.${file.path.split('.').last}',  //constructs a new filename with the prefix 'audio.' followed by the original file extension. This is used to ensure that the transcribed audio file has an appropriate filename.
         ));
 
       final response = await http.Response.fromStream(await request.send());
@@ -81,7 +81,7 @@ class WhisperTranscriptionService {
 }
 
 // Example usage:
-void main() async {
+/*void main() async {
   //final apiKey = 'YOUR_OPENAI_API_KEY';
   //final apiEndpoint = 'https://api.openai.com';
   const model = 'whisper-1';
@@ -100,4 +100,4 @@ void main() async {
   } else {
     debugPrint('Failed to transcribe video.');
   }
-}
+}*/
