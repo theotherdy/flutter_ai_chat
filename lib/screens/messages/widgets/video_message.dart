@@ -16,10 +16,10 @@ import 'package:flutter_ai_chat/screens/messages/widgets/video_dialog.dart';
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Im in VideoMessage');
+    //debugPrint('Im in VideoMessage');
     //if (message != null) {
     String videoMessageFilePath = message!.filePath.toString();
-    debugPrint('Im in VideoMessage $videoMessageFilePath');
+    //debugPrint('Im in VideoMessage $videoMessageFilePath');
     //}
 
     return SizedBox(
@@ -43,16 +43,26 @@ class VideoMessage extends StatelessWidget {
           VideoPlayerController controller =
               snapshot.data as VideoPlayerController;
           return Stack(
+            alignment: Alignment.center,
             children: [
-              VideoThumbnail(controller: controller),
-              ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => VideoDialog(controller: controller),
-                  );
-                },
-                child: const Text("Open Video"),
+              VideoThumbnail(
+                controller: controller,
+                child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => VideoDialog(controller: controller),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.play_arrow,
+                    size: 50,
+                    color: Colors.white.withOpacity(0.7), // Adjust opacity as needed
+                  ),
+                  color: Colors.transparent, // Transparent background
+                  splashColor: Colors.transparent, // No splash effect
+                  highlightColor: Colors.transparent, // No highlight effect
+                ),
               ),
             ],
           );

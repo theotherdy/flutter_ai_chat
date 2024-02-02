@@ -32,7 +32,7 @@ class _CameraModalState extends State<CameraModal> {
     if (_isRecording) {
       final file = await _cameraController.stopVideoRecording();
       setState(() => _isRecording = false);
-      debugPrint('I have a file $file.path');
+      //debugPrint('I have a file $file.path');
       // Pass the file path back to the caller
       // Use the callback to pass the file path back to the parent
       widget.onVideoRecorded(file.path);

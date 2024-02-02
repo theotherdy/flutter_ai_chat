@@ -29,7 +29,7 @@ class OpenAiService {
     List<LocalMessage> messages = [];
     _assistantId = assistantId;
 
-    debugPrint(message);
+    //debugPrint(message);
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
     //if no thread, create a thread
@@ -97,7 +97,7 @@ class OpenAiService {
   /// Returns a [messageId] or an error message
 
   Future<String> _addMesageToThread(message, threadId) async {
-    debugPrint(message);
+    //debugPrint(message);
     try {
       final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/messages"),
@@ -190,12 +190,12 @@ class OpenAiService {
 
         if (runStatus == 'completed') {
           isComplete = true;
-          debugPrint('Run $runId on Thread $threadId is complete.');
+          //debugPrint('Run $runId on Thread $threadId is complete.');
         } else {
-          debugPrint('Run $runId on Thread $threadId is still processing...');
+          //debugPrint('Run $runId on Thread $threadId is still processing...');
         }
       } else {
-        debugPrint('Error checking run status: ${response.statusCode}');
+        //debugPrint('Error checking run status: ${response.statusCode}');
       }
 
       await Future.delayed(
@@ -215,6 +215,7 @@ class OpenAiService {
     try {
       String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
       if (afterMessageId != null) {
+        debugPrint('afterMessageId coming through as $afterMessageId');
         url =
             "$url?order=asc&after=$afterMessageId"; //add after paramter value if fromMessageId
       }
@@ -252,18 +253,18 @@ class OpenAiService {
     List<LocalMessage> messages = [];
 
     //Now that we know the run has completed, return the new messages
-    List<dynamic>? returnedMessages;
+    List<dynamic>? returnedMessages = [];
     String statusText = "";
     if (_threadId != "") {
-      debugPrint("going in $_lastMessageId");
+      //debugPrint("going in $_lastMessageId");
       if (_lastMessageId != "") {
         (returnedMessages, statusText) =
             await _getMessagesFromThread(_threadId, _lastMessageId);
-            debugPrint('Im using $_lastMessageId');
+            //debugPrint('Im using $_lastMessageId');
       } else {
         (returnedMessages, statusText) =
             await _getMessagesFromThread(_threadId);
-            debugPrint('Im not using a last message Id');
+            //debugPrint('Im not using a last message Id');
       }
     }
     //debugPrint(statusText);
@@ -271,7 +272,8 @@ class OpenAiService {
     if (returnedMessages != null) {
       for (var returnedMessage in returnedMessages) {
         final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-        debugPrint(assistantMessage.content[0].text.value);
+        debugPrint(assistantMessage.content[0].text.value + ' id: ' + assistantMessage
+            .id);
         if (assistantMessage.role != "user") {
           //discard role:user messages
           messages.add(//{
@@ -280,9 +282,11 @@ class OpenAiService {
                   role: LocalMessageRole.ai,
                   type: LocalMessageType.text,
                   text: assistantMessage.content[0].text.value));
-        }
-        _lastMessageId = assistantMessage
+        
+          _lastMessageId = assistantMessage
             .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
+        }
+        
         debugPrint("coming out $_lastMessageId");
       }
     }

@@ -50,8 +50,8 @@ class _VideoPlayerControlsState extends State<VideoPlayerControls> {
     Duration currentPosition = _controller.value.position;
     Duration totalDuration = _controller.value.duration;
 
-    print('Current Position: $currentPosition');
-    print('Total Duration: $totalDuration');
+    //print('Current Position: $currentPosition');
+    //print('Total Duration: $totalDuration');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

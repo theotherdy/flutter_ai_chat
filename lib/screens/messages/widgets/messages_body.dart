@@ -81,7 +81,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           padding: const EdgeInsets.all(16.0),
           child: CameraModal(onVideoRecorded: (filePath) async {
             // Callback function when file is selected in CameraModal
-            debugPrint('I have file path in MessagesBody $filePath');
+            //debugPrint('I have file path in MessagesBody $filePath');
             setState(() {
               //add video message to list of messages
                _chatHistory.add(LocalMessage(
@@ -101,12 +101,12 @@ class _MessagesBodyState extends State<MessagesBody> {
             _chatHistory.removeLast(); //our loading message
 
             if (transcription != null) {
-              debugPrint('Transcription: ${transcription.text}');
+             // debugPrint('Transcription: ${transcription.text}');
               _showTextMessage(LocalMessageRole.user, transcription.text); //show user what video transcript says
               _sendTextMessageAndShowTextResponse(transcription.text); //send off to chat api to respond to
               
             } else {
-              debugPrint('Failed to transcribe video.');
+              //debugPrint('Failed to transcribe video.');
             }
           })
         );
@@ -128,7 +128,7 @@ class _MessagesBodyState extends State<MessagesBody> {
       _chatHistory.removeLast(); //remove our loading message
 
       for (var aiResponse in aiResponses) {
-        debugPrint(aiResponse.text);
+        //debugPrint(aiResponse.text);
         
         _showTextMessage(LocalMessageRole.ai, aiResponse.text);
         //setState(() {
@@ -253,7 +253,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                               _chatHistory.removeLast(); //remove our loading message
 
                               for (var aiResponse in aiResponses) {
-                                debugPrint(aiResponse.text);
+                                //debugPrint(aiResponse.text);
                                
                                 _showTextMessage(LocalMessageRole.ai, aiResponse.text);
                                 //setState(() {
