@@ -147,138 +147,135 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   @override
   Widget build(BuildContext context) {
-    //return Column(
-    //  children: [
-    //    Expanded(
-    //      child: Padding(
+    // Calculate the available height dynamically
+    //final availableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom;
 
     return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-          //get max height
-          height: MediaQuery.of(context).size.height - 160,
-          child: ListView.builder(
-            itemCount: _chatHistory.length,
-            shrinkWrap: false,
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            itemBuilder: (context, index) =>
-                Message(message: _chatHistory[index]),
-          ),
-          //),
-        ),
-        //todo - move this out into a separate chat_input widget
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding,
-            vertical: kDefaultPadding / 2,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            boxShadow: [
-              BoxShadow(
-                offset: const Offset(0, 4),
-                blurRadius: 32,
-                color: const Color(0xFF087949).withOpacity(0.08),
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+              child: ListView.builder(
+                itemCount: _chatHistory.length,
+                shrinkWrap: true,
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (context, index) =>
+                    Message(message: _chatHistory[index]),
               ),
-            ],
+            ),
           ),
-          child: SafeArea(
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.videocam,
-                    color: kPrimaryColor,
-                  ),
-                  // the method which is called
-                  // when button is pressed
-                  onPressed: () {
-                    _showCameraModal(context);
-                  }
-                ),
-                //const Icon(Icons.videocam, color: kPrimaryColor),
-                const SizedBox(width: kDefaultPadding),
-                /*const Icon(Icons.mic, color: kPrimaryColor),
-                const SizedBox(width: kDefaultPadding),*/
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: kDefaultPadding * 0.75,
-                    ),
-                    decoration: BoxDecoration(
-                      color: kPrimaryColor.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: kDefaultPadding / 4),
-                        Expanded(
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              hintText: "Type message",
-                              border: InputBorder.none,
-                            ),
-                            controller: _chatController,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .color!
-                                .withOpacity(0.64),
-                          ),
-                          // the method which is called
-                          // when button is pressed
-                          onPressed: () {
-                            tempChatHistoryContent = _chatController.text; //hold on to this even afetr we've cleared input
-                            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-                            _chatController.clear();
-
-                            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-                            /*_showLoadingMessage(LocalMessageRole.ai);
-
-                            openAiService
-                                .getAssistantResponseFromMessage(
-                                    tempChatHistoryContent, widget.assistantId)
-                                .then((aiResponses) {
-                              //debugPrint("checking I'm here");
-                              //debugPrint(aiResponses.toString());
-
-
-                              _chatHistory.removeLast(); //remove our loading message
-
-                              for (var aiResponse in aiResponses) {
-                                //debugPrint(aiResponse.text);
-                               
-                                _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-                                //setState(() {
-                                //  _chatHistory.add(aiResponse);
-                                //});
-                              }
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                _scrollController.animateTo(
-                                  _scrollController.position.maxScrollExtent,
-                                  duration: const Duration(seconds: 1),
-                                  curve: Curves.fastOutSlowIn,
-                                );
-                              });
-                            });*/
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+          //todo - move this out into a separate chat_input widget
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: kDefaultPadding,
+              vertical: kDefaultPadding / 2,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  offset: const Offset(0, 4),
+                  blurRadius: 32,
+                  color: const Color(0xFF087949).withOpacity(0.08),
                 ),
               ],
             ),
-          ),
-        )
-      ],
-    );
+            child: SafeArea(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.videocam,
+                      color: kPrimaryColor,
+                    ),
+                    // the method which is called
+                    // when button is pressed
+                    onPressed: () {
+                      _showCameraModal(context);
+                    }
+                  ),
+                  //const Icon(Icons.videocam, color: kPrimaryColor),
+                  const SizedBox(width: kDefaultPadding),
+                  /*const Icon(Icons.mic, color: kPrimaryColor),
+                  const SizedBox(width: kDefaultPadding),*/
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kDefaultPadding * 0.75,
+                      ),
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: kDefaultPadding / 4),
+                          Expanded(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                hintText: "Type message",
+                                border: InputBorder.none,
+                              ),
+                              controller: _chatController,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge!
+                                  .color!
+                                  .withOpacity(0.64),
+                            ),
+                            // the method which is called
+                            // when button is pressed
+                            onPressed: () {
+                              tempChatHistoryContent = _chatController.text; //hold on to this even afetr we've cleared input
+                              _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+                              _chatController.clear();
+      
+                              _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+                              /*_showLoadingMessage(LocalMessageRole.ai);
+      
+                              openAiService
+                                  .getAssistantResponseFromMessage(
+                                      tempChatHistoryContent, widget.assistantId)
+                                  .then((aiResponses) {
+                                //debugPrint("checking I'm here");
+                                //debugPrint(aiResponses.toString());
+      
+      
+                                _chatHistory.removeLast(); //remove our loading message
+      
+                                for (var aiResponse in aiResponses) {
+                                  //debugPrint(aiResponse.text);
+                                 
+                                  _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+                                  //setState(() {
+                                  //  _chatHistory.add(aiResponse);
+                                  //});
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: const Duration(seconds: 1),
+                                    curve: Curves.fastOutSlowIn,
+                                  );
+                                });
+                              });*/
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      );
   }
 }
