@@ -10,6 +10,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 //import 'package:chat/models/ChatMessage.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/camera_modal.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 
 class MessagesBody extends StatefulWidget {
   final String assistantId;
@@ -20,7 +21,7 @@ class MessagesBody extends StatefulWidget {
 }
 
 class _MessagesBodyState extends State<MessagesBody> {
-  final TextEditingController _chatController = TextEditingController();
+  //final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final OpenAiService openAiService = OpenAiService();
   final WhisperTranscriptionService whisperTranscriptionService = WhisperTranscriptionService();
@@ -182,7 +183,21 @@ class _MessagesBodyState extends State<MessagesBody> {
               ],
             ),
             child: SafeArea(
-              child: Row(
+              child: InputBar(
+                onBtnSendPressed: (textOfMessage) {
+                  // Callback function when message is sent in InputBar
+                  tempChatHistoryContent = textOfMessage; //hold on to this even afetr we've cleared input
+                  _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+                  _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+                },
+                onBtnVideoPressed: () {
+                  // Callback function when video button pressed is selected in InputBar
+                  _showCameraModal(context);
+                }
+              )
+
+
+              /*child: Row(
                 children: [
                   IconButton(
                     icon: const Icon(
@@ -237,34 +252,6 @@ class _MessagesBodyState extends State<MessagesBody> {
                               _chatController.clear();
       
                               _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-                              /*_showLoadingMessage(LocalMessageRole.ai);
-      
-                              openAiService
-                                  .getAssistantResponseFromMessage(
-                                      tempChatHistoryContent, widget.assistantId)
-                                  .then((aiResponses) {
-                                //debugPrint("checking I'm here");
-                                //debugPrint(aiResponses.toString());
-      
-      
-                                _chatHistory.removeLast(); //remove our loading message
-      
-                                for (var aiResponse in aiResponses) {
-                                  //debugPrint(aiResponse.text);
-                                 
-                                  _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-                                  //setState(() {
-                                  //  _chatHistory.add(aiResponse);
-                                  //});
-                                }
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  _scrollController.animateTo(
-                                    _scrollController.position.maxScrollExtent,
-                                    duration: const Duration(seconds: 1),
-                                    curve: Curves.fastOutSlowIn,
-                                  );
-                                });
-                              });*/
                             },
                           ),
                         ],
@@ -272,7 +259,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                     ),
                   ),
                 ],
-              ),
+              ),*/
             ),
           )
         ],

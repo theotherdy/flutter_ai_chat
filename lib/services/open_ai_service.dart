@@ -272,8 +272,8 @@ class OpenAiService {
     if (returnedMessages != null) {
       for (var returnedMessage in returnedMessages) {
         final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-        debugPrint(assistantMessage.content[0].text.value + ' id: ' + assistantMessage
-            .id);
+        debugPrint('${assistantMessage.content[0].text.value} id: ${assistantMessage
+            .id}');
         if (assistantMessage.role != "user") {
           //discard role:user messages
           messages.add(//{
