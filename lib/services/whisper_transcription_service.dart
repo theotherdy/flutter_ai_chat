@@ -35,7 +35,6 @@ class WhisperTranscriptionService {
   });
 
   Future<TranscriptionText?> transcribeVideo(String filePath) async {
-
     var openAIApiKey = dotenv.env[
         'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
     var whisperApiEndpoint = dotenv.env[
@@ -53,6 +52,7 @@ class WhisperTranscriptionService {
         'temperature': temperature.toString(),
       };
 
+      debugPrint(whisperApiEndpoint.toString());
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $openAIApiKey'
         ..fields.addAll(requestFields)
@@ -60,7 +60,8 @@ class WhisperTranscriptionService {
           'file',
           file.readAsBytes().asStream(),
           file.lengthSync(),
-          filename: 'audio.${file.path.split('.').last}',  //constructs a new filename with the prefix 'audio.' followed by the original file extension. This is used to ensure that the transcribed audio file has an appropriate filename.
+          filename:
+              'audio.${file.path.split('.').last}', //constructs a new filename with the prefix 'audio.' followed by the original file extension. This is used to ensure that the transcribed audio file has an appropriate filename.
         ));
 
       final response = await http.Response.fromStream(await request.send());

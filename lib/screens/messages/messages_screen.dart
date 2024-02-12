@@ -23,17 +23,24 @@ class MessagesScreen extends StatelessWidget {
     );
   }
 
+  /*// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
+  ///
+  ///
+  void _getInteractionFeedback() {
+    debugPrint('Im getting feedback');
+  }*/
+
   AppBar buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: const Row(
-        children: [
-          BackButton(),
-          CircleAvatar(
-            backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
-          ),
-          SizedBox(width: kDefaultPadding * 0.75),
-          Column(
+      title: Row(children: [
+        BackButton(),
+        CircleAvatar(
+          backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
+        ),
+        SizedBox(width: kDefaultPadding * 0.75),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -45,9 +52,16 @@ class MessagesScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 12),
               )
             ],
-          )
-        ],
-      ),
+          ),
+        ),
+        /*IconButton(
+          icon: Icon(
+            Icons.tips_and_updates,
+            color: kPrimaryColor,
+          ),
+          onPressed: () => _getInteractionFeedback(),
+        ),*/
+      ]),
       actions: const [
         /*IconButton(
           icon: const Icon(Icons.local_phone),

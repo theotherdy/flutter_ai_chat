@@ -6,20 +6,23 @@ class InputBar extends StatefulWidget {
   final Function(String) onBtnSendPressed;
   final Function() onBtnVideoPressed;
 
-  const InputBar({super.key, required this.onBtnSendPressed, required this.onBtnVideoPressed});
+  const InputBar(
+      {super.key,
+      required this.onBtnSendPressed,
+      required this.onBtnVideoPressed});
 
   @override
   State<InputBar> createState() => _InputBarState();
-
- 
 }
 
 class _InputBarState extends State<InputBar> {
   final TextEditingController _chatController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
     _chatController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -28,17 +31,16 @@ class _InputBarState extends State<InputBar> {
     return Row(
       children: [
         IconButton(
-          icon: const Icon(
-            Icons.videocam,
-            color: kPrimaryColor,
-          ),
-          // the method which is called
-          // when button is pressed
-          onPressed: () {
-            widget.onBtnVideoPressed();
-            //_showCameraModal(context);
-          }
-        ),
+            icon: const Icon(
+              Icons.videocam,
+              color: kPrimaryColor,
+            ),
+            // the method which is called
+            // when button is pressed
+            onPressed: () {
+              widget.onBtnVideoPressed();
+              //_showCameraModal(context);
+            }),
         //const Icon(Icons.videocam, color: kPrimaryColor),
         const SizedBox(width: kDefaultPadding),
         /*const Icon(Icons.mic, color: kPrimaryColor),
@@ -57,11 +59,16 @@ class _InputBarState extends State<InputBar> {
                 const SizedBox(width: kDefaultPadding / 4),
                 Expanded(
                   child: TextField(
+                    maxLines: 4, // Set max lines to 4
+                    minLines: 1, // Set min lines to 1
                     decoration: const InputDecoration(
                       hintText: "Type message",
                       border: InputBorder.none,
                     ),
                     controller: _chatController,
+                    scrollController: _scrollController,
+                    keyboardType:
+                        TextInputType.multiline, // Enable multiline input
                   ),
                 ),
                 IconButton(

@@ -24,7 +24,8 @@ class _MessagesBodyState extends State<MessagesBody> {
   //final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final OpenAiService openAiService = OpenAiService();
-  final WhisperTranscriptionService whisperTranscriptionService = WhisperTranscriptionService();
+  final WhisperTranscriptionService whisperTranscriptionService =
+      WhisperTranscriptionService();
 
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
@@ -33,7 +34,7 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   /// Shows a loading message of [role] by adding to end of [_chatHistory] and scrolling down.
   ///
-  /// 
+  ///
   void _showLoadingMessage(LocalMessageRole role) {
     setState(() {
       _chatHistory.add(LocalMessage(
@@ -49,12 +50,12 @@ class _MessagesBodyState extends State<MessagesBody> {
         duration: const Duration(seconds: 1),
         curve: Curves.fastOutSlowIn,
       );
-    });  
+    });
   }
 
   /// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
   ///
-  /// 
+  ///
   void _showTextMessage(LocalMessageRole role, String text) {
     setState(() {
       _chatHistory.add(LocalMessage(
@@ -70,7 +71,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         duration: const Duration(seconds: 1),
         curve: Curves.fastOutSlowIn,
       );
-    });  
+    });
   }
 
   void _showCameraModal(BuildContext context) async {
@@ -79,38 +80,39 @@ class _MessagesBodyState extends State<MessagesBody> {
       isScrollControlled: true, // Set to true for full-screen modal
       builder: (BuildContext context) {
         return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: CameraModal(onVideoRecorded: (filePath) async {
-            // Callback function when file is selected in CameraModal
-            //debugPrint('I have file path in MessagesBody $filePath');
-            setState(() {
-              //add video message to list of messages
-               _chatHistory.add(LocalMessage(
-                  time: DateTime.now(),
-                  type: LocalMessageType.video,
-                  role: LocalMessageRole.user,
-                  filePath: filePath));
-              //_cameraFilePath = path;
-            });
+            padding: const EdgeInsets.all(16.0),
+            child: CameraModal(onVideoRecorded: (filePath) async {
+              // Callback function when file is selected in CameraModal
+              //debugPrint('I have file path in MessagesBody $filePath');
+              setState(() {
+                //add video message to list of messages
+                _chatHistory.add(LocalMessage(
+                    time: DateTime.now(),
+                    type: LocalMessageType.video,
+                    role: LocalMessageRole.user,
+                    filePath: filePath));
+                //_cameraFilePath = path;
+              });
 
-            //now show a loading message whiole awaiting transcript
-            _showLoadingMessage(LocalMessageRole.user);
-            
-            //final filePath = '/path/to/your/video/file.mp4';
-            final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
+              //now show a loading message whiole awaiting transcript
+              _showLoadingMessage(LocalMessageRole.user);
 
-            _chatHistory.removeLast(); //our loading message
+              //final filePath = '/path/to/your/video/file.mp4';
+              final transcription =
+                  await whisperTranscriptionService.transcribeVideo(filePath);
 
-            if (transcription != null) {
-             // debugPrint('Transcription: ${transcription.text}');
-              _showTextMessage(LocalMessageRole.user, transcription.text); //show user what video transcript says
-              _sendTextMessageAndShowTextResponse(transcription.text); //send off to chat api to respond to
-              
-            } else {
-              //debugPrint('Failed to transcribe video.');
-            }
-          })
-        );
+              _chatHistory.removeLast(); //our loading message
+
+              if (transcription != null) {
+                // debugPrint('Transcription: ${transcription.text}');
+                _showTextMessage(LocalMessageRole.user,
+                    transcription.text); //show user what video transcript says
+                _sendTextMessageAndShowTextResponse(
+                    transcription.text); //send off to chat api to respond to
+              } else {
+                //debugPrint('Failed to transcribe video.');
+              }
+            }));
       },
     );
   }
@@ -119,18 +121,16 @@ class _MessagesBodyState extends State<MessagesBody> {
     _showLoadingMessage(LocalMessageRole.ai);
 
     openAiService
-        .getAssistantResponseFromMessage(
-            text, widget.assistantId)
+        .getAssistantResponseFromMessage(text, widget.assistantId)
         .then((aiResponses) {
       //debugPrint("checking I'm here");
       //debugPrint(aiResponses.toString());
-
 
       _chatHistory.removeLast(); //remove our loading message
 
       for (var aiResponse in aiResponses) {
         //debugPrint(aiResponse.text);
-        
+
         _showTextMessage(LocalMessageRole.ai, aiResponse.text);
         //setState(() {
         //  _chatHistory.add(aiResponse);
@@ -152,9 +152,10 @@ class _MessagesBodyState extends State<MessagesBody> {
     //final availableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom;
 
     return Column(
-        children: [
-          Expanded(
-            child: Container(
+      children: [
+        Expanded(
+          child: Stack(children: [
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
               child: ListView.builder(
                 itemCount: _chatHistory.length,
@@ -165,37 +166,51 @@ class _MessagesBodyState extends State<MessagesBody> {
                     Message(message: _chatHistory[index]),
               ),
             ),
-          ),
-          //todo - move this out into a separate chat_input widget
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kDefaultPadding,
-              vertical: kDefaultPadding / 2,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              boxShadow: [
-                BoxShadow(
-                  offset: const Offset(0, 4),
-                  blurRadius: 32,
-                  color: const Color(0xFF087949).withOpacity(0.08),
+            Visibility(
+              visible: _chatHistory.length > 0,
+              child: Positioned(
+                bottom: kDefaultPadding, // Adjust the bottom position as needed
+                right: kDefaultPadding, // Adjust the right position as needed
+                child: FloatingActionButton(
+                  onPressed: () {
+                    // Add your onPressed action here
+                  },
+                  child: Icon(
+                    Icons.tips_and_updates,
+                    //color: kPrimaryColor,
+                  ),
                 ),
-              ],
+              ),
             ),
-            child: SafeArea(
-              child: InputBar(
-                onBtnSendPressed: (textOfMessage) {
-                  // Callback function when message is sent in InputBar
-                  tempChatHistoryContent = textOfMessage; //hold on to this even afetr we've cleared input
-                  _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-                  _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-                },
-                onBtnVideoPressed: () {
-                  // Callback function when video button pressed is selected in InputBar
-                  _showCameraModal(context);
-                }
-              )
-
+          ]),
+        ),
+        //todo - move this out into a separate chat_input widget
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kDefaultPadding,
+            vertical: kDefaultPadding / 2,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: [
+              BoxShadow(
+                offset: const Offset(0, 4),
+                blurRadius: 32,
+                color: const Color(0xFF087949).withOpacity(0.08),
+              ),
+            ],
+          ),
+          child: SafeArea(
+              child: InputBar(onBtnSendPressed: (textOfMessage) {
+            // Callback function when message is sent in InputBar
+            tempChatHistoryContent =
+                textOfMessage; //hold on to this even afetr we've cleared input
+            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+          }, onBtnVideoPressed: () {
+            // Callback function when video button pressed is selected in InputBar
+            _showCameraModal(context);
+          })
 
               /*child: Row(
                 children: [
@@ -260,9 +275,9 @@ class _MessagesBodyState extends State<MessagesBody> {
                   ),
                 ],
               ),*/
-            ),
-          )
-        ],
-      );
+              ),
+        )
+      ],
+    );
   }
 }
