@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:flutter_ai_chat/constants.dart';
 
@@ -117,32 +118,66 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
   }
 
+  void _showAdvisorModal(BuildContext context, String advisorResponse) async {
+    showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true, // Set to true for full-screen modal
+      builder: (BuildContext context) {
+        return Container(
+          child: Text(advisorResponse)
+        );
+      }
+    );
+  }
+
   void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
 
     openAiService
         .getAssistantResponseFromMessage(text, widget.assistantId)
         .then((aiResponses) {
-      //debugPrint("checking I'm here");
-      //debugPrint(aiResponses.toString());
-
       _chatHistory.removeLast(); //remove our loading message
-
       for (var aiResponse in aiResponses) {
-        //debugPrint(aiResponse.text);
-
         _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-        //setState(() {
-        //  _chatHistory.add(aiResponse);
-        //});
       }
-      /*WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(seconds: 1),
-          curve: Curves.fastOutSlowIn,
-        );
-      });*/
+    });
+  }
+
+  void _sendConversationAndShowAdvisorFeedback() {
+    //_showLoadingMessage(LocalMessageRole.ai);
+
+    //todo add spinner
+
+    //get conversation - text only - from _chatHistory
+    String textToSend = '';
+    for (var localMessage in _chatHistory) {
+      if(localMessage.type == LocalMessageType.text) {
+        if(localMessage.role == LocalMessageRole.user) {
+          textToSend += 'Doctor (' + DateFormat('kk:mm:ss').format(localMessage.time) + '):';
+        } else {
+          textToSend += 'Patient (' + DateFormat('kk:mm:ss').format(localMessage.time) + '):';
+        }
+        textToSend += localMessage.text!;
+      }
+    }
+
+    //debugPrint(textToSend);
+
+    String _advisorId =
+      "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
+
+    openAiService
+        .getAssistantResponseFromMessage(textToSend, _advisorId)
+        .then((aiResponses) {
+          String advisorResponse = '';
+          for (var aiResponse in aiResponses) {
+            advisorResponse += aiResponse;
+          }
+          _showAdvisorModal(context, advisorResponse);
+      //_chatHistory.removeLast(); //remove our loading message
+      /*for (var aiResponse in aiResponses) {
+        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+      }*/
     });
   }
 
@@ -173,7 +208,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                 right: kDefaultPadding, // Adjust the right position as needed
                 child: FloatingActionButton(
                   onPressed: () {
-                    // Add your onPressed action here
+                    _sendConversationAndShowAdvisorFeedback();
                   },
                   child: Icon(
                     Icons.tips_and_updates,
@@ -202,80 +237,16 @@ class _MessagesBodyState extends State<MessagesBody> {
           ),
           child: SafeArea(
               child: InputBar(onBtnSendPressed: (textOfMessage) {
-            // Callback function when message is sent in InputBar
-            tempChatHistoryContent =
-                textOfMessage; //hold on to this even afetr we've cleared input
-            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-          }, onBtnVideoPressed: () {
-            // Callback function when video button pressed is selected in InputBar
-            _showCameraModal(context);
-          })
-
-              /*child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.videocam,
-                      color: kPrimaryColor,
-                    ),
-                    // the method which is called
-                    // when button is pressed
-                    onPressed: () {
-                      _showCameraModal(context);
-                    }
-                  ),
-                  //const Icon(Icons.videocam, color: kPrimaryColor),
-                  const SizedBox(width: kDefaultPadding),
-                  /*const Icon(Icons.mic, color: kPrimaryColor),
-                  const SizedBox(width: kDefaultPadding),*/
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: kDefaultPadding * 0.75,
-                      ),
-                      decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: kDefaultPadding / 4),
-                          Expanded(
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                hintText: "Type message",
-                                border: InputBorder.none,
-                              ),
-                              controller: _chatController,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.send,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .color!
-                                  .withOpacity(0.64),
-                            ),
-                            // the method which is called
-                            // when button is pressed
-                            onPressed: () {
-                              tempChatHistoryContent = _chatController.text; //hold on to this even afetr we've cleared input
-                              _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-                              _chatController.clear();
-      
-                              _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),*/
-              ),
+              // Callback function when message is sent in InputBar
+              tempChatHistoryContent =
+                  textOfMessage; //hold on to this even afetr we've cleared input
+              _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+              _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+            }, onBtnVideoPressed: () {
+              // Callback function when video button pressed is selected in InputBar
+              _showCameraModal(context);
+            })
+          ),
         )
       ],
     );

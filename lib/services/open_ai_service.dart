@@ -14,7 +14,8 @@ var openAIApiAssistantsEndpoint = dotenv.env[
 
 class OpenAiService {
   String _assistantId =
-      "asst_oLP6zXce2HxRuR4dDPBDt3IM"; //set to existing asistant - will need to work out how to link with different scenarios on home page
+      "asst_oLP6zXce2HxRuR4dDPBDt3IM"; //default value, as passed in with call 
+  
   String _threadId = "";
   String _lastMessageId = "";
   String _runId = "";
@@ -287,7 +288,7 @@ class OpenAiService {
             .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
         }
         
-        debugPrint("coming out $_lastMessageId");
+        //debugPrint("coming out $_lastMessageId");
       }
     }
     //debugPrint(messages.toString());
