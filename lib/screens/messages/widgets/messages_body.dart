@@ -123,9 +123,7 @@ class _MessagesBodyState extends State<MessagesBody> {
       context: context,
       isScrollControlled: true, // Set to true for full-screen modal
       builder: (BuildContext context) {
-        return Container(
-          child: Text(advisorResponse)
-        );
+        return Text(advisorResponse);
       }
     );
   }
@@ -171,8 +169,9 @@ class _MessagesBodyState extends State<MessagesBody> {
         .then((aiResponses) {
           String advisorResponse = '';
           for (var aiResponse in aiResponses) {
-            advisorResponse += aiResponse;
+            advisorResponse += aiResponse.text;
           }
+          debugPrint('Got response');
           _showAdvisorModal(context, advisorResponse);
       //_chatHistory.removeLast(); //remove our loading message
       /*for (var aiResponse in aiResponses) {
