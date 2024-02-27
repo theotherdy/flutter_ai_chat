@@ -1,5 +1,7 @@
 import 'dart:convert'; // package to encode/decode JSON data type
 import 'dart:async'; //for the Timer
+import 'dart:typed_data'; //Uint8List
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dot_env package
 import 'package:http/http.dart' as http; // http package
@@ -11,15 +13,22 @@ var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
 class OpenAiService {
-  String _assistantId =
-      "asst_oLP6zXce2HxRuR4dDPBDt3IM"; //default value, as passed in with call 
-  
-  String _threadId = "";
-  String _lastMessageId = "";
-  String _runId = "";
-  bool _runComplete = false;
+  String _assistantId = '';
+
+  //note that all of these maps will have a key of _assistantId, so that we
+  //don't get mixed up between state in different assistants
+  //not strictly necessary while a new instance of OpenAIService (and therefore
+  //a new _threadId, etc) is created for every launch of the messages_body (ie
+  //a new conversation every time the user opens a chat) but might be useful in
+  //future, if we instantiate OpenAiService at a higher level in the tree and
+  //allow students to come back to a partially complete conversation
+  Map<String, String> _threadId = {};
+  Map<String, String> _lastMessageId = {};
+  Map<String, String> _runId = {};
+  Map<String, bool> _runComplete = {}; //was false;
 
   /// Gets a response from the assistant for a message.
   ///
@@ -33,31 +42,47 @@ class OpenAiService {
     //debugPrint(message);
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
+    debugPrint('Do we have a _threadId? ' + _threadId[_assistantId].toString());
+
     //if no thread, create a thread
-    if (_threadId == "") {
-      _threadId = await _createThread();
+    if (_threadId[_assistantId] == null ||
+        _threadId[_assistantId].toString() == "") {
+      _threadId[_assistantId] = await _createThread();
     }
+
+    //debugPrint('_threadId ' + _threadId[_assistantId].toString());
 
     //attach message(s) to thread as user
-    String messageId;
-    if (_threadId != "" && message != "") {
-      messageId = await _addMesageToThread(message, _threadId);
+    String messageId = '';
+    if (_threadId[_assistantId] != "" && message != "") {
+      messageId = await _addMesageToThread(message, _threadId[_assistantId]);
     }
+
+    debugPrint('messageId ' + messageId.toString());
 
     //run assistant on the thread
-    if (_assistantId != "" && _threadId != "") {
-      _runId = await _runAssistantOnThread(_assistantId, _threadId);
+    if (_assistantId != "" && _threadId[_assistantId] != "") {
+      _runId[_assistantId] =
+          await _runAssistantOnThread(_assistantId, _threadId[_assistantId]);
     }
+
+    debugPrint('_runId[_assistantId] ' + _runId[_assistantId].toString());
 
     //is run complete
-    if (_runId != "" && _threadId != "") {
-      _runComplete = await _isRunComplete(_threadId, _runId);
+    if (_runId[_assistantId] != "" && _threadId[_assistantId] != "") {
+      _runComplete[_assistantId] = await _isRunComplete(
+          _threadId[_assistantId].toString(), _runId[_assistantId].toString());
     }
 
+    debugPrint(
+        '_runComplete[_assistantId] ' + _runComplete[_assistantId].toString());
+
     //get messages from completed run
-    if (_runComplete && _threadId != "") {
-      messages = await _getCompletedResponse(_threadId);
+    if (_runComplete[_assistantId]! && _threadId[_assistantId] != "") {
+      messages = await _getCompletedResponse(_threadId[_assistantId]);
     }
+
+    debugPrint('messages ' + messages.toString());
 
     return messages;
   }
@@ -77,12 +102,12 @@ class OpenAiService {
           "OpenAI-Beta": "assistants=v1",
         },
       );
-
+      debugPrint('openAIApiAssistantsEndpoint $openAIApiAssistantsEndpoint');
       if (res.statusCode == 200) {
         // decode the JSON response
         Map<String, dynamic> response = jsonDecode(res.body);
         String threadId = response['id'];
-        //debugPrint(threadId);
+        debugPrint('threadId $threadId');
         return threadId;
       } else {
         var statusCode = res.statusCode.toString();
@@ -256,16 +281,16 @@ class OpenAiService {
     //Now that we know the run has completed, return the new messages
     List<dynamic>? returnedMessages = [];
     String statusText = "";
-    if (_threadId != "") {
+    if (_threadId[_assistantId] != "") {
       //debugPrint("going in $_lastMessageId");
-      if (_lastMessageId != "") {
-        (returnedMessages, statusText) =
-            await _getMessagesFromThread(_threadId, _lastMessageId);
-            //debugPrint('Im using $_lastMessageId');
+      if (_lastMessageId[_assistantId] != "") {
+        (returnedMessages, statusText) = await _getMessagesFromThread(
+            _threadId[_assistantId], _lastMessageId[_assistantId]);
+        //debugPrint('Im using $_lastMessageId');
       } else {
         (returnedMessages, statusText) =
-            await _getMessagesFromThread(_threadId);
-            //debugPrint('Im not using a last message Id');
+            await _getMessagesFromThread(_threadId[_assistantId]);
+        //debugPrint('Im not using a last message Id');
       }
     }
     //debugPrint(statusText);
@@ -273,8 +298,8 @@ class OpenAiService {
     if (returnedMessages != null) {
       for (var returnedMessage in returnedMessages) {
         final assistantMessage = AssistantMessage.fromJson(returnedMessage);
-        debugPrint('${assistantMessage.content[0].text.value} id: ${assistantMessage
-            .id}');
+        debugPrint(
+            '${assistantMessage.content[0].text.value} id: ${assistantMessage.id}');
         if (assistantMessage.role != "user") {
           //discard role:user messages
           messages.add(//{
@@ -283,15 +308,53 @@ class OpenAiService {
                   role: LocalMessageRole.ai,
                   type: LocalMessageType.text,
                   text: assistantMessage.content[0].text.value));
-        
-          _lastMessageId = assistantMessage
-            .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
+
+          _lastMessageId[_assistantId] = assistantMessage
+              .id; //update the _lastMessageId with the last loaded message so that _getMessagesFromThread can be told to only return messages after that
         }
-        
+
         //debugPrint("coming out $_lastMessageId");
       }
     }
     //debugPrint(messages.toString());
     return messages;
+  }
+
+  /// Get speech from [openAISpeechEndpoint] using [voice] for [text]
+  ///
+  /// Returns a Future<Uint8List?> of the audio
+
+  Future<Uint8List?> generateAudio({
+    required String text,
+    required String voice,
+    String model = 'tts-1',
+    String responseFormat = 'mp3',
+    double speed = 1.0,
+  }) async {
+    final url = Uri.parse('$openAISpeechEndpoint');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $openAIApiKey',
+    };
+    final body = {
+      'model': model,
+      'input': text,
+      'voice': voice,
+      'response_format': responseFormat,
+      'speed': speed,
+    };
+
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      print('Failed to generate audio: ${response.statusCode}');
+      return null;
+    }
   }
 }

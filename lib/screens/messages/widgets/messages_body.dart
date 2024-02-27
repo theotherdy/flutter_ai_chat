@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:typed_data'; //Uint8List
+
+import 'package:just_audio/just_audio.dart';
 
 import 'package:flutter_ai_chat/constants.dart';
 
@@ -11,6 +14,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 //import 'package:chat/models/ChatMessage.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/camera_modal.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/advisor_modal.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 
 class MessagesBody extends StatefulWidget {
@@ -24,14 +28,28 @@ class MessagesBody extends StatefulWidget {
 class _MessagesBodyState extends State<MessagesBody> {
   //final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final OpenAiService openAiService = OpenAiService();
+  final OpenAiService openAiService =
+      OpenAiService(); //todo NEW INSTANCE of service (ie new thread) every time we come to this page - may want to do this explictly to allow people to continue a conversation?
   final WhisperTranscriptionService whisperTranscriptionService =
       WhisperTranscriptionService();
 
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
+  String _lastAdvisorResponse = ''; //to hold last respnse from advisor
 
-  //String _cameraFilePath = ''; // Store the file path received from CameraModal
+  late AudioPlayer _audioPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   /// Shows a loading message of [role] by adding to end of [_chatHistory] and scrolling down.
   ///
@@ -58,6 +76,7 @@ class _MessagesBodyState extends State<MessagesBody> {
   ///
   ///
   void _showTextMessage(LocalMessageRole role, String text) {
+    _lastAdvisorResponse = ''; //new message so can't reuse
     setState(() {
       _chatHistory.add(LocalMessage(
           time: DateTime.now(),
@@ -85,6 +104,7 @@ class _MessagesBodyState extends State<MessagesBody> {
             child: CameraModal(onVideoRecorded: (filePath) async {
               // Callback function when file is selected in CameraModal
               //debugPrint('I have file path in MessagesBody $filePath');
+              _lastAdvisorResponse = ''; //new message so can't reuse
               setState(() {
                 //add video message to list of messages
                 _chatHistory.add(LocalMessage(
@@ -118,72 +138,121 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
   }
 
-  void _showAdvisorModal(BuildContext context, String advisorResponse) async {
-    showModalBottomSheet<String>(
+  void _showAdvisorSpinnerModal(BuildContext context) {
+    showDialog(
       context: context,
-      isScrollControlled: true, // Set to true for full-screen modal
+      barrierDismissible: false, // Prevent users from dismissing the dialog
       builder: (BuildContext context) {
-        return Text(advisorResponse);
-      }
+        return Stack(
+          children: [
+            Container(
+              color: Colors.black
+                  .withOpacity(0.5), // Semi-transparent black background
+            ),
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _hideAdvisorSpinnerModal(BuildContext context) {
+    Navigator.pop(context); // Dismiss the bottom sheet to hide the spinner
+  }
+
+  void _showAdvisorModal(BuildContext context, String advisorResponse) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AdvisorModal(advisorResponse: advisorResponse);
+      },
     );
   }
 
   void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
-
     openAiService
         .getAssistantResponseFromMessage(text, widget.assistantId)
-        .then((aiResponses) {
+        .then((aiResponses) async {
       _chatHistory.removeLast(); //remove our loading message
+      //collate text frommultiple messages to sedn to the spech_to_text
+      String textToSend = '';
       for (var aiResponse in aiResponses) {
         _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+        textToSend += aiResponse.text;
+      }
+      //generate speech from text
+      final Uint8List? audioBytes = await openAiService.generateAudio(
+        text: textToSend,
+        voice: 'alloy', // Specify the voice here
+      );
+      if (audioBytes != null) {
+        _playAudio(audioBytes);
       }
     });
   }
 
   void _sendConversationAndShowAdvisorFeedback() {
-    //_showLoadingMessage(LocalMessageRole.ai);
-
-    //todo add spinner
-
-    //get conversation - text only - from _chatHistory
-    String textToSend = '';
-    for (var localMessage in _chatHistory) {
-      if(localMessage.type == LocalMessageType.text) {
-        if(localMessage.role == LocalMessageRole.user) {
-          textToSend += 'Doctor (' + DateFormat('kk:mm:ss').format(localMessage.time) + '):';
-        } else {
-          textToSend += 'Patient (' + DateFormat('kk:mm:ss').format(localMessage.time) + '):';
-        }
-        textToSend += localMessage.text!;
-      }
-    }
-
-    //debugPrint(textToSend);
-
-    String _advisorId =
-      "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
-
-    openAiService
-        .getAssistantResponseFromMessage(textToSend, _advisorId)
-        .then((aiResponses) {
-          String advisorResponse = '';
-          for (var aiResponse in aiResponses) {
-            advisorResponse += aiResponse.text;
+    //check if we have a _lastAdvisorResponse - if so, then no new messages have been posted/received so just redisplay that
+    if (_lastAdvisorResponse != '') {
+      _showAdvisorModal(context, _lastAdvisorResponse);
+    } else {
+      _showAdvisorSpinnerModal(
+          context); // Show spinner before making the API call
+      //get conversation - text only - from _chatHistory
+      String textToSend = '';
+      for (var localMessage in _chatHistory) {
+        if (localMessage.type == LocalMessageType.text) {
+          if (localMessage.role == LocalMessageRole.user) {
+            textToSend += 'Doctor (' +
+                DateFormat('kk:mm:ss').format(localMessage.time) +
+                '):';
+          } else {
+            textToSend += 'Patient (' +
+                DateFormat('kk:mm:ss').format(localMessage.time) +
+                '):';
           }
-          debugPrint('Got response');
-          _showAdvisorModal(context, advisorResponse);
-      //_chatHistory.removeLast(); //remove our loading message
-      /*for (var aiResponse in aiResponses) {
-        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-      }*/
-    });
+          textToSend += localMessage.text!;
+        }
+      }
+
+      //debugPrint(textToSend);
+
+      String _advisorId =
+          "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
+
+      openAiService
+          .getAssistantResponseFromMessage(textToSend, _advisorId)
+          .then((aiResponses) {
+        String advisorResponse = '';
+        for (var aiResponse in aiResponses) {
+          advisorResponse += aiResponse.text;
+        }
+        debugPrint('Got response');
+        _hideAdvisorSpinnerModal(context); // Hide spinner when request ends
+        _lastAdvisorResponse = advisorResponse;
+        _showAdvisorModal(context, advisorResponse);
+      });
+    }
+  }
+
+  void _playAudio(Uint8List audioBytes) async {
+    await _audioPlayer.setAudioSource(
+      AudioSource.uri(
+        Uri.dataFromBytes(
+          audioBytes,
+          mimeType: 'audio/mp3',
+        ),
+      ),
+    );
+    _audioPlayer.play();
   }
 
   @override
   Widget build(BuildContext context) {
     // Calculate the available height dynamically
-    //final availableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom;
 
     return Column(
       children: [
@@ -236,16 +305,15 @@ class _MessagesBodyState extends State<MessagesBody> {
           ),
           child: SafeArea(
               child: InputBar(onBtnSendPressed: (textOfMessage) {
-              // Callback function when message is sent in InputBar
-              tempChatHistoryContent =
-                  textOfMessage; //hold on to this even afetr we've cleared input
-              _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-              _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-            }, onBtnVideoPressed: () {
-              // Callback function when video button pressed is selected in InputBar
-              _showCameraModal(context);
-            })
-          ),
+            // Callback function when message is sent in InputBar
+            tempChatHistoryContent =
+                textOfMessage; //hold on to this even afetr we've cleared input
+            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+          }, onBtnVideoPressed: () {
+            // Callback function when video button pressed is selected in InputBar
+            _showCameraModal(context);
+          })),
         )
       ],
     );
