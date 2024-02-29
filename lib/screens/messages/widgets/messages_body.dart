@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:typed_data'; //Uint8List
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
 
@@ -240,6 +242,15 @@ class _MessagesBodyState extends State<MessagesBody> {
   }
 
   void _playAudio(Uint8List audioBytes) async {
+  Directory tempDir = await getTemporaryDirectory();
+  String tempPath = '${tempDir.path}/temp.mp3';
+  File tempFile = File(tempPath);
+  await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+  await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath))); 
+  _audioPlayer.play();
+}
+  
+  /*void _playAudio(Uint8List audioBytes) async {
     await _audioPlayer.setAudioSource(
       AudioSource.uri(
         Uri.dataFromBytes(
@@ -249,7 +260,7 @@ class _MessagesBodyState extends State<MessagesBody> {
       ),
     );
     _audioPlayer.play();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
