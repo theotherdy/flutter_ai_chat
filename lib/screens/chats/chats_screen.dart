@@ -120,7 +120,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     Navigator.pushNamed(
                       context,
                       '/messages',
-                      arguments: {'assistantId': chats[index].assistantId},
+                      arguments: {
+                        'assistantId': chats[index].assistantId,
+                        'advisorId': chats[index].advisorId
+                      },
                     );
                   },
                 );

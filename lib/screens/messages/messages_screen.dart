@@ -16,10 +16,11 @@ class MessagesScreen extends StatelessWidget {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     String assistantId = args['assistantId'];
+    String advisorId = args['advisorId'];
     //debugPrint(assistantId);
     return Scaffold(
       appBar: buildAppBar(),
-      body: MessagesBody(assistantId: assistantId),
+      body: MessagesBody(assistantId: assistantId, advisorId: advisorId),
     );
   }
 

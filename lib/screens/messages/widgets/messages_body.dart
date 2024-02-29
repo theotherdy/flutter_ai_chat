@@ -19,7 +19,8 @@ import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 
 class MessagesBody extends StatefulWidget {
   final String assistantId;
-  const MessagesBody({super.key, this.assistantId = ''});
+  final String advisorId;
+  const MessagesBody({super.key, this.assistantId = '', this.advisorId = ''});
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();
@@ -220,11 +221,11 @@ class _MessagesBodyState extends State<MessagesBody> {
 
       //debugPrint(textToSend);
 
-      String _advisorId =
-          "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
+      //String _advisorId =
+      //    "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
 
       openAiService
-          .getAssistantResponseFromMessage(textToSend, _advisorId)
+          .getAssistantResponseFromMessage(textToSend, widget.advisorId)
           .then((aiResponses) {
         String advisorResponse = '';
         for (var aiResponse in aiResponses) {

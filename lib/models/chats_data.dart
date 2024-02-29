@@ -5,6 +5,7 @@ class ChatsData {
   int difficulty;
   int attempts;
   String assistantId;
+  String advisorId; //ie which will provide feedback on interaction
 
   ChatsData({
     required this.avatar,
@@ -13,6 +14,7 @@ class ChatsData {
     required this.difficulty,
     required this.attempts,
     required this.assistantId,
+    required this.advisorId,
   });
 
   static List<ChatsData> getChats() {
@@ -24,6 +26,7 @@ class ChatsData {
         difficulty: 2,
         attempts: 1,
         assistantId: 'asst_oLP6zXce2HxRuR4dDPBDt3IM',
+        advisorId: 'asst_YEv4v9UdwtTd4NoJzh3iwHw7',
       ),
       ChatsData(
         avatar: 'assets/images/user_5.png',
@@ -32,6 +35,7 @@ class ChatsData {
         difficulty: 3,
         attempts: 0,
         assistantId: '456',
+        advisorId: '234',
       ),
       ChatsData(
         avatar: 'assets/images/user_2.png',
@@ -40,6 +44,7 @@ class ChatsData {
         difficulty: 1,
         attempts: 2,
         assistantId: '789',
+        advisorId: '235',
       ),
     ];
   }
