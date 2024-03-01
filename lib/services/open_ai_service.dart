@@ -25,10 +25,10 @@ class OpenAiService {
   //a new conversation every time the user opens a chat) but might be useful in
   //future, if we instantiate OpenAiService at a higher level in the tree and
   //allow students to come back to a partially complete conversation
-  Map<String, String> _threadId = {};
-  Map<String, String> _lastMessageId = {};
-  Map<String, String> _runId = {};
-  Map<String, bool> _runComplete = {}; //was false;
+  final Map<String, String> _threadId = {};
+  final Map<String, String> _lastMessageId = {};
+  final Map<String, String> _runId = {};
+  final Map<String, bool> _runComplete = {}; //was false;
 
   /// Gets a response from the assistant for a message.
   ///
@@ -42,7 +42,7 @@ class OpenAiService {
     //debugPrint(message);
     //if no assistant, create assistant - for now just use ID = asst_oLP6zXce2HxRuR4dDPBDt3IM
 
-    debugPrint('Do we have a _threadId? ' + _threadId[_assistantId].toString());
+    debugPrint('Do we have a _threadId? ${_threadId[_assistantId]}');
 
     //if no thread, create a thread
     if (_threadId[_assistantId] == null ||
@@ -58,7 +58,7 @@ class OpenAiService {
       messageId = await _addMesageToThread(message, _threadId[_assistantId]);
     }
 
-    debugPrint('messageId ' + messageId.toString());
+    debugPrint('messageId $messageId');
 
     //run assistant on the thread
     if (_assistantId != "" && _threadId[_assistantId] != "") {
@@ -66,7 +66,7 @@ class OpenAiService {
           await _runAssistantOnThread(_assistantId, _threadId[_assistantId]);
     }
 
-    debugPrint('_runId[_assistantId] ' + _runId[_assistantId].toString());
+    debugPrint('_runId[_assistantId] ${_runId[_assistantId]}');
 
     //is run complete
     if (_runId[_assistantId] != "" && _threadId[_assistantId] != "") {
@@ -75,14 +75,14 @@ class OpenAiService {
     }
 
     debugPrint(
-        '_runComplete[_assistantId] ' + _runComplete[_assistantId].toString());
+        '_runComplete[_assistantId] ${_runComplete[_assistantId]}');
 
     //get messages from completed run
     if (_runComplete[_assistantId]! && _threadId[_assistantId] != "") {
       messages = await _getCompletedResponse(_threadId[_assistantId]);
     }
 
-    debugPrint('messages ' + messages.toString());
+    debugPrint('messages $messages');
 
     return messages;
   }

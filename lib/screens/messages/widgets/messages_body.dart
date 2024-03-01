@@ -152,7 +152,7 @@ class _MessagesBodyState extends State<MessagesBody> {
               color: Colors.black
                   .withOpacity(0.5), // Semi-transparent black background
             ),
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
             ),
           ],
@@ -209,13 +209,9 @@ class _MessagesBodyState extends State<MessagesBody> {
       for (var localMessage in _chatHistory) {
         if (localMessage.type == LocalMessageType.text) {
           if (localMessage.role == LocalMessageRole.user) {
-            textToSend += 'Doctor (' +
-                DateFormat('kk:mm:ss').format(localMessage.time) +
-                '):';
+            textToSend += 'Doctor (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
           } else {
-            textToSend += 'Patient (' +
-                DateFormat('kk:mm:ss').format(localMessage.time) +
-                '):';
+            textToSend += 'Patient (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
           }
           textToSend += localMessage.text!;
         }
@@ -282,7 +278,7 @@ class _MessagesBodyState extends State<MessagesBody> {
               ),
             ),
             Visibility(
-              visible: _chatHistory.length > 0,
+              visible: _chatHistory.isNotEmpty,
               child: Positioned(
                 bottom: kDefaultPadding, // Adjust the bottom position as needed
                 right: kDefaultPadding, // Adjust the right position as needed
@@ -290,7 +286,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                   onPressed: () {
                     _sendConversationAndShowAdvisorFeedback();
                   },
-                  child: Icon(
+                  child: const Icon(
                     Icons.tips_and_updates,
                     //color: kPrimaryColor,
                   ),

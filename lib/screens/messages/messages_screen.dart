@@ -34,7 +34,7 @@ class MessagesScreen extends StatelessWidget {
   AppBar buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Row(children: [
+      title: const Row(children: [
         BackButton(),
         CircleAvatar(
           backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
