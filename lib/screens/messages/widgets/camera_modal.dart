@@ -79,7 +79,7 @@ class _CameraModalState extends State<CameraModal> {
     final cameras = await availableCameras();
     final front = cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.front);
-    _cameraController = CameraController(front, ResolutionPreset.medium);
+    _cameraController = CameraController(front, ResolutionPreset.low);
     await _cameraController.initialize();
     setState(() => _isLoading = false);
   }

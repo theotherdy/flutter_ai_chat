@@ -128,10 +128,14 @@ class _VideoPlayerState extends State<_VideoPlayer> {
             height: 50.0, 
             child: DecoratedBox(
               decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(27.0),
+                  topRight: Radius.circular(27.0),
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
                 ),
               ),
               child: Row( // Align the close button within the gradient bar
@@ -151,13 +155,21 @@ class _VideoPlayerState extends State<_VideoPlayer> {
             bottom: 0,
             left: 0,
             right: 0,
-            height: 80.0, 
+            height: 50.0, 
             child: DecoratedBox(
               decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(27),
+                  bottomRight: Radius.circular(27),
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                  colors: [
+                    
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.8), 
+                  ],
                 ),
               ),
               child: Row( 
