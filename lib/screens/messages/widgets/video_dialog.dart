@@ -3,94 +3,6 @@ import 'package:video_player/video_player.dart';
 
 import 'package:flutter_ai_chat/screens/messages/utils/video_utils.dart';
 
-class VideoPlayerControls extends StatefulWidget {
-  final VideoPlayerController controller;
-  final VoidCallback play;
-  final VoidCallback pause;
-  final VoidCallback replay;
-  final VoidCallback close;
-
-  const VideoPlayerControls({super.key, 
-    required this.controller,
-    required this.play,
-    required this.pause,
-    required this.replay,
-    required this.close,
-  });
-
-  @override
-  _VideoPlayerControlsState createState() => _VideoPlayerControlsState();
-}
-
-class _VideoPlayerControlsState extends State<VideoPlayerControls> {
-  late VideoPlayerController _controller;
-  late VoidCallback _listener;
-  bool _isPaused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller;
-    _listener = () {
-      if (mounted) {
-        setState(() {});
-      }
-    };
-    _controller.addListener(_listener);
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_listener);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Duration currentPosition = _controller.value.position;
-    Duration totalDuration = _controller.value.duration;
-
-    //print('Current Position: $currentPosition');
-    //print('Total Duration: $totalDuration');
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton(
-          onPressed: (currentPosition == Duration.zero || _isPaused)
-              ? () {
-                  setState(() {
-                    _isPaused = false;
-                  });
-                  widget.play();
-                }
-              : null,
-          child: const Icon(Icons.play_arrow),
-        ),
-        ElevatedButton(
-          onPressed: (currentPosition < totalDuration && !_isPaused)
-              ? () {
-                  setState(() {
-                    _isPaused = true;
-                  });
-                  widget.pause();
-                }
-              : null,
-          child: const Icon(Icons.pause),
-        ),
-        ElevatedButton(
-          onPressed: currentPosition > Duration.zero ? widget.replay : null,
-          child: const Icon(Icons.replay),
-        ),
-        ElevatedButton(
-          onPressed: widget.close,
-          child: const Icon(Icons.close),
-        ),
-      ],
-    );
-  }
-}
-
 class VideoDialog extends StatelessWidget {
   final VideoPlayerController controller;
 
@@ -118,63 +30,157 @@ class VideoDialog extends StatelessWidget {
   }
 }
 
-class _VideoPlayer extends StatelessWidget {
+class _VideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
   final double containerWidth;
   final double containerHeight;
 
   const _VideoPlayer({
+    Key? key,
     required this.controller,
     required this.containerWidth,
     required this.containerHeight,
-  });
+  }) : super(key: key);
+
+  @override
+  _VideoPlayerState createState() => _VideoPlayerState();
+}
+
+class _VideoPlayerState extends State<_VideoPlayer> {
+  bool _isPaused = true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(() {});
+    super.dispose();
+  }
+
+  // Internal control methods
+  void _play() {
+    widget.controller.play();
+    setState(() {
+      _isPaused = false;
+    });
+  }
+
+  void _pause() {
+    widget.controller.pause();
+    setState(() {
+      _isPaused = true;
+    });
+  }
+
+  void _replay() {
+    widget.controller.seekTo(Duration.zero);
+    widget.controller.play();
+    setState(() {
+      _isPaused = false;
+    });
+  }
+
+  void _close() {
+    widget.controller.pause();
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
-    bool isPlaying = false;
-
     Size videoDimensions = VideoUtils.calculateVideoDimensions(
-      controller,
-      containerWidth,
-      containerHeight,
+      widget.controller,
+      widget.containerWidth,
+      widget.containerHeight,
     );
 
     return SizedBox(
       width: videoDimensions.width,
       height: videoDimensions.height,
       child: Stack(
-        //mainAxisSize: MainAxisSize.min,
         children: [
+          // Video player
           Center(
-              child: SizedBox(
-            width: videoDimensions.width,
-            height: videoDimensions.height,
-            child: controller.value.isInitialized
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: VideoPlayer(controller),
-                  )
-                : Container(),
-          )),
-          VideoPlayerControls(
-            controller: controller,
-            play: () {
-              controller.play();
-              isPlaying = true;
-            },
-            pause: () {
-              controller.pause();
-              isPlaying = false;
-            },
-            replay: () {
-              controller.seekTo(Duration.zero);
-              controller.play();
-              isPlaying = true;
-            },
-            close: () {
-              controller.pause();
-              Navigator.of(context).pop();
-            },
+            child: SizedBox(
+              width: videoDimensions.width,
+              height: videoDimensions.height,
+              child: widget.controller.value.isInitialized
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: VideoPlayer(widget.controller),
+                    )
+                  : Container(),
+            ),
+          ),
+
+          // Gradient top bar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 50.0, 
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                ),
+              ),
+              child: Row( // Align the close button within the gradient bar
+                mainAxisAlignment: MainAxisAlignment.end, // Push close button to the right
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: _close, 
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Gradient bottom bar with controls
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 80.0, 
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                ),
+              ),
+              child: Row( 
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: (widget.controller.value.position == Duration.zero || _isPaused)
+                        ? _play
+                        : _pause,
+                    icon: Icon(
+                      _isPaused ? Icons.play_arrow : Icons.pause,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10.0), 
+                  IconButton(
+                    onPressed:
+                        widget.controller.value.position > Duration.zero ? _replay : null,
+                    icon: const Icon(Icons.replay, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

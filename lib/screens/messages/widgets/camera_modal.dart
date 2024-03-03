@@ -63,7 +63,9 @@ class _CameraModalState extends State<CameraModal> {
               padding: const EdgeInsets.all(25),
               child: FloatingActionButton(
                 backgroundColor: Colors.red,
+                foregroundColor: _isRecording ? Colors.white : Colors.red,
                 child: Icon(_isRecording ? Icons.stop : Icons.circle),
+                shape: RoundedRectangleBorder(side: BorderSide(width: 3,color: Colors.white),borderRadius: BorderRadius.circular(100)),
                 onPressed: () => _recordVideo(),
               ),
             ),
@@ -77,7 +79,7 @@ class _CameraModalState extends State<CameraModal> {
     final cameras = await availableCameras();
     final front = cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.front);
-    _cameraController = CameraController(front, ResolutionPreset.max);
+    _cameraController = CameraController(front, ResolutionPreset.medium);
     await _cameraController.initialize();
     setState(() => _isLoading = false);
   }
