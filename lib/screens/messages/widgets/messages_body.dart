@@ -6,7 +6,9 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
 
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+//import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 
 import 'package:flutter_ai_chat/constants.dart';
 
@@ -123,9 +125,20 @@ class _MessagesBodyState extends State<MessagesBody> {
               //now show a loading message whiole awaiting transcript
               _showLoadingMessage(LocalMessageRole.user);
 
+              // Audio Extraction with ffmpeg_kit_flutter and path_provider
+              final tempDirectory =
+                  await getTemporaryDirectory(); // Get temporary directory
+              final audioOutputPath =
+                  '${tempDirectory.path}/extracted_audio.mp3'; // Use a suitable extension
+              await _extractAudio(filePath, audioOutputPath);
+
+              debugPrint(audioOutputPath);
+
               //final filePath = '/path/to/your/video/file.mp4';
-              final transcription =
-                  await whisperTranscriptionService.transcribeVideo(filePath);
+              //final transcription =
+              //await whisperTranscriptionService.transcribeVideo(filePath);
+              final transcription = await whisperTranscriptionService
+                  .transcribeVideo(audioOutputPath);
 
               _chatHistory.removeLast(); //our loading message
 
@@ -145,9 +158,26 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   // Helper function for audio extraction using FFmpegKit
   Future<void> _extractAudio(String inputPath, String outputPath) async {
-    String command = '-i $inputPath -vn -acodec copy $outputPath';
+    String command =
+        '-y -i $inputPath -vn -acodec libmp3lame $outputPath'; //-y tells it to autooverwrite
     await FFmpegKit.execute(command).then((session) async {
-      // ... handle success, cancel, and errors as before ...
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        // SUCCESS, audio extracted
+        debugPrint('Audio extraction success');
+      } else if (ReturnCode.isCancel(returnCode)) {
+        // Operation was canceled
+        debugPrint('Audio extraction canceled');
+      } else {
+        // ERROR
+        debugPrint('Error extracting audio. Error Code: $returnCode');
+      }
+
+      // Access logs
+      await session.getLogs().then((logs) {
+        logs.forEach((log) => debugPrint(log.getMessage()));
+      });
     });
   }
 
@@ -219,9 +249,11 @@ class _MessagesBodyState extends State<MessagesBody> {
       for (var localMessage in _chatHistory) {
         if (localMessage.type == LocalMessageType.text) {
           if (localMessage.role == LocalMessageRole.user) {
-            textToSend += 'Doctor (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
+            textToSend +=
+                'Doctor (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
           } else {
-            textToSend += 'Patient (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
+            textToSend +=
+                'Patient (${DateFormat('kk:mm:ss').format(localMessage.time)}):';
           }
           textToSend += localMessage.text!;
         }
@@ -248,14 +280,14 @@ class _MessagesBodyState extends State<MessagesBody> {
   }
 
   void _playAudio(Uint8List audioBytes) async {
-  Directory tempDir = await getTemporaryDirectory();
-  String tempPath = '${tempDir.path}/temp.mp3';
-  File tempFile = File(tempPath);
-  await tempFile.writeAsBytes(audioBytes); // Asynchronous write
-  await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath))); 
-  _audioPlayer.play();
-}
-  
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = '${tempDir.path}/temp.mp3';
+    File tempFile = File(tempPath);
+    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
+    _audioPlayer.play();
+  }
+
   /*void _playAudio(Uint8List audioBytes) async {
     await _audioPlayer.setAudioSource(
       AudioSource.uri(
