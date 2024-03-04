@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
 
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+
 import 'package:flutter_ai_chat/constants.dart';
 
 import 'package:flutter_ai_chat/services/open_ai_service.dart';
@@ -139,6 +141,14 @@ class _MessagesBodyState extends State<MessagesBody> {
             }));
       },
     );
+  }
+
+  // Helper function for audio extraction using FFmpegKit
+  Future<void> _extractAudio(String inputPath, String outputPath) async {
+    String command = '-i $inputPath -vn -acodec copy $outputPath';
+    await FFmpegKit.execute(command).then((session) async {
+      // ... handle success, cancel, and errors as before ...
+    });
   }
 
   void _showAdvisorSpinnerModal(BuildContext context) {

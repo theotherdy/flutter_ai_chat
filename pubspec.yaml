@@ -45,6 +45,7 @@ dependencies:
   just_audio: ^0.9.36
 
   path_provider: any
+  ffmpeg_kit_flutter: ^6.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
