@@ -140,18 +140,46 @@ class _MessagesBodyState extends State<MessagesBody> {
               final transcription = await whisperTranscriptionService
                   .transcribeVideo(audioOutputPath);
 
-              _chatHistory.removeLast(); //our loading message
+              setState(() {
+                _chatHistory.removeLast(); //our loading message
+              });
 
-              if (transcription != null) {
-                // debugPrint('Transcription: ${transcription.text}');
+              if (transcription != null &&
+                  transcription.text != '' &&
+                  transcription.text.toLowerCase() != 'you') {
+                //for some reason, it seems to hallucinate 'you' if no sound!
                 _showTextMessage(LocalMessageRole.user,
                     transcription.text); //show user what video transcript says
                 _sendTextMessageAndShowTextResponse(
                     transcription.text); //send off to chat api to respond to
               } else {
-                //debugPrint('Failed to transcribe video.');
+                //show an eror dialogue
+                _showWhisperErrorDialog();
               }
             }));
+      },
+    );
+  }
+
+  void _showWhisperErrorDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext newContext) {
+        // Capture a new BuildContext
+        return AlertDialog(
+          title: Text("Sorry"),
+          content: Text(
+              "I'm afraid couldn't find any speech in that video, or something went wrong - please try again, or type your message instead"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(newContext).pop(); // Use the new BuildContext
+              },
+            ),
+          ],
+        );
       },
     );
   }
