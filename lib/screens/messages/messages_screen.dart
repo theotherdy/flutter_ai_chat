@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_ai_chat/models/local_message.dart';
-
 import 'package:flutter_ai_chat/constants.dart';
-
 import 'package:flutter_ai_chat/screens/messages/widgets/messages_body.dart';
-
-//import 'classes/local_message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/information_modal.dart';
 
 class MessagesScreen extends StatelessWidget {
-  const MessagesScreen({super.key});
+  MessagesScreen({super.key});
   static const routeName = '/messages';
+  bool _isFirstLoad = true; // Introduce the variable
 
   @override
   Widget build(BuildContext context) {
@@ -17,63 +14,75 @@ class MessagesScreen extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     String assistantId = args['assistantId'];
     String advisorId = args['advisorId'];
-    //debugPrint(assistantId);
+    String instructions = args['instructions'];
+    String avatar = args['avatar'];
+    String title = args['title'];
+
+    // Show the dialog on initial load
+    if (_isFirstLoad) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showInstructionsDialog(context, instructions);
+        _isFirstLoad = false; // Make sure it only shows once
+      });
+    }
+
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: buildAppBar(title, avatar, context, instructions),
       body: MessagesBody(assistantId: assistantId, advisorId: advisorId),
     );
   }
 
-  /*// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
-  ///
-  ///
-  void _getInteractionFeedback() {
-    debugPrint('Im getting feedback');
-  }*/
-
-  AppBar buildAppBar() {
+  AppBar buildAppBar(
+      String title, String avatar, BuildContext context, String instructions) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: const Row(children: [
-        BackButton(),
-        CircleAvatar(
-          backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
-        ),
-        SizedBox(width: kDefaultPadding * 0.75),
+      title: Row(children: [
+        const BackButton(),
+        CircleAvatar(backgroundImage: AssetImage(avatar)),
+        const SizedBox(width: kDefaultPadding * 0.75),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Patient with back pain",
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                "Easy",
-                style: TextStyle(fontSize: 12),
-              )
-            ],
-          ),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(fontSize: 16)),
+          ]),
         ),
-        /*IconButton(
-          icon: Icon(
-            Icons.tips_and_updates,
-            color: kPrimaryColor,
-          ),
-          onPressed: () => _getInteractionFeedback(),
-        ),*/
       ]),
-      actions: const [
-        /*IconButton(
-          icon: const Icon(Icons.local_phone),
-          onPressed: () {},
-        ),
+      actions: [
         IconButton(
-          icon: const Icon(Icons.videocam),
-          onPressed: () {},
+          icon: const Icon(Icons.info_outline),
+          onPressed: () => _showInstructionsDialog(context, instructions),
         ),
-        const SizedBox(width: kDefaultPadding / 2),*/
       ],
     );
+  }
+
+  void _showInstructionsDialog(BuildContext context, String instructions) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return InformationModal(information: instructions);
+      },
+    );
+
+    /*showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: SingleChildScrollView(
+          // Add scrollable behavior
+          child: Scrollbar(
+            // Include the scrollbar
+            child: SingleChildScrollView(
+              child: Text(instructions),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );*/
   }
 }
