@@ -122,7 +122,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                       '/messages',
                       arguments: {
                         'assistantId': chats[index].assistantId,
-                        'advisorId': chats[index].advisorId
+                        'advisorId': chats[index].advisorId,
+                        'instructions': chats[index].instructions,
+                        'avatar': chats[index].avatar,
+                        'title': chats[index].title,
                       },
                     );
                   },

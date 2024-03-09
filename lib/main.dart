@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       initialRoute: ChatsScreen.routeName,
       routes: {
         ChatsScreen.routeName: (context) => const ChatsScreen(),
-        MessagesScreen.routeName: (context) => const MessagesScreen(),
+        MessagesScreen.routeName: (context) => MessagesScreen(),
       },
     );
   }

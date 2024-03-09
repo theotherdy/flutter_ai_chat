@@ -20,7 +20,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 //import 'package:chat/models/ChatMessage.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/camera_modal.dart';
-import 'package:flutter_ai_chat/screens/messages/widgets/advisor_modal.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/information_modal.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 
 class MessagesBody extends StatefulWidget {
@@ -237,7 +237,7 @@ class _MessagesBodyState extends State<MessagesBody> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AdvisorModal(advisorResponse: advisorResponse);
+        return InformationModal(information: advisorResponse);
       },
     );
   }
