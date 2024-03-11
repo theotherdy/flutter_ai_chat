@@ -29,7 +29,8 @@ class ChatsData {
         attempts: 0,
         assistantId: 'asst_oLP6zXce2HxRuR4dDPBDt3IM',
         advisorId: 'asst_YEv4v9UdwtTd4NoJzh3iwHw7',
-        instructions: 'Please take a patient history',
+        instructions: 'Please take a patient history. Use a structured ' +
+            'approach, such as SOCRATES for a pain history.',
       ),
       ChatsData(
         avatar: 'assets/images/user_5.png', //patient-centred consulting
@@ -70,16 +71,16 @@ class ChatsData {
         assistantId: 'asst_Ex9Ixe2e9bd441OFlG0HqwFM',
         advisorId: 'asst_RMtNGqIvuEmmKUhUfyTXYSnQ',
         instructions: 'You are asked to see Jo Heston who has abdominal pain. ' +
-            'Useful phrases and ways to explore the patient’s ideas: ' +
-            'Direct approach - how did that make you feel? ' +
-            'Pick up cues - you say you have been worried? ' +
-            'Repetition of cues with non-verbal encouragement. ' +
-            'Picking up and checking out verbal cues ‘You said that you  ' +
+            'Useful phrases and ways to explore the patient\'s ideas: \n\n' +
+            'Direct approach - how did that make you feel?  \n' +
+            'Pick up cues - you say you have been worried?  \n' +
+            'Repetition of cues with non-verbal encouragement.  \n' +
+            'Picking up and checking out verbal cues \'You said that you  ' +
             'were worried that the pain might be something serious- was  ' +
-            'there something in particular you were thinking of?’ ' +
-            'Picking up and checking out non-verbal cues ‘I sense that  ' +
-            'you’re not quite happy with the explanations you’ve been given ' +
-            'in the past, is that right?’',
+            'there something in particular you were thinking of?\'  \n' +
+            'Picking up and checking out non-verbal cues \'I sense that  ' +
+            'you\'re not quite happy with the explanations you\'ve been given ' +
+            'in the past, is that right?\'',
       ),
       ChatsData(
         avatar:
@@ -90,7 +91,11 @@ class ChatsData {
         attempts: 0,
         assistantId: 'asst_iCXpBuRmbfchy3tEgTiXXlG6',
         advisorId: 'asst_Hycn6zIFMWPMCBncJCFIGPgO',
-        instructions: 'Please ',
+        instructions: 'You are on an attachment in a GP surgery. Chris Watson' +
+            'has had 2 episodes of abdominal pain and you have received a copy' +
+            'of an ultrasound report showing 2 small stones in the gall bladder. \n\n' +
+            'Please answer their questions. \n\n' +
+            'Please now discuss the management options for this patient.',
       ),
     ];
   }
