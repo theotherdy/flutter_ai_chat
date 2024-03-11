@@ -27,11 +27,13 @@ class MessagesBody extends StatefulWidget {
   final String assistantId;
   final String advisorId;
   final String avatar;
+  final String voice;
   const MessagesBody(
       {super.key,
       this.assistantId = '',
       this.advisorId = '',
-      this.avatar = ''});
+      this.avatar = '',
+      this.voice = ''});
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();
@@ -262,7 +264,7 @@ class _MessagesBodyState extends State<MessagesBody> {
       //generate speech from text
       final Uint8List? audioBytes = await openAiService.generateAudio(
         text: textToSend,
-        voice: 'alloy', // Specify the voice here
+        voice: widget.voice, // Specify the voice here
       );
       if (audioBytes != null) {
         _playAudio(audioBytes);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class InformationModal extends StatefulWidget {
   const InformationModal({
@@ -15,6 +16,7 @@ class InformationModal extends StatefulWidget {
 class _InformationModalState extends State<InformationModal> {
   final ScrollController _scrollController = ScrollController();
   bool _showFloatingButton = true;
+  Timer? _buttonTimer;
 
   @override
   void initState() {
@@ -26,12 +28,21 @@ class _InformationModalState extends State<InformationModal> {
   void dispose() {
     _scrollController.removeListener(_calculateFloatingButtonVisibility);
     _scrollController.dispose();
+    _buttonTimer?.cancel();
     super.dispose();
   }
 
   void _calculateFloatingButtonVisibility() {
-    setState(() {
-      _showFloatingButton = _scrollController.position.maxScrollExtent > 0;
+    if (_buttonTimer != null && _buttonTimer!.isActive) {
+      _buttonTimer!.cancel();
+    }
+    _buttonTimer = Timer(Duration(milliseconds: 100), () {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final pixels = _scrollController.position.pixels;
+      final atBottom = pixels >= maxScroll;
+      setState(() {
+        _showFloatingButton = !_showFloatingButton || !atBottom;
+      });
     });
   }
 

@@ -16,6 +16,7 @@ class MessagesScreen extends StatelessWidget {
     String advisorId = args['advisorId'];
     String instructions = args['instructions'];
     String avatar = args['avatar'];
+    String voice = args['voice'];
     String title = args['title'];
 
     // Show the dialog on initial load
@@ -29,7 +30,7 @@ class MessagesScreen extends StatelessWidget {
     return Scaffold(
       appBar: buildAppBar(title, avatar, context, instructions),
       body: MessagesBody(
-          assistantId: assistantId, advisorId: advisorId, avatar: avatar),
+          assistantId: assistantId, advisorId: advisorId, avatar: avatar, voice: voice),
     );
   }
 

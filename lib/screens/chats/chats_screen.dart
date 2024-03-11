@@ -125,6 +125,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         'advisorId': chats[index].advisorId,
                         'instructions': chats[index].instructions,
                         'avatar': chats[index].avatar,
+                        'voice': chats[index].voice,
                         'title': chats[index].title,
                       },
                     );
