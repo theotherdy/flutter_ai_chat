@@ -14,9 +14,11 @@ class Message extends StatelessWidget {
   const Message({
     super.key,
     required this.message,
+    required this.avatar,
   });
 
   final LocalMessage message;
+  final String avatar;
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +47,9 @@ class Message extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           if (message.role != LocalMessageRole.user) ...[
-            const CircleAvatar(
+            CircleAvatar(
               radius: 12,
-              backgroundImage: AssetImage("assets/images/55yo_back_pain.png"),
+              backgroundImage: AssetImage(avatar),
             ),
             const SizedBox(width: kDefaultPadding / 2),
           ],

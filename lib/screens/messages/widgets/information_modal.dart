@@ -14,49 +14,48 @@ class InformationModal extends StatefulWidget {
 
 class _InformationModalState extends State<InformationModal> {
   final ScrollController _scrollController = ScrollController();
-  bool _showFloatingIcon = false;
+  bool _showFloatingButton = true;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_updateFloatingIconVisibility);
+    _scrollController.addListener(_calculateFloatingButtonVisibility);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_updateFloatingIconVisibility);
+    _scrollController.removeListener(_calculateFloatingButtonVisibility);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _updateFloatingIconVisibility() {
+  void _calculateFloatingButtonVisibility() {
     setState(() {
-      // Check if user has scrolled more than a certain offset from the top
-      _showFloatingIcon = _scrollController.position.pixels > 100;
+      _showFloatingButton = _scrollController.position.maxScrollExtent > 0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
+      content: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(widget
-                      .information), // Provide very long text to force overflow
-                  SizedBox(height: 20), // Adding some space below the text
-                ],
-              ),
+          SingleChildScrollView(
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(widget.information),
+                SizedBox(height: 20),
+              ],
             ),
           ),
-          if (_showFloatingIcon)
-            _buildFloatingDownIcon(), // Add floating down icon
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: _buildFloatingButton(),
+          ),
         ],
       ),
       actions: <Widget>[
@@ -70,11 +69,10 @@ class _InformationModalState extends State<InformationModal> {
     );
   }
 
-  Widget _buildFloatingDownIcon() {
-    return Container(
-      alignment: Alignment.center,
-      child: IconButton(
-        icon: Icon(Icons.keyboard_arrow_down), // Use an arrow icon
+  Widget _buildFloatingButton() {
+    return Visibility(
+      visible: _showFloatingButton,
+      child: FloatingActionButton(
         onPressed: () {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
@@ -82,6 +80,7 @@ class _InformationModalState extends State<InformationModal> {
             curve: Curves.easeOut,
           );
         },
+        child: Icon(Icons.keyboard_arrow_down), // Use an arrow icon
       ),
     );
   }

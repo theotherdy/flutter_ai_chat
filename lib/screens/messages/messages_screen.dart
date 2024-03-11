@@ -21,14 +21,15 @@ class MessagesScreen extends StatelessWidget {
     // Show the dialog on initial load
     if (_isFirstLoad) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showInstructionsDialog(context, instructions);
         _isFirstLoad = false; // Make sure it only shows once
+        _showInstructionsDialog(context, instructions);
       });
     }
 
     return Scaffold(
       appBar: buildAppBar(title, avatar, context, instructions),
-      body: MessagesBody(assistantId: assistantId, advisorId: advisorId),
+      body: MessagesBody(
+          assistantId: assistantId, advisorId: advisorId, avatar: avatar),
     );
   }
 

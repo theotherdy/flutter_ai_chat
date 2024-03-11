@@ -33,7 +33,7 @@ class ChatsData {
             'approach, such as SOCRATES for a pain history.',
       ),
       ChatsData(
-        avatar: 'assets/images/user_5.png', //patient-centred consulting
+        avatar: 'assets/images/50yowoman.png', //patient-centred consulting
         title: '50yo woman with chest pain',
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
@@ -60,10 +60,30 @@ class ChatsData {
             '•	Giving space and time - use of silence \n' +
             '•	Verbal encouragement and facilitation - neutral phrases early and later use repetition, paraphrasing and interpretation \n' +
             '•	non-verbal encouragement \n' +
+            'You are a student in general practice and have been ' +
+            'asked to see Alex Simpson. The patient has presented to the practice ' +
+            'nurse/nurse practitioner and mentioned chest pains (not currently ' +
+            'present). The practice Nurse/Practitioner has done some basic tests: ' +
+            'pulse 90 regular, BP 150/95, temp 36.7.  ECG – no obvious signs of ' +
+            'acute MI. \n The patient is not unwell, and no urgent action is required ' +
+            'so they are able to talk to you before they see the duty doctor. \n\n' +
+            'Active Listening \n' +
+            'You are a student in general practice and have been ' +
+            'asked to see Alex Simpson. The patient has presented to the practice ' +
+            'nurse/nurse practitioner and mentioned chest pains (not currently ' +
+            'present). The practice Nurse/Practitioner has done some basic tests: ' +
+            'pulse 90 regular, BP 150/95, temp 36.7.  ECG – no obvious signs of ' +
+            'acute MI. \n The patient is not unwell, and no urgent action is required ' +
+            'so they are able to talk to you before they see the duty doctor. \n\n' +
+            'Active Listening \n' +
+            'How do doctors show that they are actively listening? You may wish to consider: \n' +
+            '•	Giving space and time - use of silence \n' +
+            '•	Verbal encouragement and facilitation - neutral phrases early and later use repetition, paraphrasing and interpretation \n' +
+            '•	non-verbal encouragement \n' +
             '•	picking up cues',
       ),
       ChatsData(
-        avatar: 'assets/images/user_5.png', //patient-centred consulting
+        avatar: 'assets/images/47yowoman.png', //patient-centred consulting
         title: '47yo woman with abdominal pain',
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
@@ -77,14 +97,11 @@ class ChatsData {
             'Repetition of cues with non-verbal encouragement.  \n' +
             'Picking up and checking out verbal cues \'You said that you  ' +
             'were worried that the pain might be something serious- was  ' +
-            'there something in particular you were thinking of?\'  \n' +
-            'Picking up and checking out non-verbal cues \'I sense that  ' +
-            'you\'re not quite happy with the explanations you\'ve been given ' +
-            'in the past, is that right?\'',
+            'there something in particular you were thinking of?\'',
       ),
       ChatsData(
         avatar:
-            'assets/images/user_2.png', //explanation and shared decision-making
+            'assets/images/53yoman.png', //explanation and shared decision-making
         title: '53yo man with abdominal pain',
         subTitle: 'Explanation and shared decision-making',
         difficulty: 2,

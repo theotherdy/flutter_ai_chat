@@ -26,7 +26,12 @@ import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 class MessagesBody extends StatefulWidget {
   final String assistantId;
   final String advisorId;
-  const MessagesBody({super.key, this.assistantId = '', this.advisorId = ''});
+  final String avatar;
+  const MessagesBody(
+      {super.key,
+      this.assistantId = '',
+      this.advisorId = '',
+      this.avatar = ''});
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();
@@ -343,8 +348,8 @@ class _MessagesBodyState extends State<MessagesBody> {
                 shrinkWrap: true,
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
-                itemBuilder: (context, index) =>
-                    Message(message: _chatHistory[index]),
+                itemBuilder: (context, index) => Message(
+                    message: _chatHistory[index], avatar: widget.avatar),
               ),
             ),
             Visibility(
