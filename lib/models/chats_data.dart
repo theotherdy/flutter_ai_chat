@@ -98,7 +98,7 @@ class ChatsData {
             'has had 2 episodes of abdominal pain and you have received a copy' +
             'of an ultrasound report showing 2 small stones in the gall bladder. \n\n' +
             'Please answer their questions. \n\n' +
-            'Please now discuss the management options for this patient.',
+            'Please then discuss the management options for this patient.',
       ),
     ];
   }
