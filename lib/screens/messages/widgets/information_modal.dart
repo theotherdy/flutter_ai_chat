@@ -27,11 +27,6 @@ class _InformationModalState extends State<InformationModal> {
     _scrollController.addListener(_calculateFloatingButtonVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateShowFloatingButton();
-      // Here we check for visibility after each frame, this updates the down-arrow scroll indicator
-      /*setState(() {
-        _showFloatingButton = _scrollController.position.viewportDimension <
-            _scrollController.position.maxScrollExtent;
-      });*/
     });
   }
 
@@ -49,38 +44,14 @@ class _InformationModalState extends State<InformationModal> {
     setState(() {
       _showFloatingButton = !_showFloatingButton || !atBottom;
     });
-    debugPrint(maxScroll.toString());
-    debugPrint(pixels.toString());
-    debugPrint(_scrollController.position.viewportDimension.toString());
-    //debugPrint(_scrollController.position.maxScrollExtent.toString());
   }
-
-  /*void _updateShowFloatingButton() {
-    setState(() {
-      _showFloatingButton = _scrollController.position.viewportDimension <
-          _scrollController.position.maxScrollExtent;
-    });
-    debugPrint(_scrollController.position.viewportDimension.toString());
-    debugPrint(_scrollController.position.maxScrollExtent.toString());
-  }*/
-
-  /*void _updateShowFloatingButton() {
-    Future.delayed(Duration.zero).then((value) {
-      setState(() {
-        _showFloatingButton = _scrollController.position.viewportDimension <
-            _scrollController.position.maxScrollExtent;
-      });
-      debugPrint(_scrollController.position.viewportDimension.toString());
-      debugPrint(_scrollController.position.maxScrollExtent.toString());
-    });
-  }*/
 
   void _updateShowFloatingButton() {
     setState(() {
       final hasExtentAfter = _scrollController.position.extentAfter > 0;
       _showFloatingButton = hasExtentAfter;
     });
-    debugPrint(_scrollController.position.extentAfter.toString());
+    //debugPrint(_scrollController.position.extentAfter.toString());
   }
 
   @override
