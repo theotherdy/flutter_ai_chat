@@ -51,7 +51,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: 4f3e461722055d21515cf3261b64c973c062f345
-  camera_avfoundation: 8b8d780bcfb6a4a02b0fbe2b4bd17b5b71946e68
+  camera_avfoundation: 759172d1a77ae7be0de08fc104cfb79738b8a59e
   ffmpeg-kit-ios-full: 0099a769d22114dde52cdc238397941c32f75d27
   ffmpeg_kit_flutter_full: a2ad4ff5b14b7c040724edc8cd3bc293dd2d6d0f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
