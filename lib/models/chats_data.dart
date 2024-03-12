@@ -52,22 +52,6 @@ class ChatsData {
             'acute MI. \n The patient is not unwell, and no urgent action is required ' +
             'so they are able to talk to you before they see the duty doctor. \n\n' +
             'Active Listening \n' +
-            'You are a student in general practice and have been ' +
-            'asked to see Alex Simpson. The patient has presented to the practice ' +
-            'nurse/nurse practitioner and mentioned chest pains (not currently ' +
-            'present). The practice Nurse/Practitioner has done some basic tests: ' +
-            'pulse 90 regular, BP 150/95, temp 36.7.  ECG – no obvious signs of ' +
-            'acute MI. \n The patient is not unwell, and no urgent action is required ' +
-            'so they are able to talk to you before they see the duty doctor. \n\n' +
-            'Active Listening \n' +
-            'You are a student in general practice and have been ' +
-            'asked to see Alex Simpson. The patient has presented to the practice ' +
-            'nurse/nurse practitioner and mentioned chest pains (not currently ' +
-            'present). The practice Nurse/Practitioner has done some basic tests: ' +
-            'pulse 90 regular, BP 150/95, temp 36.7.  ECG – no obvious signs of ' +
-            'acute MI. \n The patient is not unwell, and no urgent action is required ' +
-            'so they are able to talk to you before they see the duty doctor. \n\n' +
-            'Active Listening \n' +
             'How do doctors show that they are actively listening? You may wish to consider: \n' +
             '•	Giving space and time - use of silence \n' +
             '•	Verbal encouragement and facilitation - neutral phrases early and later use repetition, paraphrasing and interpretation \n' +
