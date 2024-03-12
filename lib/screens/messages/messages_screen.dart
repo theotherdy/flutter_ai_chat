@@ -7,7 +7,7 @@ class MessagesScreen extends StatelessWidget {
   MessagesScreen({super.key});
   static const routeName = '/messages';
   bool _isFirstLoad = true; // Introduce the variable
-  bool _attemptsIncremented = false;
+  //bool _attemptsIncremented = false;
 
   @override
   Widget build(BuildContext context) {

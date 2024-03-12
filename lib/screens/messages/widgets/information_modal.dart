@@ -1,4 +1,4 @@
-import 'dart:async';
+//import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,7 @@ class _InformationModalState extends State<InformationModal> {
     super.initState();
     _showFloatingButton = false;
     _scrollController.addListener(_calculateFloatingButtonVisibility);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateShowFloatingButton();
       // Here we check for visibility after each frame, this updates the down-arrow scroll indicator
       /*setState(() {
