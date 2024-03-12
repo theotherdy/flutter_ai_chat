@@ -1,5 +1,3 @@
-//import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 class InformationModal extends StatefulWidget {
@@ -25,7 +23,7 @@ class _InformationModalState extends State<InformationModal> {
     super.initState();
     _showFloatingButton = false;
     _scrollController.addListener(_calculateFloatingButtonVisibility);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
       _updateShowFloatingButton();
     });
   }
@@ -41,6 +39,7 @@ class _InformationModalState extends State<InformationModal> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final pixels = _scrollController.position.pixels;
     final atBottom = pixels >= maxScroll;
+
     setState(() {
       _showFloatingButton = !_showFloatingButton || !atBottom;
     });
@@ -51,7 +50,6 @@ class _InformationModalState extends State<InformationModal> {
       final hasExtentAfter = _scrollController.position.extentAfter > 0;
       _showFloatingButton = hasExtentAfter;
     });
-    //debugPrint(_scrollController.position.extentAfter.toString());
   }
 
   @override
@@ -106,8 +104,10 @@ class _InformationModalState extends State<InformationModal> {
                   Positioned(
                     bottom: 16,
                     right: 16,
-                    child: Visibility(
-                      visible: _showFloatingButton,
+                    child: AnimatedOpacity(
+                      opacity: _showFloatingButton ? 1.0 : 0.0,
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
                       child: FloatingActionButton(
                         onPressed: () {
                           _scrollController.animateTo(
