@@ -33,7 +33,7 @@ class ChatsData {
         advisorId: 'asst_YEv4v9UdwtTd4NoJzh3iwHw7',
         voice: 'onyx',
         instructions: 'Please take a patient history. Use a structured ' +
-            'approach, such as SOCRATES for a pain history.',
+            'approach, such as SOCRATES, for a pain history.',
       ),
       ChatsData(
         avatar: 'assets/images/50yowoman.png', //patient-centred consulting
@@ -45,14 +45,6 @@ class ChatsData {
         advisorId: 'asst_RMtNGqIvuEmmKUhUfyTXYSnQ',
         voice: 'nova',
         instructions: 'You are a student in general practice and have been ' +
-            'asked to see Alex Simpson. The patient has presented to the practice ' +
-            'nurse/nurse practitioner and mentioned chest pains (not currently ' +
-            'present). The practice Nurse/Practitioner has done some basic tests: ' +
-            'pulse 90 regular, BP 150/95, temp 36.7.  ECG – no obvious signs of ' +
-            'acute MI. \n The patient is not unwell, and no urgent action is required ' +
-            'so they are able to talk to you before they see the duty doctor. \n\n' +
-            'Active Listening \n' +
-            'You are a student in general practice and have been ' +
             'asked to see Alex Simpson. The patient has presented to the practice ' +
             'nurse/nurse practitioner and mentioned chest pains (not currently ' +
             'present). The practice Nurse/Practitioner has done some basic tests: ' +
@@ -94,8 +86,8 @@ class ChatsData {
         assistantId: 'asst_iCXpBuRmbfchy3tEgTiXXlG6',
         advisorId: 'asst_Hycn6zIFMWPMCBncJCFIGPgO',
         voice: 'fable',
-        instructions: 'You are on an attachment in a GP surgery. Chris Watson' +
-            'has had 2 episodes of abdominal pain and you have received a copy' +
+        instructions: 'You are on an attachment in a GP surgery. Chris Watson ' +
+            'has had 2 episodes of abdominal pain and you have received a copy ' +
             'of an ultrasound report showing 2 small stones in the gall bladder. \n\n' +
             'Please answer their questions. \n\n' +
             'Please then discuss the management options for this patient.',

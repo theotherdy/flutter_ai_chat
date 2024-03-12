@@ -24,6 +24,14 @@ class _ChatsScreenState extends State<ChatsScreen> {
   List<ChatsData> chats = ChatsData.getChats();
   SortOption sortOption = SortOption.titleAscending;
 
+  /// Increment the attempts property of chats[index]
+  ///
+  void incrementAttempts(int index) {
+    setState(() {
+      chats[index].attempts++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     chats.sort((a, b) {
@@ -127,6 +135,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         'avatar': chats[index].avatar,
                         'voice': chats[index].voice,
                         'title': chats[index].title,
+                        'index':
+                            index, // Pass the index as needed when calling back to incrementAttempts
+                        'incrementAttempts':
+                            incrementAttempts, // Pass the callback function
                       },
                     );
                   },

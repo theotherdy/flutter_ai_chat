@@ -74,8 +74,7 @@ class OpenAiService {
           _threadId[_assistantId].toString(), _runId[_assistantId].toString());
     }
 
-    debugPrint(
-        '_runComplete[_assistantId] ${_runComplete[_assistantId]}');
+    debugPrint('_runComplete[_assistantId] ${_runComplete[_assistantId]}');
 
     //get messages from completed run
     if (_runComplete[_assistantId]! && _threadId[_assistantId] != "") {
@@ -351,6 +350,7 @@ class OpenAiService {
     );
 
     if (response.statusCode == 200) {
+      debugPrint('I have a response');
       return response.bodyBytes;
     } else {
       print('Failed to generate audio: ${response.statusCode}');

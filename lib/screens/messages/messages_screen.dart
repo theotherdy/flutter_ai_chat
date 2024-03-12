@@ -7,6 +7,7 @@ class MessagesScreen extends StatelessWidget {
   MessagesScreen({super.key});
   static const routeName = '/messages';
   bool _isFirstLoad = true; // Introduce the variable
+  bool _attemptsIncremented = false;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +19,8 @@ class MessagesScreen extends StatelessWidget {
     String avatar = args['avatar'];
     String voice = args['voice'];
     String title = args['title'];
+    int index = args['index'];
+    Function(int) incrementAttempts = args['incrementAttempts'];
 
     // Show the dialog on initial load
     if (_isFirstLoad) {
@@ -28,10 +31,15 @@ class MessagesScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: buildAppBar(title, avatar, context, instructions),
-      body: MessagesBody(
-          assistantId: assistantId, advisorId: advisorId, avatar: avatar, voice: voice),
-    );
+        appBar: buildAppBar(title, avatar, context, instructions),
+        body: MessagesBody(
+          assistantId: assistantId,
+          advisorId: advisorId,
+          avatar: avatar,
+          voice: voice,
+          index: index, // Pass the index
+          incrementAttempts: incrementAttempts, // Pass the callback function),
+        ));
   }
 
   AppBar buildAppBar(
@@ -62,29 +70,9 @@ class MessagesScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return InformationModal(information: instructions);
+        return InformationModal(
+            information: instructions, title: 'Instructions');
       },
     );
-
-    /*showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: SingleChildScrollView(
-          // Add scrollable behavior
-          child: Scrollbar(
-            // Include the scrollbar
-            child: SingleChildScrollView(
-              child: Text(instructions),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );*/
   }
 }

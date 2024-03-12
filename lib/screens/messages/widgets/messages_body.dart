@@ -28,12 +28,18 @@ class MessagesBody extends StatefulWidget {
   final String advisorId;
   final String avatar;
   final String voice;
-  const MessagesBody(
-      {super.key,
-      this.assistantId = '',
-      this.advisorId = '',
-      this.avatar = '',
-      this.voice = ''});
+  final int index; // Receive the index
+  final Function(int) incrementAttempts; // Receive the callback function
+
+  const MessagesBody({
+    super.key,
+    required this.assistantId,
+    required this.advisorId,
+    required this.avatar,
+    required this.voice,
+    required this.index, // Receive the index
+    required this.incrementAttempts, // Receive the callback function
+  });
 
   @override
   State<MessagesBody> createState() => _MessagesBodyState();
@@ -50,6 +56,8 @@ class _MessagesBodyState extends State<MessagesBody> {
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
   String _lastAdvisorResponse = ''; //to hold last respnse from advisor
+  bool _attemptsIncremented =
+      false; //so that we only increment attempts once per load
 
   late AudioPlayer _audioPlayer;
 
@@ -244,12 +252,48 @@ class _MessagesBodyState extends State<MessagesBody> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return InformationModal(information: advisorResponse);
+        return InformationModal(
+            information: advisorResponse, title: 'AI feedback');
       },
     );
   }
 
   void _sendTextMessageAndShowTextResponse(String text) {
+    _showLoadingMessage(LocalMessageRole.ai);
+    openAiService
+        .getAssistantResponseFromMessage(text, widget.assistantId)
+        .then((aiResponses) async {
+      _chatHistory.removeLast(); //remove our loading message
+      //collate text from multiple messages to send to the speech_to_text
+      String textToSend = '';
+      for (var aiResponse in aiResponses) {
+        //_showTextMessage(LocalMessageRole.ai, aiResponse.text);
+        textToSend += aiResponse.text;
+      }
+
+      // Set a timeout duration of 5 seconds for generating audio
+      final audioFuture = openAiService.generateAudio(
+        text: textToSend,
+        voice: widget.voice, // Specify the voice here
+      );
+
+      try {
+        final audioBytes = await audioFuture.timeout(Duration(seconds: 3));
+        if (audioBytes != null) {
+          _playAudio(audioBytes);
+        }
+      } catch (e) {
+        // Handle timeout exception
+        debugPrint(
+            'Audio generation timed out, showing text messages instead.');
+      }
+      for (var aiResponse in aiResponses) {
+        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
+      }
+    });
+  }
+
+  /*void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
     openAiService
         .getAssistantResponseFromMessage(text, widget.assistantId)
@@ -270,7 +314,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         _playAudio(audioBytes);
       }
     });
-  }
+  }*/
 
   void _sendConversationAndShowAdvisorFeedback() {
     //check if we have a _lastAdvisorResponse - if so, then no new messages have been posted/received so just redisplay that
@@ -311,6 +355,12 @@ class _MessagesBodyState extends State<MessagesBody> {
         _lastAdvisorResponse = advisorResponse;
         _showAdvisorModal(context, advisorResponse);
       });
+
+      if (!_attemptsIncremented) {
+        widget.incrementAttempts(
+            widget.index); // Call the callback function to increment attempts
+        _attemptsIncremented = true;
+      }
     }
   }
 
