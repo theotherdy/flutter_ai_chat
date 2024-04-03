@@ -15,6 +15,12 @@ var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
+/* AZURE Equivalents */
+var azureApiKey = dotenv.env[
+    'AZURE_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+var azureApiAssistantsEndpoint = dotenv.env[
+    'AZURE_ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+
 class OpenAiService {
   String _assistantId = '';
 
@@ -93,15 +99,24 @@ class OpenAiService {
   Future<String> _createThread() async {
     // post the prompt to the API and receive response
     try {
-      final res = await http.post(
+      /*final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
           "OpenAI-Beta": "assistants=v1",
         },
+      );*/
+      final res = await http.post(
+        Uri.parse(
+            "$azureApiAssistantsEndpoint/openai/threads?api-version=2024-02-15-preview"),
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "$azureApiKey",
+          //"OpenAI-Beta": "assistants=v1",
+        },
       );
-      debugPrint('openAIApiAssistantsEndpoint $openAIApiAssistantsEndpoint');
+      //debugPrint('openAIApiAssistantsEndpoint $openAIApiAssistantsEndpoint');
       if (res.statusCode == 200) {
         // decode the JSON response
         Map<String, dynamic> response = jsonDecode(res.body);
@@ -124,12 +139,27 @@ class OpenAiService {
   Future<String> _addMesageToThread(message, threadId) async {
     //debugPrint(message);
     try {
-      final res = await http.post(
+      /*final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/messages"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
           "OpenAI-Beta": "assistants=v1",
+        },
+        // encode the object to JSON
+        body: jsonEncode(
+          {
+            "role": "user",
+            "content": message,
+          },
+        ),
+      );*/
+      final res = await http.post(
+        Uri.parse(
+            "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages?api-version=2024-02-15-preview"),
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "$azureApiKey",
         },
         // encode the object to JSON
         body: jsonEncode(
@@ -160,12 +190,27 @@ class OpenAiService {
 
   Future<String> _runAssistantOnThread(assistantId, threadId) async {
     try {
-      final res = await http.post(
+      /*final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/runs"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
           "OpenAI-Beta": "assistants=v1",
+        },
+        // encode the object to JSON
+        body: jsonEncode(
+          {
+            "assistant_id": assistantId,
+          },
+        ),
+      );*/
+
+      final res = await http.post(
+        Uri.parse(
+            "$azureApiAssistantsEndpoint/openai/threads/$threadId/runs?api-version=2024-02-15-preview"),
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "$azureApiKey",
         },
         // encode the object to JSON
         body: jsonEncode(
@@ -201,11 +246,20 @@ class OpenAiService {
 
     while (!isComplete && attempt < maxAttempts) {
       //debugPrint('$openAIApiAssistantsEndpoint/$threadId/runs/$runId');
-      final response = await http.get(
+      /*final response = await http.get(
         Uri.parse('$openAIApiAssistantsEndpoint/$threadId/runs/$runId'),
         headers: {
           'Authorization': 'Bearer $openAIApiKey',
           "OpenAI-Beta": "assistants=v1",
+        },
+      );*/
+
+      final response = await http.get(
+        Uri.parse(
+            '$azureApiAssistantsEndpoint/openai/threads/$threadId/runs/$runId?api-version=2024-02-15-preview'),
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "$azureApiKey",
         },
       );
 
@@ -238,18 +292,30 @@ class OpenAiService {
   Future<(List<dynamic>?, String)> _getMessagesFromThread(threadId,
       [afterMessageId]) async {
     try {
-      String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
+      //String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
+      String url =
+          "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages";
       if (afterMessageId != null) {
         debugPrint('afterMessageId coming through as $afterMessageId');
         url =
-            "$url?order=asc&after=$afterMessageId"; //add after paramter value if fromMessageId
+            "$url?api-version=2024-02-15-preview&order=asc&after=$afterMessageId"; //add after paramter value if fromMessageId
+      } else {
+        url = "$url?api-version=2024-02-15-preview";
       }
-      final res = await http.get(
+      /*final res = await http.get(
         Uri.parse(url),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
           "OpenAI-Beta": "assistants=v1",
+        },
+      );*/
+
+      final res = await http.get(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "$azureApiKey",
         },
       );
 
@@ -330,6 +396,8 @@ class OpenAiService {
     String responseFormat = 'mp3',
     double speed = 1.0,
   }) async {
+    text = removeTextInSquareBrackets(
+        text); //remove any non-verbals in square brackets
     final url = Uri.parse('$openAISpeechEndpoint');
     final headers = {
       'Content-Type': 'application/json',
@@ -356,5 +424,10 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
+  }
+
+  String removeTextInSquareBrackets(String text) {
+    RegExp exp = RegExp(r"\[.*?\]");
+    return text.replaceAll(exp, '');
   }
 }

@@ -29,7 +29,8 @@ class ChatsData {
         subTitle: 'History-taking',
         difficulty: 2,
         attempts: 0,
-        assistantId: 'asst_oLP6zXce2HxRuR4dDPBDt3IM',
+        assistantId:
+            'asst_ul1WkfLOW8ubtJEYD0PeQ6k2', //'asst_oLP6zXce2HxRuR4dDPBDt3IM',
         advisorId: 'asst_YEv4v9UdwtTd4NoJzh3iwHw7',
         voice: 'onyx',
         instructions: 'Please take a patient history. Use a structured ' +
