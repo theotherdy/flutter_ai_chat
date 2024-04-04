@@ -1,4 +1,5 @@
 class ChatsData {
+  int id;
   String avatar;
   String title;
   String subTitle;
@@ -10,6 +11,7 @@ class ChatsData {
   String instructions;
 
   ChatsData({
+    required this.id,
     required this.avatar,
     required this.title,
     required this.subTitle,
@@ -24,6 +26,7 @@ class ChatsData {
   static List<ChatsData> getChats() {
     return [
       ChatsData(
+        id: 1,
         avatar: 'assets/images/55yo_back_pain.png', //history-taking
         title: '55yo with back pain',
         subTitle: 'History-taking',
@@ -37,6 +40,7 @@ class ChatsData {
             'approach, such as SOCRATES, for a pain history.',
       ),
       ChatsData(
+        id: 2,
         avatar: 'assets/images/50yowoman.png', //patient-centred consulting
         title: '50yo woman with chest pain',
         subTitle: 'Listening and Patient-centred consulting',
@@ -60,6 +64,7 @@ class ChatsData {
             '•	picking up cues',
       ),
       ChatsData(
+        id: 3,
         avatar: 'assets/images/47yowoman.png', //patient-centred consulting
         title: '47yo woman with abdominal pain',
         subTitle: 'Listening and Patient-centred consulting',
@@ -78,6 +83,7 @@ class ChatsData {
             'there something in particular you were thinking of?\'',
       ),
       ChatsData(
+        id: 4,
         avatar:
             'assets/images/53yoman.png', //explanation and shared decision-making
         title: '53yo man with abdominal pain',
