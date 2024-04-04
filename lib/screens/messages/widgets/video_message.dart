@@ -63,11 +63,7 @@ class VideoMessage extends StatelessWidget {
                 Text(
                   message!.text
                       .toString(), //need to cast to string as .text is Strng? (optional)
-                  style: TextStyle(
-                    color: message!.role == LocalMessageRole.user
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyLarge!.color,
-                  ),
+                  style: TextStyle(color: Colors.white),
                 ),
               ]));
         } else {

@@ -127,18 +127,9 @@ class _MessagesBodyState extends State<MessagesBody> {
               // Callback function when file is selected in CameraModal
               //debugPrint('I have file path in MessagesBody $filePath');
               _lastAdvisorResponse = ''; //new message so can't reuse
-              setState(() {
-                //add video message to list of messages
-                _chatHistory.add(LocalMessage(
-                    time: DateTime.now(),
-                    type: LocalMessageType.video,
-                    role: LocalMessageRole.user,
-                    filePath: filePath));
-                //_cameraFilePath = path;
-              });
 
               //now show a loading message whiole awaiting transcript
-              _showLoadingMessage(LocalMessageRole.user);
+              //_showLoadingMessage(LocalMessageRole.user);
 
               // Audio Extraction with ffmpeg_kit_flutter and path_provider
               final tempDirectory =
@@ -147,7 +138,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                   '${tempDirectory.path}/extracted_audio.mp3'; // Use a suitable extension
               await _extractAudio(filePath, audioOutputPath);
 
-              debugPrint(audioOutputPath);
+              //debugPrint(audioOutputPath);
 
               //final filePath = '/path/to/your/video/file.mp4';
               //final transcription =
@@ -155,16 +146,29 @@ class _MessagesBodyState extends State<MessagesBody> {
               final transcription = await whisperTranscriptionService
                   .transcribeVideo(audioOutputPath);
 
-              setState(() {
-                _chatHistory.removeLast(); //our loading message
-              });
+              //setState(() {
+              //  _chatHistory.removeLast(); //our loading message
+              //});
+
+              String transcribedText = '';
 
               if (transcription != null &&
                   transcription.text != '' &&
                   transcription.text.toLowerCase() != 'you') {
                 //for some reason, it seems to hallucinate 'you' if no sound!
-                _showTextMessage(LocalMessageRole.user,
-                    transcription.text); //show user what video transcript says
+                //_showTextMessage(LocalMessageRole.user,
+                //    transcription.text); //show user what video transcript says
+                transcribedText = transcription.text;
+                setState(() {
+                  //add video message to list of messages
+                  _chatHistory.add(LocalMessage(
+                      time: DateTime.now(),
+                      type: LocalMessageType.video,
+                      role: LocalMessageRole.user,
+                      text: transcribedText,
+                      filePath: filePath));
+                  //_cameraFilePath = path;
+                });
                 _sendTextMessageAndShowTextResponse(
                     transcription.text); //send off to chat api to respond to
               } else {
