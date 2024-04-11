@@ -19,8 +19,9 @@ class MessagesScreen extends StatelessWidget {
     String avatar = args['avatar'];
     String voice = args['voice'];
     String title = args['title'];
-    int index = args['index'];
+    int chat_index = args['chat_index'];
     Function(int) incrementAttempts = args['incrementAttempts'];
+    int attempt_index = args['attempt_index'];
 
     // Show the dialog on initial load
     if (_isFirstLoad) {
@@ -37,8 +38,9 @@ class MessagesScreen extends StatelessWidget {
           advisorId: advisorId,
           avatar: avatar,
           voice: voice,
-          index: index, // Pass the index
+          chat_index: chat_index, // Pass the index
           incrementAttempts: incrementAttempts, // Pass the callback function),
+          attempt_index: attempt_index,
         ));
   }
 

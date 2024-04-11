@@ -9,19 +9,20 @@ class ChatsData {
   String advisorId; //ie which will provide feedback on interaction
   String voice; //voice used by text to speech
   String instructions;
+  List<ChatAttempt> pastAttempts; // Store past attempts
 
-  ChatsData({
-    required this.id,
-    required this.avatar,
-    required this.title,
-    required this.subTitle,
-    required this.difficulty,
-    required this.attempts,
-    required this.assistantId,
-    required this.advisorId,
-    required this.voice,
-    required this.instructions,
-  });
+  ChatsData(
+      {required this.id,
+      required this.avatar,
+      required this.title,
+      required this.subTitle,
+      required this.difficulty,
+      required this.attempts,
+      required this.assistantId,
+      required this.advisorId,
+      required this.voice,
+      required this.instructions,
+      this.pastAttempts = const []});
 
   static List<ChatsData> getChats() {
     return [
@@ -101,4 +102,11 @@ class ChatsData {
       ),
     ];
   }
+}
+
+class ChatAttempt {
+  DateTime date;
+  int numberOfMessages;
+
+  ChatAttempt({required this.date, required this.numberOfMessages});
 }

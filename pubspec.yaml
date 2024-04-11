@@ -47,6 +47,7 @@ dependencies:
   path_provider: any
   #ffmpeg_kit_flutter: ^6.0.3
   ffmpeg_kit_flutter_full: ^6.0.3
+  shared_preferences: ^2.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

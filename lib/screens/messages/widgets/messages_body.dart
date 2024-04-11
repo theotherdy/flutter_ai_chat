@@ -28,17 +28,19 @@ class MessagesBody extends StatefulWidget {
   final String advisorId;
   final String avatar;
   final String voice;
-  final int index; // Receive the index
+  final int chat_index; // Receive the index
   final Function(int) incrementAttempts; // Receive the callback function
+  final int attempt_index;
 
-  const MessagesBody({
+  MessagesBody({
     super.key,
     required this.assistantId,
     required this.advisorId,
     required this.avatar,
     required this.voice,
-    required this.index, // Receive the index
+    required this.chat_index, // Receive the index
     required this.incrementAttempts, // Receive the callback function
+    required this.attempt_index,
   });
 
   @override
@@ -361,8 +363,8 @@ class _MessagesBodyState extends State<MessagesBody> {
       });
 
       if (!_attemptsIncremented) {
-        widget.incrementAttempts(
-            widget.index); // Call the callback function to increment attempts
+        widget.incrementAttempts(widget
+            .chat_index); // Call the callback function to increment attempts
         _attemptsIncremented = true;
       }
     }

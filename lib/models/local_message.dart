@@ -16,4 +16,27 @@ class LocalMessage {
     this.text,
     this.filePath,
   });
+
+  // Convert LocalMessage to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'time': time.millisecondsSinceEpoch, // Store time as milliseconds
+      'role': role.name, // Store the enum name (e.g., "user", "ai")
+      'type': type.name, // Store the enum name
+      'text': text,
+      'filePath': filePath,
+    };
+  }
+
+  // Create LocalMessage from JSON
+  factory LocalMessage.fromJson(Map<String, dynamic> json) {
+    return LocalMessage(
+      time: DateTime.fromMillisecondsSinceEpoch(json['time']),
+      role: LocalMessageRole.values
+          .byName(json['role']), // Map enum name to value
+      type: LocalMessageType.values.byName(json['type']),
+      text: json['text'],
+      filePath: json['filePath'],
+    );
+  }
 }

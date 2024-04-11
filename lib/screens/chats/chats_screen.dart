@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_ai_chat/models/chats_data.dart';
+
+import 'package:flutter_ai_chat/screens/messages/messages_screen.dart'; // Import MessagesScreen
+import 'package:flutter_ai_chat/services/chat_history_service.dart';
 import 'package:flutter_ai_chat/screens/chats/widgets/difficulty_indicator.dart';
+import 'package:flutter_ai_chat/screens/chats/chat_history_screen.dart'; // Import ChatHistoryScreen
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
@@ -125,22 +129,41 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     }
                   }(),
                   onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/messages',
-                      arguments: {
-                        'assistantId': chats[index].assistantId,
-                        'advisorId': chats[index].advisorId,
-                        'instructions': chats[index].instructions,
-                        'avatar': chats[index].avatar,
-                        'voice': chats[index].voice,
-                        'title': chats[index].title,
-                        'index':
+                    if (chats[index].pastAttempts.length > 0) {
+                      //navigate intermediate ChatHistoryScreen
+                      Navigator.pushNamed(context, '/chat_history', arguments: {
+                        'chatData': chats[index],
+                        'chat_index':
                             index, // Pass the index as needed when calling back to incrementAttempts
                         'incrementAttempts':
-                            incrementAttempts, // Pass the callback function
-                      },
-                    );
+                            incrementAttempts, // Pass the callback function},
+                      }
+
+                          /*MaterialPageRoute(
+                          builder: (context) =>
+                              ChatHistoryScreen(chatData: chats[index]),
+                        ),*/
+                          );
+                    } else {
+                      //navigate straight to MessagesScreen
+                      Navigator.pushNamed(
+                        context,
+                        '/messages',
+                        arguments: {
+                          'assistantId': chats[index].assistantId,
+                          'advisorId': chats[index].advisorId,
+                          'instructions': chats[index].instructions,
+                          'avatar': chats[index].avatar,
+                          'voice': chats[index].voice,
+                          'title': chats[index].title,
+                          'chat_index':
+                              index, // Pass the index as needed when calling back to incrementAttempts
+                          'incrementAttempts':
+                              incrementAttempts, // Pass the callback function
+                          //'attempt_index': null,
+                        },
+                      );
+                    }
                   },
                 );
               },
