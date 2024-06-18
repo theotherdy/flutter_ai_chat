@@ -4,12 +4,14 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 
 class ChatHistoryService {
   // Key prefix for storing chat history
-  static const _chatHistoryKeyPrefix = 'chat_history_';
+  static const _chatHistoryKeyPrefix = 'chist_';
+  static const _chatIdPrefix = 'cid_';
+  static const _attemptIdPrefix = 'aid_';
 
   // Save a message to a chat's history
-  Future<void> saveMessage(int chatAttemptId, LocalMessage message) async {
+  Future<void> saveMessage(int chatId, int attemptId, LocalMessage message) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = _chatHistoryKeyPrefix + chatAttemptId.toString();
+    final key = _chatHistoryKeyPrefix + _chatIdPrefix + chatId.toString() + _attemptIdPrefix + attemptId.toString();
 
     // Retrieve existing history or initialize an empty list
     final existingData = prefs.getString(key);
@@ -27,9 +29,9 @@ class ChatHistoryService {
   }
 
   // Load chat history
-  Future<List<LocalMessage>?> loadHistory(int chatAttemptId) async {
+  Future<List<LocalMessage>?> loadHistory(int chatId, int attemptId, ) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = _chatHistoryKeyPrefix + chatAttemptId.toString();
+    final key = _chatHistoryKeyPrefix + _chatIdPrefix + chatId.toString() + _attemptIdPrefix + attemptId.toString();
     final jsonData = prefs.getString(key);
 
     if (jsonData != null) {

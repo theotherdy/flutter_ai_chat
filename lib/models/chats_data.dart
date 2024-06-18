@@ -34,8 +34,8 @@ class ChatsData {
         difficulty: 2,
         attempts: 0,
         assistantId:
-            'asst_ul1WkfLOW8ubtJEYD0PeQ6k2', //'asst_oLP6zXce2HxRuR4dDPBDt3IM',
-        advisorId: 'asst_YEv4v9UdwtTd4NoJzh3iwHw7',
+            'asst_XNUzPh8YGHmLCpofeJJhyXQA', //'asst_oLP6zXce2HxRuR4dDPBDt3IM',
+        advisorId: 'asst_uXAJviGjEc6AoJ8aAnVOmE7B',
         voice: 'onyx',
         instructions: 'Please take a patient history. Use a structured ' +
             'approach, such as SOCRATES, for a pain history.',
@@ -71,8 +71,8 @@ class ChatsData {
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
         attempts: 0,
-        assistantId: 'asst_Ex9Ixe2e9bd441OFlG0HqwFM',
-        advisorId: 'asst_RMtNGqIvuEmmKUhUfyTXYSnQ',
+        assistantId: 'asst_dQEyAejoQ2TBK0gFvqBat6jl',
+        advisorId: 'asst_cJWRfsfHZhLVIc0Frl1yHrYF',
         voice: 'shimmer',
         instructions: 'You are asked to see Jo Heston who has abdominal pain. ' +
             'Useful phrases and ways to explore the patient\'s ideas: \n\n' +
@@ -105,8 +105,9 @@ class ChatsData {
 }
 
 class ChatAttempt {
+  int id;
   DateTime date;
   int numberOfMessages;
 
-  ChatAttempt({required this.date, required this.numberOfMessages});
+  ChatAttempt({required this.id, required this.date, required this.numberOfMessages});
 }

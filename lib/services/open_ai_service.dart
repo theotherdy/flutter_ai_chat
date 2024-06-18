@@ -99,15 +99,15 @@ class OpenAiService {
   Future<String> _createThread() async {
     // post the prompt to the API and receive response
     try {
-      /*final res = await http.post(
+      final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
-          "OpenAI-Beta": "assistants=v1",
+          "OpenAI-Beta": "assistants=v2",
         },
-      );*/
-      final res = await http.post(
+      );
+      /*final res = await http.post(
         Uri.parse(
             "$azureApiAssistantsEndpoint/openai/threads?api-version=2024-02-15-preview"),
         headers: {
@@ -115,7 +115,7 @@ class OpenAiService {
           "api-key": "$azureApiKey",
           //"OpenAI-Beta": "assistants=v1",
         },
-      );
+      );*/
       //debugPrint('openAIApiAssistantsEndpoint $openAIApiAssistantsEndpoint');
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -139,12 +139,12 @@ class OpenAiService {
   Future<String> _addMesageToThread(message, threadId) async {
     //debugPrint(message);
     try {
-      /*final res = await http.post(
+      final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/messages"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
-          "OpenAI-Beta": "assistants=v1",
+          "OpenAI-Beta": "assistants=v2",
         },
         // encode the object to JSON
         body: jsonEncode(
@@ -153,8 +153,8 @@ class OpenAiService {
             "content": message,
           },
         ),
-      );*/
-      final res = await http.post(
+      );
+      /*final res = await http.post(
         Uri.parse(
             "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages?api-version=2024-02-15-preview"),
         headers: {
@@ -168,7 +168,7 @@ class OpenAiService {
             "content": message,
           },
         ),
-      );
+      );*/
 
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -190,12 +190,12 @@ class OpenAiService {
 
   Future<String> _runAssistantOnThread(assistantId, threadId) async {
     try {
-      /*final res = await http.post(
+      final res = await http.post(
         Uri.parse("$openAIApiAssistantsEndpoint/$threadId/runs"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
-          "OpenAI-Beta": "assistants=v1",
+          "OpenAI-Beta": "assistants=v2",
         },
         // encode the object to JSON
         body: jsonEncode(
@@ -203,9 +203,9 @@ class OpenAiService {
             "assistant_id": assistantId,
           },
         ),
-      );*/
+      );
 
-      final res = await http.post(
+      /*final res = await http.post(
         Uri.parse(
             "$azureApiAssistantsEndpoint/openai/threads/$threadId/runs?api-version=2024-02-15-preview"),
         headers: {
@@ -218,7 +218,7 @@ class OpenAiService {
             "assistant_id": assistantId,
           },
         ),
-      );
+      );*/
 
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -246,22 +246,22 @@ class OpenAiService {
 
     while (!isComplete && attempt < maxAttempts) {
       //debugPrint('$openAIApiAssistantsEndpoint/$threadId/runs/$runId');
-      /*final response = await http.get(
+      final response = await http.get(
         Uri.parse('$openAIApiAssistantsEndpoint/$threadId/runs/$runId'),
         headers: {
           'Authorization': 'Bearer $openAIApiKey',
-          "OpenAI-Beta": "assistants=v1",
+          "OpenAI-Beta": "assistants=v2",
         },
-      );*/
+      );
 
-      final response = await http.get(
+      /*final response = await http.get(
         Uri.parse(
             '$azureApiAssistantsEndpoint/openai/threads/$threadId/runs/$runId?api-version=2024-02-15-preview'),
         headers: {
           "Content-Type": "application/json",
           "api-key": "$azureApiKey",
         },
-      );
+      );*/
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -292,9 +292,9 @@ class OpenAiService {
   Future<(List<dynamic>?, String)> _getMessagesFromThread(threadId,
       [afterMessageId]) async {
     try {
-      //String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
-      String url =
-          "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages";
+      String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
+      //String url =
+      //    "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages";
       if (afterMessageId != null) {
         debugPrint('afterMessageId coming through as $afterMessageId');
         url =
@@ -302,22 +302,22 @@ class OpenAiService {
       } else {
         url = "$url?api-version=2024-02-15-preview";
       }
-      /*final res = await http.get(
+      final res = await http.get(
         Uri.parse(url),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $openAIApiKey",
-          "OpenAI-Beta": "assistants=v1",
+          "OpenAI-Beta": "assistants=v2",
         },
-      );*/
+      );
 
-      final res = await http.get(
+      /*final res = await http.get(
         Uri.parse(url),
         headers: {
           "Content-Type": "application/json",
           "api-key": "$azureApiKey",
         },
-      );
+      );*/
 
       if (res.statusCode == 200) {
         // decode the JSON response

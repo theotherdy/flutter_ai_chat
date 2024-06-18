@@ -160,7 +160,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                               index, // Pass the index as needed when calling back to incrementAttempts
                           'incrementAttempts':
                               incrementAttempts, // Pass the callback function
-                          //'attempt_index': null,
+                          'attempt_index': 0,
                         },
                       );
                     }

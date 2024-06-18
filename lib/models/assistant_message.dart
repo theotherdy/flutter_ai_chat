@@ -41,7 +41,7 @@ class AssistantMessage {
   String threadId;
   String role;
   List<MessageContent> content;
-  List<String> fileIds;
+  List<String> attachments;
   String? assistantId;
   String? runId;
   Map<String, dynamic> metadata;
@@ -53,7 +53,7 @@ class AssistantMessage {
     required this.threadId,
     required this.role,
     required this.content,
-    required this.fileIds,
+    required this.attachments,
     this.assistantId,
     this.runId,
     required this.metadata,
@@ -68,7 +68,7 @@ class AssistantMessage {
       role: json['role'],
       content: List<MessageContent>.from(
           json['content'].map((content) => MessageContent.fromJson(content))),
-      fileIds: List<String>.from(json['file_ids']),
+      attachments: List<String>.from(json['attachments']),
       assistantId: json['assistant_id'] as String?,
       runId: json['run_id'] as String?,
       metadata: json['metadata'],
