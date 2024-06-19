@@ -68,7 +68,7 @@ class AssistantMessage {
       role: json['role'],
       content: List<MessageContent>.from(
           json['content'].map((content) => MessageContent.fromJson(content))),
-      attachments: List<String>.from(json['attachments']),
+      attachments: List<String>.from(json['attachments']), //this has chnaged from file_id in v1 of API
       assistantId: json['assistant_id'] as String?,
       runId: json['run_id'] as String?,
       metadata: json['metadata'],

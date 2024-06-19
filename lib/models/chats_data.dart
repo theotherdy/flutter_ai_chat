@@ -47,8 +47,8 @@ class ChatsData {
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
         attempts: 0,
-        assistantId: 'asst_vn4QcvVQHuiqgHPyzNBrK4o2',
-        advisorId: 'asst_RMtNGqIvuEmmKUhUfyTXYSnQ',
+        assistantId: 'asst_MKo8uJHQx6kr56OgfiHYyHXK',
+        advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
         voice: 'nova',
         instructions: 'You are a student in general practice and have been ' +
             'asked to see Alex Simpson. The patient has presented to the practice ' +
@@ -71,8 +71,8 @@ class ChatsData {
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
         attempts: 0,
-        assistantId: 'asst_dQEyAejoQ2TBK0gFvqBat6jl',
-        advisorId: 'asst_cJWRfsfHZhLVIc0Frl1yHrYF',
+        assistantId: 'asst_tH2URvo0blyaxzx38Gidn9eH',
+        advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
         voice: 'shimmer',
         instructions: 'You are asked to see Jo Heston who has abdominal pain. ' +
             'Useful phrases and ways to explore the patient\'s ideas: \n\n' +
@@ -91,8 +91,8 @@ class ChatsData {
         subTitle: 'Explanation and shared decision-making',
         difficulty: 2,
         attempts: 0,
-        assistantId: 'asst_iCXpBuRmbfchy3tEgTiXXlG6',
-        advisorId: 'asst_Hycn6zIFMWPMCBncJCFIGPgO',
+        assistantId: 'asst_5tzHkOBLawxn8RRpqAeIFnop',
+        advisorId: 'asst_CLp18vcToHK16EWWErOf3xM8',
         voice: 'fable',
         instructions: 'You are on an attachment in a GP surgery. Chris Watson ' +
             'has had 2 episodes of abdominal pain and you have received a copy ' +
