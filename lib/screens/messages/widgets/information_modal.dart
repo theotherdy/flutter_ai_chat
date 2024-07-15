@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class InformationModal extends StatefulWidget {
   const InformationModal({
@@ -77,7 +80,8 @@ class _InformationModalState extends State<InformationModal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.information),
+                  MarkdownBody(
+                      data: utf8.decode(widget.information!.runes.toList())),
                   SizedBox(height: 20),
                 ],
               ),

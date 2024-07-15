@@ -31,6 +31,7 @@ class MessagesBody extends StatefulWidget {
   final int chat_index; // Receive the index
   final Function(int) incrementAttempts; // Receive the callback function
   final int attempt_index;
+  final String systemMessage;
 
   MessagesBody({
     super.key,
@@ -41,6 +42,7 @@ class MessagesBody extends StatefulWidget {
     required this.chat_index, // Receive the index
     required this.incrementAttempts, // Receive the callback function
     required this.attempt_index,
+    required this.systemMessage,
   });
 
   @override
@@ -75,6 +77,17 @@ class _MessagesBodyState extends State<MessagesBody> {
     super.dispose();
   }
 
+  //Scrolls to bottom of page
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   /// Shows a loading message of [role] by adding to end of [_chatHistory] and scrolling down.
   ///
   ///
@@ -86,14 +99,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           role: role,
           text: "..."));
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(seconds: 1),
-        curve: Curves.fastOutSlowIn,
-      );
-    });
+    _scrollToBottom();
   }
 
   /// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
@@ -108,14 +114,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           role: role,
           text: text));
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(seconds: 1),
-        curve: Curves.fastOutSlowIn,
-      );
-    });
+    _scrollToBottom();
   }
 
   void _showCameraModal(BuildContext context) async {
@@ -172,6 +171,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                       filePath: filePath));
                   //_cameraFilePath = path;
                 });
+                _scrollToBottom();
                 _sendTextMessageAndShowTextResponse(
                     transcription.text); //send off to chat api to respond to
               } else {
@@ -278,11 +278,10 @@ class _MessagesBodyState extends State<MessagesBody> {
       text: text,
     ));
 
-    openAiService.getChatResponseFromMessage(updatedConversationHistory).then((aiResponses) async {
-      setState(() {
-        _chatHistory.removeLast(); // Remove the loading message
-      });
-
+    openAiService
+        .getChatResponseFromMessage(
+            updatedConversationHistory, widget.systemMessage)
+        .then((aiResponses) async {
       String textToSend = aiResponses.map((msg) => msg.text).join(" ");
 
       final audioFuture = openAiService.generateAudio(
@@ -291,17 +290,22 @@ class _MessagesBodyState extends State<MessagesBody> {
       );
 
       try {
-        final audioBytes = await audioFuture.timeout(const Duration(seconds: 3));
+        final audioBytes =
+            await audioFuture.timeout(const Duration(seconds: 3));
         if (audioBytes != null) {
           _playAudio(audioBytes);
         }
       } catch (e) {
-        debugPrint('Audio generation timed out, showing text messages instead.');
+        debugPrint(
+            'Audio generation timed out, showing text messages instead.');
       }
-
+      setState(() {
+        _chatHistory.removeLast(); // Remove the loading message
+      });
       setState(() {
         _chatHistory.addAll(aiResponses);
       });
+      _scrollToBottom();
     });
   }
 
@@ -399,7 +403,7 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   void _playAudio(Uint8List audioBytes) async {
     Directory tempDir = await getTemporaryDirectory();
-    String tempPath = '${tempDir.path}/temp.mpg';  // Change to 'temp.aac'?
+    String tempPath = '${tempDir.path}/temp.mpg'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
     await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));

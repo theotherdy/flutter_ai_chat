@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_ai_chat/constants.dart';
 import 'package:flutter_ai_chat/models/local_message.dart';
@@ -12,8 +13,8 @@ class TextMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String text = message!.text
-        .toString(); //need to cast to string as .text is Strng? (optional)
+    // Convert text to a UTF-8 string
+    String text = utf8.decode(message!.text!.runes.toList());
 
     // Extracting non-verbal information wrapped in square brackets
     int startIndex = text.indexOf('[');

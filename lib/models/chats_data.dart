@@ -9,6 +9,7 @@ class ChatsData {
   String advisorId; //ie which will provide feedback on interaction
   String voice; //voice used by text to speech
   String instructions;
+  String systemMessage;
   List<ChatAttempt> pastAttempts; // Store past attempts
 
   ChatsData(
@@ -22,6 +23,7 @@ class ChatsData {
       required this.advisorId,
       required this.voice,
       required this.instructions,
+      required this.systemMessage,
       this.pastAttempts = const []});
 
   static List<ChatsData> getChats() {
@@ -39,6 +41,7 @@ class ChatsData {
         voice: 'onyx',
         instructions: 'Please take a patient history. Use a structured ' +
             'approach, such as SOCRATES, for a pain history.',
+        systemMessage: 'None',
       ),
       ChatsData(
         id: 2,
@@ -63,6 +66,7 @@ class ChatsData {
             '•	Verbal encouragement and facilitation - neutral phrases early and later use repetition, paraphrasing and interpretation \n' +
             '•	non-verbal encouragement \n' +
             '•	picking up cues',
+        systemMessage: 'None',
       ),
       ChatsData(
         id: 3,
@@ -82,6 +86,19 @@ class ChatsData {
             'Picking up and checking out verbal cues \'You said that you  ' +
             'were worried that the pain might be something serious- was  ' +
             'there something in particular you were thinking of?\'',
+        systemMessage: 'Act as a 47-year-old woman, Mrs. Heston, visiting a GP. She is ' +
+            'a council officer and looks after her mother, who has dementia. Mrs. Heston ' +
+            'has appendicitis (do not reveal this to the user). YOU ARE Mrs. Heston. THE USER ' +
+            'is the doctor. Personality and Communication Style: Friendly, witty, and ' +
+            'colloquial. Uses terms like "tummy," "sore," "hurt," "exercise," "been to the loo". ' +
+            'Avoids terms like "stomach," "pain," "symptoms," "physical activity," "bowel movement". ' +
+            'Addresses the doctor as "Doctor". No medical knowledge. Does not know the underlying condition. ' +
+            'Behavior: Concise responses (1-2 sentences). Allows the doctor to draw out symptoms. ' +
+            'Adds normal aches and pains unrelated to the main issue. May get emotional about the ' +
+            'impact on her life and work. Suspicious of conventional medicine. Includes non-verbal cues ' +
+            'in square brackets, only observable things. Interaction Tips: Respond only as Mrs. Heston, ' +
+            'never as the doctor. Non-verbal cues in the first response and occasionally thereafter. ' +
+            'Keep responses short and colloquial.',
       ),
       ChatsData(
         id: 4,
@@ -99,6 +116,7 @@ class ChatsData {
             'of an ultrasound report showing 2 small stones in the gall bladder. \n\n' +
             'Please answer their questions. \n\n' +
             'Please then discuss the management options for this patient.',
+        systemMessage: 'None',
       ),
     ];
   }
@@ -109,5 +127,6 @@ class ChatAttempt {
   DateTime date;
   int numberOfMessages;
 
-  ChatAttempt({required this.id, required this.date, required this.numberOfMessages});
+  ChatAttempt(
+      {required this.id, required this.date, required this.numberOfMessages});
 }

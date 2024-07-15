@@ -13,11 +13,11 @@ var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
-var chatApiEndpoint = dotenv.env[
-    'CHAT_API_URL'];
+var chatApiEndpoint = dotenv.env['CHAT_API_URL'];
 var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
-String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ?? 'https://api.sws.speechify.com/v1/audio/speech';
+String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ??
+    'https://api.sws.speechify.com/v1/audio/speech';
 var speechifySpeechKey = dotenv.env['SPEECHIFY_API_KEY'];
 
 class OpenAiService {
@@ -328,9 +328,10 @@ class OpenAiService {
 
   //Deals with Chat API (for student-'patient' interactions)
   //Note that this needs not just the current messages but the whole conversation history
-  Future<List<LocalMessage>> getChatResponseFromMessage(List<LocalMessage> conversationHistory) async {
+  Future<List<LocalMessage>> getChatResponseFromMessage(
+      List<LocalMessage> conversationHistory, String systemMessage) async {
     List<LocalMessage> messages = [];
-    
+
     // Prepare the conversation history in the proper format for Chat API
     /*List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
       return {
@@ -339,15 +340,35 @@ class OpenAiService {
       };
     }).toList();*/
 
-    List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
-      String role = message.role == LocalMessageRole.user ? 'user' : 'assistant';
+    List<Map<String, String>> messagesPayload = [
+      {
+        'role': 'system',
+        'content': systemMessage,
+      }
+    ];
+
+    messagesPayload.addAll(conversationHistory.map((message) {
+      String role =
+          message.role == LocalMessageRole.user ? 'user' : 'assistant';
       String content = message.text ?? ''; // Handle nullable text
 
       return {
         'role': role,
         'content': content,
       };
-    }).toList();
+    }).toList());
+
+    /*List<Map<String, String>> messagesPayload =
+        conversationHistory.map((message) {
+      String role =
+          message.role == LocalMessageRole.user ? 'user' : 'assistant';
+      String content = message.text ?? ''; // Handle nullable text
+
+      return {
+        'role': role,
+        'content': content,
+      };
+    }).toList();*/
 
     try {
       final response = await http.post(
@@ -440,18 +461,20 @@ class OpenAiService {
     String responseFormat = 'aac',
     String language = 'en-GB',
   }) async {
-    text = removeTextInSquareBrackets(text); // Remove any non-verbals in square brackets
-    
+    text = removeTextInSquareBrackets(
+        text); // Remove any non-verbals in square brackets
+
     final url = Uri.parse(speechifySpeechEndpoint);
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $speechifySpeechKey',  // Replace with your Speechify API Key
+      'Authorization':
+          'Bearer $speechifySpeechKey', // Replace with your Speechify API Key
     };
     final body = {
       'audio_format': responseFormat,
       'input': text,
       'language': language,
-      'voice_id': voice,
+      'voice_id': 'harper', //voice,
       'model': model,
     };
 
@@ -473,7 +496,6 @@ class OpenAiService {
       return null;
     }
   }*/
-
 
   String removeTextInSquareBrackets(String text) {
     RegExp exp = RegExp(r"\[.*?\]");
