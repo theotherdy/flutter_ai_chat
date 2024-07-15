@@ -73,7 +73,7 @@ class ChatsData {
         attempts: 0,
         assistantId: 'asst_tH2URvo0blyaxzx38Gidn9eH',
         advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
-        voice: 'shimmer',
+        voice: 'harper',
         instructions: 'You are asked to see Jo Heston who has abdominal pain. ' +
             'Useful phrases and ways to explore the patient\'s ideas: \n\n' +
             'Direct approach - how did that make you feel?  \n' +

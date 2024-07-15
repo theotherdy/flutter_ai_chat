@@ -5,8 +5,7 @@ import 'package:camera/camera.dart';
 class CameraModal extends StatefulWidget {
   final Function(String) onVideoRecorded;
 
-  const CameraModal({Key? key, required this.onVideoRecorded})
-      : super(key: key);
+  const CameraModal({Key? key, required this.onVideoRecorded}) : super(key: key);
 
   @override
   State<CameraModal> createState() => _CameraModalState();
@@ -16,7 +15,7 @@ class _CameraModalState extends State<CameraModal> {
   bool _isLoading = true;
   bool _isRecording = false;
   late CameraController _cameraController;
-  late Timer _timer;
+  Timer? _timer;
   int _timerSeconds = 30;
 
   @override
@@ -28,7 +27,7 @@ class _CameraModalState extends State<CameraModal> {
   @override
   void dispose() {
     _cameraController.dispose();
-    _timer.cancel(); // Cancel the timer to prevent memory leaks
+    _timer?.cancel(); // Cancel the timer to prevent memory leaks
     super.dispose();
   }
 
@@ -36,9 +35,6 @@ class _CameraModalState extends State<CameraModal> {
     if (_isRecording) {
       final file = await _cameraController.stopVideoRecording();
       setState(() => _isRecording = false);
-      //debugPrint('I have a file $file.path');
-      // Pass the file path back to the caller
-      // Use the callback to pass the file path back to the parent
       widget.onVideoRecorded(file.path);
       Navigator.pop(context);
     } else {
@@ -65,6 +61,11 @@ class _CameraModalState extends State<CameraModal> {
     });
   }
 
+  void _closeModal() {
+    _timer?.cancel(); // Cancel the timer before closing the modal
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -75,33 +76,53 @@ class _CameraModalState extends State<CameraModal> {
         ),
       );
     } else {
-      return Center(
-        child: Stack(
-          alignment: Alignment.bottomCenter,
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
           children: [
-            CameraPreview(_cameraController),
-            Padding(
-              padding: const EdgeInsets.all(25),
-              child: FloatingActionButton(
-                backgroundColor: Colors.red,
-                foregroundColor: _isRecording ? Colors.white : Colors.red,
-                child: Icon(_isRecording ? Icons.stop : Icons.circle),
-                shape: RoundedRectangleBorder(
+            // Camera preview and other elements
+            Center(
+              child: CameraPreview(_cameraController),
+            ),
+            // Close button
+            Positioned(
+              top: 16.0,
+              right: 16.0,
+              child: IconButton(
+                icon: Icon(Icons.close),
+                color: Colors.white,
+                onPressed: _closeModal,
+              ),
+            ),
+            // Record/Stop button
+            Positioned(
+              bottom: 30.0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: FloatingActionButton(
+                  backgroundColor: Colors.red,
+                  foregroundColor: _isRecording ? Colors.white : Colors.red,
+                  child: Icon(_isRecording ? Icons.stop : Icons.circle),
+                  shape: RoundedRectangleBorder(
                     side: BorderSide(width: 3, color: Colors.white),
-                    borderRadius: BorderRadius.circular(100)),
-                onPressed: () => _recordVideo(),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  onPressed: () => _recordVideo(),
+                ),
               ),
             ),
             if (_isRecording)
               Positioned(
                 top: 50,
-                child: SizedBox(
-                  width: 150, // Constant width for the background container
+                left: 0,
+                right: 0,
+                child: Center(
                   child: Container(
+                    width: 150, // Constant width for the background container
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
-                      color:
-                          Colors.black.withOpacity(0.3), // Adjust opacity here
+                      color: Colors.black.withOpacity(0.3), // Adjust opacity here
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

@@ -54,73 +54,51 @@ class _InformationModalState extends State<InformationModal> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      contentPadding: EdgeInsets.zero,
-      content: IntrinsicHeight(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    widget.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+    return Dialog(
+      insetPadding: EdgeInsets.all(16.0), // Adjust to fit full screen
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-            Expanded(
-              child: Stack(
+          ],
+        ),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              controller: _scrollController,
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.information),
-                          SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: AnimatedOpacity(
-                      opacity: _showFloatingButton ? 1.0 : 0.0,
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.easeInOut,
-                      child: FloatingActionButton(
-                        onPressed: () {
-                          _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.easeOut,
-                          );
-                        },
-                        child: Icon(Icons.keyboard_arrow_down),
-                      ),
-                    ),
-                  ),
+                  Text(widget.information),
+                  SizedBox(height: 20),
                 ],
+              ),
+            ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: _showFloatingButton ? 1.0 : 0.0,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  child: Icon(Icons.keyboard_arrow_down),
+                ),
               ),
             ),
           ],

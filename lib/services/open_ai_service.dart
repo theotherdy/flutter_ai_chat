@@ -15,11 +15,14 @@ var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
+String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ?? 'https://api.sws.speechify.com/v1/audio/speech';
+var speechifySpeechKey = dotenv.env['SPEECHIFY_API_KEY'];
+
 /* AZURE Equivalents */
-var azureApiKey = dotenv.env[
+/*var azureApiKey = dotenv.env[
     'AZURE_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var azureApiAssistantsEndpoint = dotenv.env[
-    'AZURE_ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+    'AZURE_ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory*/
 
 class OpenAiService {
   String _assistantId = '';
@@ -389,7 +392,7 @@ class OpenAiService {
   ///
   /// Returns a Future<Uint8List?> of the audio
 
-  Future<Uint8List?> generateAudio({
+  /*Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
     String model = 'tts-1',
@@ -424,7 +427,56 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
+  }*/
+
+  /// Get speech from Speechify using [voice] for [text]
+  ///
+  /// Returns a Future<Uint8List?> of the audio
+  Future<Uint8List?> generateAudio({
+    required String text,
+    required String voice,
+    String model = 'simba-base',
+    String responseFormat = 'mp3',
+    String language = 'en-GB',
+  }) async {
+    text = removeTextInSquareBrackets(text); // Remove any non-verbals in square brackets
+    
+    final url = Uri.parse(speechifySpeechEndpoint);
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $speechifySpeechKey',  // Replace with your Speechify API Key
+    };
+    final body = {
+      'audio_format': responseFormat,
+      'input': text,
+      'language': language,
+      'voice_id': voice,
+      'model': model,
+    };
+
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    debugPrint(url.toString());
+    debugPrint(headers.toString());
+    debugPrint(body.toString());
+
+
+
+    
+
+    if (response.statusCode == 200) {
+      debugPrint('Audio generated successfully');
+      return response.bodyBytes;
+    } else {
+      print('Failed to generate audio: ${response.statusCode}');
+      return null;
+    }
   }
+
 
   String removeTextInSquareBrackets(String text) {
     RegExp exp = RegExp(r"\[.*?\]");

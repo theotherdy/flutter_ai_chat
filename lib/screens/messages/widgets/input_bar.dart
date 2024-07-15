@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_ai_chat/constants.dart';
 
 class InputBar extends StatefulWidget {
@@ -30,33 +29,27 @@ class _InputBarState extends State<InputBar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        IconButton(
+        Padding(
+          padding: const EdgeInsets.only(left: 0.0, right:0.0), // Reduce space to the left
+          child: IconButton(
             icon: const Icon(
               Icons.videocam,
               color: kPrimaryColor,
             ),
-            // the method which is called
-            // when button is pressed
             onPressed: () {
               widget.onBtnVideoPressed();
-              //_showCameraModal(context);
-            }),
-        //const Icon(Icons.videocam, color: kPrimaryColor),
-        const SizedBox(width: kDefaultPadding),
-        /*const Icon(Icons.mic, color: kPrimaryColor),
-        const SizedBox(width: kDefaultPadding),*/
+            },
+          ),
+        ),
         Expanded(
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kDefaultPadding * 0.75,
-            ),
+            padding: const EdgeInsets.only(left: kDefaultPadding * 0.8, right:0.0), // Reduce space to the left
             decoration: BoxDecoration(
               color: kPrimaryColor.withOpacity(0.05),
               borderRadius: BorderRadius.circular(40),
             ),
             child: Row(
               children: [
-                const SizedBox(width: kDefaultPadding / 4),
                 Expanded(
                   child: TextField(
                     maxLines: 4, // Set max lines to 4
@@ -64,32 +57,25 @@ class _InputBarState extends State<InputBar> {
                     decoration: const InputDecoration(
                       hintText: "Type message",
                       border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(left: 8.0), // Reduce space inside the text field
                     ),
                     controller: _chatController,
                     scrollController: _scrollController,
-                    keyboardType:
-                        TextInputType.multiline, // Enable multiline input
+                    keyboardType: TextInputType.multiline, // Enable multiline input
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.send,
-                    color: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .color!
-                        .withOpacity(0.64),
+                Padding(
+                  padding: const EdgeInsets.only(right: 0.0), // Reduce space to the right
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.send,
+                      color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.64),
+                    ),
+                    onPressed: () {
+                      widget.onBtnSendPressed(_chatController.text);
+                      _chatController.clear();
+                    },
                   ),
-                  // the method which is called
-                  // when button is pressed
-                  onPressed: () {
-                    widget.onBtnSendPressed(_chatController.text);
-                    //tempChatHistoryContent = _chatController.text; //hold on to this even afetr we've cleared input
-                    //_showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-                    _chatController.clear();
-
-                    //_sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-                  },
                 ),
               ],
             ),

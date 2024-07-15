@@ -124,7 +124,8 @@ class _MessagesBodyState extends State<MessagesBody> {
       isScrollControlled: true, // Set to true for full-screen modal
       builder: (BuildContext context) {
         return Container(
-            padding: const EdgeInsets.all(16.0),
+            height: MediaQuery.of(context).size.height, // Full height
+            padding: const EdgeInsets.all(0),
             child: CameraModal(onVideoRecorded: (filePath) async {
               // Callback function when file is selected in CameraModal
               //debugPrint('I have file path in MessagesBody $filePath');
@@ -233,7 +234,7 @@ class _MessagesBodyState extends State<MessagesBody> {
   void _showAdvisorSpinnerModal(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent users from dismissing the dialog
+      barrierDismissible: true, // Prevent users from dismissing the dialog
       builder: (BuildContext context) {
         return Stack(
           children: [
@@ -261,6 +262,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         return InformationModal(
             information: advisorResponse, title: 'AI feedback');
       },
+      barrierDismissible: true,
     );
   }
 
@@ -431,7 +433,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         //todo - move this out into a separate chat_input widget
         Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding,
+            horizontal: kDefaultPadding * 0.2,
             vertical: kDefaultPadding / 2,
           ),
           decoration: BoxDecoration(
