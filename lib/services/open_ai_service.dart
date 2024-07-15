@@ -13,16 +13,12 @@ var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
+var chatApiEndpoint = dotenv.env[
+    'CHAT_API_URL'];
 var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
 String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ?? 'https://api.sws.speechify.com/v1/audio/speech';
 var speechifySpeechKey = dotenv.env['SPEECHIFY_API_KEY'];
-
-/* AZURE Equivalents */
-/*var azureApiKey = dotenv.env[
-    'AZURE_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
-var azureApiAssistantsEndpoint = dotenv.env[
-    'AZURE_ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory*/
 
 class OpenAiService {
   String _assistantId = '';
@@ -110,15 +106,6 @@ class OpenAiService {
           "OpenAI-Beta": "assistants=v2",
         },
       );
-      /*final res = await http.post(
-        Uri.parse(
-            "$azureApiAssistantsEndpoint/openai/threads?api-version=2024-02-15-preview"),
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "$azureApiKey",
-          //"OpenAI-Beta": "assistants=v1",
-        },
-      );*/
       //debugPrint('openAIApiAssistantsEndpoint $openAIApiAssistantsEndpoint');
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -157,21 +144,6 @@ class OpenAiService {
           },
         ),
       );
-      /*final res = await http.post(
-        Uri.parse(
-            "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages?api-version=2024-02-15-preview"),
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "$azureApiKey",
-        },
-        // encode the object to JSON
-        body: jsonEncode(
-          {
-            "role": "user",
-            "content": message,
-          },
-        ),
-      );*/
 
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -208,21 +180,6 @@ class OpenAiService {
         ),
       );
 
-      /*final res = await http.post(
-        Uri.parse(
-            "$azureApiAssistantsEndpoint/openai/threads/$threadId/runs?api-version=2024-02-15-preview"),
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "$azureApiKey",
-        },
-        // encode the object to JSON
-        body: jsonEncode(
-          {
-            "assistant_id": assistantId,
-          },
-        ),
-      );*/
-
       if (res.statusCode == 200) {
         // decode the JSON response
         Map<String, dynamic> response = jsonDecode(res.body);
@@ -257,15 +214,6 @@ class OpenAiService {
         },
       );
 
-      /*final response = await http.get(
-        Uri.parse(
-            '$azureApiAssistantsEndpoint/openai/threads/$threadId/runs/$runId?api-version=2024-02-15-preview'),
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "$azureApiKey",
-        },
-      );*/
-
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         final runStatus = responseData['status'];
@@ -296,8 +244,6 @@ class OpenAiService {
       [afterMessageId]) async {
     try {
       String url = "$openAIApiAssistantsEndpoint/$threadId/messages";
-      //String url =
-      //    "$azureApiAssistantsEndpoint/openai/threads/$threadId/messages";
       if (afterMessageId != null) {
         debugPrint('afterMessageId coming through as $afterMessageId');
         url =
@@ -313,14 +259,6 @@ class OpenAiService {
           "OpenAI-Beta": "assistants=v2",
         },
       );
-
-      /*final res = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "$azureApiKey",
-        },
-      );*/
 
       if (res.statusCode == 200) {
         // decode the JSON response
@@ -388,11 +326,74 @@ class OpenAiService {
     return messages;
   }
 
+  //Deals with Chat API (for student-'patient' interactions)
+  //Note that this needs not just the current messages but the whole conversation history
+  Future<List<LocalMessage>> getChatResponseFromMessage(List<LocalMessage> conversationHistory) async {
+    List<LocalMessage> messages = [];
+    
+    // Prepare the conversation history in the proper format for Chat API
+    /*List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
+      return {
+        'role': message.role == LocalMessageRole.user ? 'user' : 'assistant',
+        'content': message.text,
+      };
+    }).toList();*/
+
+    List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
+      String role = message.role == LocalMessageRole.user ? 'user' : 'assistant';
+      String content = message.text ?? ''; // Handle nullable text
+
+      return {
+        'role': role,
+        'content': content,
+      };
+    }).toList();
+
+    try {
+      final response = await http.post(
+        Uri.parse(chatApiEndpoint!),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $openAIApiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4o', // specify the model
+          'messages': messagesPayload,
+          'temperature': 0.7,
+        }),
+      );
+
+      // Check the response status code
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = jsonDecode(response.body);
+        List<dynamic> choices = responseData['choices'];
+
+        for (var choice in choices) {
+          Map<String, dynamic> message = choice['message'];
+          if (message['role'] == 'assistant') {
+            messages.add(LocalMessage(
+              time: DateTime.now(),
+              role: LocalMessageRole.ai,
+              type: LocalMessageType.text,
+              text: message['content'],
+            ));
+          }
+        }
+      } else {
+        throw Exception("Failed to fetch the response from the Chat API");
+      }
+    } catch (error) {
+      throw Exception("An error occurred: $error");
+    }
+
+    return messages;
+  }
+
   /// Get speech from [openAISpeechEndpoint] using [voice] for [text]
   ///
   /// Returns a Future<Uint8List?> of the audio
 
-  /*Future<Uint8List?> generateAudio({
+  Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
     String model = 'tts-1',
@@ -409,7 +410,7 @@ class OpenAiService {
     final body = {
       'model': model,
       'input': text,
-      'voice': voice,
+      'voice': 'shimmer', //todo relace with voiceß
       'response_format': responseFormat,
       'speed': speed,
     };
@@ -427,16 +428,16 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }*/
+  }
 
   /// Get speech from Speechify using [voice] for [text]
   ///
   /// Returns a Future<Uint8List?> of the audio
-  Future<Uint8List?> generateAudio({
+  /*Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
     String model = 'simba-base',
-    String responseFormat = 'mp3',
+    String responseFormat = 'aac',
     String language = 'en-GB',
   }) async {
     text = removeTextInSquareBrackets(text); // Remove any non-verbals in square brackets
@@ -464,10 +465,6 @@ class OpenAiService {
     debugPrint(headers.toString());
     debugPrint(body.toString());
 
-
-
-    
-
     if (response.statusCode == 200) {
       debugPrint('Audio generated successfully');
       return response.bodyBytes;
@@ -475,7 +472,7 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }
+  }*/
 
 
   String removeTextInSquareBrackets(String text) {

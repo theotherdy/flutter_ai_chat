@@ -266,7 +266,46 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
   }
 
+  // Updated function to handle sending a text message and showing the AI response using the Chat API
   void _sendTextMessageAndShowTextResponse(String text) {
+    _showLoadingMessage(LocalMessageRole.ai);
+
+    List<LocalMessage> updatedConversationHistory = List.from(_chatHistory);
+    updatedConversationHistory.add(LocalMessage(
+      time: DateTime.now(),
+      role: LocalMessageRole.user,
+      type: LocalMessageType.text,
+      text: text,
+    ));
+
+    openAiService.getChatResponseFromMessage(updatedConversationHistory).then((aiResponses) async {
+      setState(() {
+        _chatHistory.removeLast(); // Remove the loading message
+      });
+
+      String textToSend = aiResponses.map((msg) => msg.text).join(" ");
+
+      final audioFuture = openAiService.generateAudio(
+        text: textToSend,
+        voice: widget.voice,
+      );
+
+      try {
+        final audioBytes = await audioFuture.timeout(const Duration(seconds: 3));
+        if (audioBytes != null) {
+          _playAudio(audioBytes);
+        }
+      } catch (e) {
+        debugPrint('Audio generation timed out, showing text messages instead.');
+      }
+
+      setState(() {
+        _chatHistory.addAll(aiResponses);
+      });
+    });
+  }
+
+  /*void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
     openAiService
         .getAssistantResponseFromMessage(text, widget.assistantId)
@@ -297,29 +336,6 @@ class _MessagesBodyState extends State<MessagesBody> {
       }
       for (var aiResponse in aiResponses) {
         _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-      }
-    });
-  }
-
-  /*void _sendTextMessageAndShowTextResponse(String text) {
-    _showLoadingMessage(LocalMessageRole.ai);
-    openAiService
-        .getAssistantResponseFromMessage(text, widget.assistantId)
-        .then((aiResponses) async {
-      _chatHistory.removeLast(); //remove our loading message
-      //collate text frommultiple messages to sedn to the spech_to_text
-      String textToSend = '';
-      for (var aiResponse in aiResponses) {
-        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-        textToSend += aiResponse.text;
-      }
-      //generate speech from text
-      final Uint8List? audioBytes = await openAiService.generateAudio(
-        text: textToSend,
-        voice: widget.voice, // Specify the voice here
-      );
-      if (audioBytes != null) {
-        _playAudio(audioBytes);
       }
     });
   }*/
@@ -372,26 +388,24 @@ class _MessagesBodyState extends State<MessagesBody> {
     }
   }
 
-  void _playAudio(Uint8List audioBytes) async {
+  /*void _playAudio(Uint8List audioBytes) async {
     Directory tempDir = await getTemporaryDirectory();
     String tempPath = '${tempDir.path}/temp.mp3';
     File tempFile = File(tempPath);
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
     await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
     _audioPlayer.play();
-  }
-
-  /*void _playAudio(Uint8List audioBytes) async {
-    await _audioPlayer.setAudioSource(
-      AudioSource.uri(
-        Uri.dataFromBytes(
-          audioBytes,
-          mimeType: 'audio/mp3',
-        ),
-      ),
-    );
-    _audioPlayer.play();
   }*/
+
+  void _playAudio(Uint8List audioBytes) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = '${tempDir.path}/temp.mpg';  // Change to 'temp.aac'?
+    File tempFile = File(tempPath);
+    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
+    _audioPlayer.play();
+    //debugPrint('Trying to play $tempPath');
+  }
 
   @override
   Widget build(BuildContext context) {
