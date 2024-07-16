@@ -286,6 +286,12 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
   }
 
+  // Function to strip SSML tags from the text
+  String stripSSMLTags(String text) {
+    final RegExp ssmlRegExp = RegExp(r'<[^>]+>');
+    return text.replaceAll(ssmlRegExp, '');
+  }
+
   // Updated function to handle sending a text message and showing the AI response using the Chat API
   void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
@@ -304,6 +310,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         .then((aiResponses) async {
       String textToSend = aiResponses.map((msg) => msg.text).join(" ");
 
+      // Send the text to generate audio
       final audioFuture = openAiService.generateAudio(
         text: textToSend,
         voice: widget.voice,
@@ -319,6 +326,13 @@ class _MessagesBodyState extends State<MessagesBody> {
         debugPrint(
             'Audio generation timed out, showing text messages instead.');
       }
+
+      // Strip SSML tags from AI responses
+      aiResponses = aiResponses.map((msg) {
+        msg.text = msg.text != null ? stripSSMLTags(msg.text!) : null;
+        return msg;
+      }).toList();
+
       setState(() {
         _chatHistory.removeLast(); // Remove the loading message
       });
@@ -441,12 +455,12 @@ class _MessagesBodyState extends State<MessagesBody> {
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
 
     // Log the path to manually check the file
-    debugPrint('Audio file saved at: $tempPath');
+    //debugPrint('Audio file saved at: $tempPath');
 
     // Notify the user to check the file
-    ScaffoldMessenger.of(context).showSnackBar(
+    /*ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file saved at: $tempPath')),
-    );
+    );*/
 
     // Test playing the audio
     try {

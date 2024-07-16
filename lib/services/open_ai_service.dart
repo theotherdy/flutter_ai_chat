@@ -461,8 +461,10 @@ class OpenAiService {
     String responseFormat = 'mp3',
     String language = 'en-GB',
   }) async {
-    text = removeTextInSquareBrackets(
-        text); // Remove any non-verbals in square brackets
+    //text = removeTextInSquareBrackets(
+    //    text); // Remove any non-verbals in square brackets
+
+    text = _cleanText(text);
 
     final url = Uri.parse(speechifySpeechEndpoint);
     final headers = {
@@ -484,9 +486,11 @@ class OpenAiService {
       body: json.encode(body),
     );
 
+    final encodedBody = json.encode(body);
+
     debugPrint(url.toString());
     debugPrint(headers.toString());
-    debugPrint(body.toString());
+    debugPrint(encodedBody.toString());
 
     if (response.statusCode == 200) {
       debugPrint('Audio generated successfully');
@@ -499,8 +503,16 @@ class OpenAiService {
     }
   }
 
-  String removeTextInSquareBrackets(String text) {
+  /*String removeTextInSquareBrackets(String text) {
     RegExp exp = RegExp(r"\[.*?\]");
     return text.replaceAll(exp, '');
+  }*/
+
+  String _cleanText(String text) {
+    // Remove any non-verbals in square brackets
+    text = text.replaceAll(RegExp(r'\[.*?\]'), '');
+    // Remove double newlines
+    text = text.replaceAll('\n\n', '');
+    return text;
   }
 }
