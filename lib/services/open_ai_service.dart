@@ -414,7 +414,7 @@ class OpenAiService {
   ///
   /// Returns a Future<Uint8List?> of the audio
 
-  Future<Uint8List?> generateAudio({
+  /*Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
     String model = 'tts-1',
@@ -449,16 +449,16 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }
+  }*/
 
   /// Get speech from Speechify using [voice] for [text]
   ///
   /// Returns a Future<Uint8List?> of the audio
-  /*Future<Uint8List?> generateAudio({
+  Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
-    String model = 'simba-base',
-    String responseFormat = 'aac',
+    String model = 'simba-turbo',
+    String responseFormat = 'mp3',
     String language = 'en-GB',
   }) async {
     text = removeTextInSquareBrackets(
@@ -474,7 +474,7 @@ class OpenAiService {
       'audio_format': responseFormat,
       'input': text,
       'language': language,
-      'voice_id': 'harper', //voice,
+      'voice_id': 'carol', //voice,
       'model': model,
     };
 
@@ -490,12 +490,14 @@ class OpenAiService {
 
     if (response.statusCode == 200) {
       debugPrint('Audio generated successfully');
-      return response.bodyBytes;
+      final jsonResponse = json.decode(response.body);
+      String audioData = jsonResponse['audio_data'];
+      return base64Decode(audioData);
     } else {
-      print('Failed to generate audio: ${response.statusCode}');
+      debugPrint('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }*/
+  }
 
   String removeTextInSquareBrackets(String text) {
     RegExp exp = RegExp(r"\[.*?\]");

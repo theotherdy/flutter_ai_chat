@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
 
+import 'package:jumping_dot/jumping_dot.dart';
+
 //import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
@@ -242,8 +244,26 @@ class _MessagesBodyState extends State<MessagesBody> {
               color: Colors.black
                   .withOpacity(0.5), // Semi-transparent black background
             ),
-            const Center(
-              child: CircularProgressIndicator(),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Analysing conversation and formulating advice - this will take a few seconds',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.white), // Ensure text is visible
+                  ),
+                  const SizedBox(height: 20),
+                  JumpingDots(
+                    numberOfDots: 3,
+                    color: Colors.grey,
+                    radius: 3,
+                    innerPadding: 4.5,
+                    delay: 1000,
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -291,7 +311,7 @@ class _MessagesBodyState extends State<MessagesBody> {
 
       try {
         final audioBytes =
-            await audioFuture.timeout(const Duration(seconds: 3));
+            await audioFuture.timeout(const Duration(seconds: 5));
         if (audioBytes != null) {
           _playAudio(audioBytes);
         }
@@ -394,21 +414,47 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   /*void _playAudio(Uint8List audioBytes) async {
     Directory tempDir = await getTemporaryDirectory();
-    String tempPath = '${tempDir.path}/temp.mp3';
+    String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
+    debugPrint('File created at: $tempPath');
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
-    _audioPlayer.play();
-  }*/
-
-  void _playAudio(Uint8List audioBytes) async {
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = '${tempDir.path}/temp.mpg'; // Change to 'temp.aac'?
-    File tempFile = File(tempPath);
-    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+    debugPrint('Audio file saved at: $tempPath');
     await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
     _audioPlayer.play();
     //debugPrint('Trying to play $tempPath');
+  }*/
+
+  void _playAudio(Uint8List audioBytes) async {
+    /*Directory downloadsDir = Directory('/storage/emulated/0/Download');
+    String downloadsPath = '${downloadsDir.path}/temp.mp3';
+    File downloadsFile = File(downloadsPath);*/
+
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
+    File tempFile = File(tempPath);
+
+    // Ensure the Downloads directory exists
+    //if (!await downloadsDir.exists()) {
+    //  await downloadsDir.create(recursive: true);
+    //}
+
+    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+
+    // Log the path to manually check the file
+    debugPrint('Audio file saved at: $tempPath');
+
+    // Notify the user to check the file
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Audio file saved at: $tempPath')),
+    );
+
+    // Test playing the audio
+    try {
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
+      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint('Error setting audio source: $e');
+    }
   }
 
   @override
