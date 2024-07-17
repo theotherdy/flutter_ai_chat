@@ -476,7 +476,7 @@ class OpenAiService {
       'audio_format': responseFormat,
       'input': text,
       'language': language,
-      'voice_id': 'carol', //voice,
+      'voice_id': voice, //voice,
       'model': model,
     };
 
@@ -513,6 +513,64 @@ class OpenAiService {
     text = text.replaceAll(RegExp(r'\[.*?\]'), '');
     // Remove double newlines
     text = text.replaceAll('\n\n', '');
+    // Remove single newlines
+    text = text.replaceAll('\n', '');
+    // Remove exclamation marks
+    text = text.replaceAll('!', '.');
+    // Replace UTF-8 apostrophes with standard ASCII apostrophes
+    text = _replaceUTF8Apostrophes(text);
+    // Trim spaces outside <speak> tags
+    final RegExp speakTagRegExp =
+        RegExp(r'^\s*<speak>(.*)</speak>\s*$', multiLine: true, dotAll: true);
+    if (speakTagRegExp.hasMatch(text)) {
+      final match = speakTagRegExp.firstMatch(text);
+      if (match != null) {
+        final contentInsideSpeak = match.group(1)?.trim() ?? '';
+        text = '<speak>$contentInsideSpeak</speak>';
+      }
+    } else {
+      text = text.trim(); // If no <speak> tags, just trim the entire text
+    }
+
+    // Validate and fix tags
+    text = _ensureSpeakTagClosed(text);
+
+    return text;
+  }
+
+  // Helper function to ensure <speak> tag is closed and remove orphaned closing tags
+  String _ensureSpeakTagClosed(String text) {
+    // Check if <speak> tag is present
+    final RegExp speakTagOpenRegExp = RegExp(r'<speak>');
+    final RegExp speakTagCloseRegExp = RegExp(r'</speak>');
+
+    final bool hasOpenTag = speakTagOpenRegExp.hasMatch(text);
+    final bool hasCloseTag = speakTagCloseRegExp.hasMatch(text);
+
+    if (hasOpenTag && !hasCloseTag) {
+      // Add closing tag at the end if it is missing
+      text += '</speak>';
+    }
+
+    // Remove any orphaned closing tags
+    text = text.replaceAllMapped(speakTagCloseRegExp, (match) {
+      // Check the part of the string before this closing tag
+      final beforeCloseTag = text.substring(0, match.start);
+      if (beforeCloseTag.contains('<speak>')) {
+        return match.group(0) ?? '';
+      } else {
+        // Orphaned closing tag found
+        return '';
+      }
+    });
+
+    return text;
+  }
+
+  String _replaceUTF8Apostrophes(String text) {
+    // Replace common UTF-8 apostrophe variants with standard ASCII apostrophe
+    text = text.replaceAll('â', "'");
+    text = text.replaceAll('’', "'");
     return text;
   }
 }
