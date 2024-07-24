@@ -11,6 +11,11 @@ class TextMessage extends StatelessWidget {
 
   final LocalMessage? message;
 
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Convert text to a UTF-8 string
@@ -52,7 +57,7 @@ class TextMessage extends StatelessWidget {
           if (nonVerbalInfo
               .isNotEmpty) // Conditionally render non-verbal info Text widget
             Text(
-              nonVerbalInfo.trim(),
+              capitalizeFirstLetter(nonVerbalInfo.trim()),
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: message!.role == LocalMessageRole.user
