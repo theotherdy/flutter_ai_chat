@@ -13,11 +13,11 @@ var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
 var openAIApiAssistantsEndpoint = dotenv.env[
     'ASSISTANTS_API_URL']; //access the OPEN_AI_API_KEY from the .env file in the root directory
-var chatApiEndpoint = dotenv.env[
-    'CHAT_API_URL'];
+var chatApiEndpoint = dotenv.env['CHAT_API_URL'];
 var openAISpeechEndpoint = dotenv.env['SPEECH_API_URL'];
 
-String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ?? 'https://api.sws.speechify.com/v1/audio/speech';
+String speechifySpeechEndpoint = dotenv.env['SPEECHIFY_API_URL'] ??
+    'https://api.sws.speechify.com/v1/audio/speech';
 var speechifySpeechKey = dotenv.env['SPEECHIFY_API_KEY'];
 
 class OpenAiService {
@@ -328,9 +328,10 @@ class OpenAiService {
 
   //Deals with Chat API (for student-'patient' interactions)
   //Note that this needs not just the current messages but the whole conversation history
-  Future<List<LocalMessage>> getChatResponseFromMessage(List<LocalMessage> conversationHistory) async {
+  Future<List<LocalMessage>> getChatResponseFromMessage(
+      List<LocalMessage> conversationHistory, String systemMessage) async {
     List<LocalMessage> messages = [];
-    
+
     // Prepare the conversation history in the proper format for Chat API
     /*List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
       return {
@@ -339,15 +340,35 @@ class OpenAiService {
       };
     }).toList();*/
 
-    List<Map<String, String>> messagesPayload = conversationHistory.map((message) {
-      String role = message.role == LocalMessageRole.user ? 'user' : 'assistant';
+    List<Map<String, String>> messagesPayload = [
+      {
+        'role': 'system',
+        'content': systemMessage,
+      }
+    ];
+
+    messagesPayload.addAll(conversationHistory.map((message) {
+      String role =
+          message.role == LocalMessageRole.user ? 'user' : 'assistant';
       String content = message.text ?? ''; // Handle nullable text
 
       return {
         'role': role,
         'content': content,
       };
-    }).toList();
+    }).toList());
+
+    /*List<Map<String, String>> messagesPayload =
+        conversationHistory.map((message) {
+      String role =
+          message.role == LocalMessageRole.user ? 'user' : 'assistant';
+      String content = message.text ?? ''; // Handle nullable text
+
+      return {
+        'role': role,
+        'content': content,
+      };
+    }).toList();*/
 
     try {
       final response = await http.post(
@@ -393,7 +414,7 @@ class OpenAiService {
   ///
   /// Returns a Future<Uint8List?> of the audio
 
-  Future<Uint8List?> generateAudio({
+  /*Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
     String model = 'tts-1',
@@ -428,30 +449,34 @@ class OpenAiService {
       print('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }
+  }*/
 
   /// Get speech from Speechify using [voice] for [text]
   ///
   /// Returns a Future<Uint8List?> of the audio
-  /*Future<Uint8List?> generateAudio({
+  Future<Uint8List?> generateAudio({
     required String text,
     required String voice,
-    String model = 'simba-base',
-    String responseFormat = 'aac',
+    String model = 'simba-turbo',
+    String responseFormat = 'mp3',
     String language = 'en-GB',
   }) async {
-    text = removeTextInSquareBrackets(text); // Remove any non-verbals in square brackets
-    
+    //text = removeTextInSquareBrackets(
+    //    text); // Remove any non-verbals in square brackets
+
+    text = _cleanText(text);
+
     final url = Uri.parse(speechifySpeechEndpoint);
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $speechifySpeechKey',  // Replace with your Speechify API Key
+      'Authorization':
+          'Bearer $speechifySpeechKey', // Replace with your Speechify API Key
     };
     final body = {
       'audio_format': responseFormat,
       'input': text,
       'language': language,
-      'voice_id': voice,
+      'voice_id': voice, //voice,
       'model': model,
     };
 
@@ -461,22 +486,91 @@ class OpenAiService {
       body: json.encode(body),
     );
 
+    final encodedBody = json.encode(body);
+
     debugPrint(url.toString());
     debugPrint(headers.toString());
-    debugPrint(body.toString());
+    debugPrint(encodedBody.toString());
 
     if (response.statusCode == 200) {
       debugPrint('Audio generated successfully');
-      return response.bodyBytes;
+      final jsonResponse = json.decode(response.body);
+      String audioData = jsonResponse['audio_data'];
+      return base64Decode(audioData);
     } else {
-      print('Failed to generate audio: ${response.statusCode}');
+      debugPrint('Failed to generate audio: ${response.statusCode}');
       return null;
     }
-  }*/
+  }
 
-
-  String removeTextInSquareBrackets(String text) {
+  /*String removeTextInSquareBrackets(String text) {
     RegExp exp = RegExp(r"\[.*?\]");
     return text.replaceAll(exp, '');
+  }*/
+
+  String _cleanText(String text) {
+    // Remove any non-verbals in square brackets
+    text = text.replaceAll(RegExp(r'\[.*?\]'), '');
+    // Remove double newlines
+    text = text.replaceAll('\n\n', '');
+    // Remove single newlines
+    text = text.replaceAll('\n', '');
+    // Remove exclamation marks
+    text = text.replaceAll('!', '.');
+    // Replace UTF-8 apostrophes with standard ASCII apostrophes
+    text = _replaceUTF8Apostrophes(text);
+    // Trim spaces outside <speak> tags
+    final RegExp speakTagRegExp =
+        RegExp(r'^\s*<speak>(.*)</speak>\s*$', multiLine: true, dotAll: true);
+    if (speakTagRegExp.hasMatch(text)) {
+      final match = speakTagRegExp.firstMatch(text);
+      if (match != null) {
+        final contentInsideSpeak = match.group(1)?.trim() ?? '';
+        text = '<speak>$contentInsideSpeak</speak>';
+      }
+    } else {
+      text = text.trim(); // If no <speak> tags, just trim the entire text
+    }
+
+    // Validate and fix tags
+    text = _ensureSpeakTagClosed(text);
+
+    return text;
+  }
+
+  // Helper function to ensure <speak> tag is closed and remove orphaned closing tags
+  String _ensureSpeakTagClosed(String text) {
+    // Check if <speak> tag is present
+    final RegExp speakTagOpenRegExp = RegExp(r'<speak>');
+    final RegExp speakTagCloseRegExp = RegExp(r'</speak>');
+
+    final bool hasOpenTag = speakTagOpenRegExp.hasMatch(text);
+    final bool hasCloseTag = speakTagCloseRegExp.hasMatch(text);
+
+    if (hasOpenTag && !hasCloseTag) {
+      // Add closing tag at the end if it is missing
+      text += '</speak>';
+    }
+
+    // Remove any orphaned closing tags
+    text = text.replaceAllMapped(speakTagCloseRegExp, (match) {
+      // Check the part of the string before this closing tag
+      final beforeCloseTag = text.substring(0, match.start);
+      if (beforeCloseTag.contains('<speak>')) {
+        return match.group(0) ?? '';
+      } else {
+        // Orphaned closing tag found
+        return '';
+      }
+    });
+
+    return text;
+  }
+
+  String _replaceUTF8Apostrophes(String text) {
+    // Replace common UTF-8 apostrophe variants with standard ASCII apostrophe
+    text = text.replaceAll('â', "'");
+    text = text.replaceAll('’', "'");
+    return text;
   }
 }

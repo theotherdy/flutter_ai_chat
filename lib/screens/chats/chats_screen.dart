@@ -161,6 +161,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                           'incrementAttempts':
                               incrementAttempts, // Pass the callback function
                           'attempt_index': 0,
+                          'systemMessage': chats[index].systemMessage,
                         },
                       );
                     }

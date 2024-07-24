@@ -5,7 +5,8 @@ import 'package:camera/camera.dart';
 class CameraModal extends StatefulWidget {
   final Function(String) onVideoRecorded;
 
-  const CameraModal({Key? key, required this.onVideoRecorded}) : super(key: key);
+  const CameraModal({Key? key, required this.onVideoRecorded})
+      : super(key: key);
 
   @override
   State<CameraModal> createState() => _CameraModalState();
@@ -114,15 +115,16 @@ class _CameraModalState extends State<CameraModal> {
             ),
             if (_isRecording)
               Positioned(
-                top: 50,
+                top: 20, // Adjust the position to be closer to the top
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Container(
-                    width: 150, // Constant width for the background container
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    width: 80, // Adjust the width of the background container
+                    padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3), // Adjust opacity here
+                      color:
+                          Colors.black.withOpacity(0.5), // Adjust opacity here
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -130,7 +132,7 @@ class _CameraModalState extends State<CameraModal> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _timerSeconds <= 5 ? Colors.red : Colors.white,
-                        fontSize: 72, // Adjust font size here
+                        fontSize: 24, // Smaller font size
                         fontWeight: FontWeight.bold,
                       ),
                     ),

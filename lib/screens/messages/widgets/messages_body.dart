@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
 
+import 'package:jumping_dot/jumping_dot.dart';
+
 //import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
@@ -31,6 +33,7 @@ class MessagesBody extends StatefulWidget {
   final int chat_index; // Receive the index
   final Function(int) incrementAttempts; // Receive the callback function
   final int attempt_index;
+  final String systemMessage;
 
   MessagesBody({
     super.key,
@@ -41,6 +44,7 @@ class MessagesBody extends StatefulWidget {
     required this.chat_index, // Receive the index
     required this.incrementAttempts, // Receive the callback function
     required this.attempt_index,
+    required this.systemMessage,
   });
 
   @override
@@ -75,6 +79,17 @@ class _MessagesBodyState extends State<MessagesBody> {
     super.dispose();
   }
 
+  //Scrolls to bottom of page
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   /// Shows a loading message of [role] by adding to end of [_chatHistory] and scrolling down.
   ///
   ///
@@ -86,14 +101,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           role: role,
           text: "..."));
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(seconds: 1),
-        curve: Curves.fastOutSlowIn,
-      );
-    });
+    _scrollToBottom();
   }
 
   /// Shows a text message of [role] by adding to end of [_chatHistory] and scrolling down.
@@ -108,14 +116,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           role: role,
           text: text));
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(seconds: 1),
-        curve: Curves.fastOutSlowIn,
-      );
-    });
+    _scrollToBottom();
   }
 
   void _showCameraModal(BuildContext context) async {
@@ -172,6 +173,7 @@ class _MessagesBodyState extends State<MessagesBody> {
                       filePath: filePath));
                   //_cameraFilePath = path;
                 });
+                _scrollToBottom();
                 _sendTextMessageAndShowTextResponse(
                     transcription.text); //send off to chat api to respond to
               } else {
@@ -242,8 +244,26 @@ class _MessagesBodyState extends State<MessagesBody> {
               color: Colors.black
                   .withOpacity(0.5), // Semi-transparent black background
             ),
-            const Center(
-              child: CircularProgressIndicator(),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Analysing conversation and formulating advice - this will take a few seconds',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.white), // Ensure text is visible
+                  ),
+                  const SizedBox(height: 20),
+                  JumpingDots(
+                    numberOfDots: 3,
+                    color: Colors.grey,
+                    radius: 3,
+                    innerPadding: 4.5,
+                    delay: 1000,
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -266,6 +286,12 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
   }
 
+  // Function to strip SSML tags from the text
+  String stripSSMLTags(String text) {
+    final RegExp ssmlRegExp = RegExp(r'<[^>]+>');
+    return text.replaceAll(ssmlRegExp, '');
+  }
+
   // Updated function to handle sending a text message and showing the AI response using the Chat API
   void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
@@ -278,30 +304,42 @@ class _MessagesBodyState extends State<MessagesBody> {
       text: text,
     ));
 
-    openAiService.getChatResponseFromMessage(updatedConversationHistory).then((aiResponses) async {
-      setState(() {
-        _chatHistory.removeLast(); // Remove the loading message
-      });
-
+    openAiService
+        .getChatResponseFromMessage(
+            updatedConversationHistory, widget.systemMessage)
+        .then((aiResponses) async {
       String textToSend = aiResponses.map((msg) => msg.text).join(" ");
 
+      // Send the text to generate audio
       final audioFuture = openAiService.generateAudio(
         text: textToSend,
         voice: widget.voice,
       );
 
       try {
-        final audioBytes = await audioFuture.timeout(const Duration(seconds: 3));
+        final audioBytes =
+            await audioFuture.timeout(const Duration(seconds: 5));
         if (audioBytes != null) {
           _playAudio(audioBytes);
         }
       } catch (e) {
-        debugPrint('Audio generation timed out, showing text messages instead.');
+        debugPrint(
+            'Audio generation timed out, showing text messages instead.');
       }
 
+      // Strip SSML tags from AI responses
+      aiResponses = aiResponses.map((msg) {
+        msg.text = msg.text != null ? stripSSMLTags(msg.text!) : null;
+        return msg;
+      }).toList();
+
+      setState(() {
+        _chatHistory.removeLast(); // Remove the loading message
+      });
       setState(() {
         _chatHistory.addAll(aiResponses);
       });
+      _scrollToBottom();
     });
   }
 
@@ -390,21 +428,47 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   /*void _playAudio(Uint8List audioBytes) async {
     Directory tempDir = await getTemporaryDirectory();
-    String tempPath = '${tempDir.path}/temp.mp3';
+    String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
+    debugPrint('File created at: $tempPath');
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
-    _audioPlayer.play();
-  }*/
-
-  void _playAudio(Uint8List audioBytes) async {
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = '${tempDir.path}/temp.mpg';  // Change to 'temp.aac'?
-    File tempFile = File(tempPath);
-    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+    debugPrint('Audio file saved at: $tempPath');
     await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
     _audioPlayer.play();
     //debugPrint('Trying to play $tempPath');
+  }*/
+
+  void _playAudio(Uint8List audioBytes) async {
+    /*Directory downloadsDir = Directory('/storage/emulated/0/Download');
+    String downloadsPath = '${downloadsDir.path}/temp.mp3';
+    File downloadsFile = File(downloadsPath);*/
+
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
+    File tempFile = File(tempPath);
+
+    // Ensure the Downloads directory exists
+    //if (!await downloadsDir.exists()) {
+    //  await downloadsDir.create(recursive: true);
+    //}
+
+    await tempFile.writeAsBytes(audioBytes); // Asynchronous write
+
+    // Log the path to manually check the file
+    //debugPrint('Audio file saved at: $tempPath');
+
+    // Notify the user to check the file
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Audio file saved at: $tempPath')),
+    );*/
+
+    // Test playing the audio
+    try {
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.file(tempPath)));
+      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint('Error setting audio source: $e');
+    }
   }
 
   @override
