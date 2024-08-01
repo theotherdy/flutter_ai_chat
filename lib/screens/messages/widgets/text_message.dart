@@ -16,16 +16,14 @@ class TextMessage extends StatelessWidget {
     // Convert text to a UTF-8 string
     String text = utf8.decode(message!.text!.runes.toList());
 
-    // Extracting non-verbal information wrapped in square brackets
-    int startIndex = text.indexOf('[');
-    int endIndex = text.indexOf(']');
-    String nonVerbalInfo = '';
-    if (startIndex != -1 && endIndex != -1) {
-      nonVerbalInfo = text.substring(startIndex + 1, endIndex);
+    // Extracting all non-verbal information wrapped in square brackets
+    final RegExp regex = RegExp(r'\[([^\]]+)\]');
+    final List<String> nonVerbalInfos = [];
 
-      // Removing non-verbal information from the text
-      text = text.replaceRange(startIndex, endIndex + 1, '');
-    }
+    text = text.replaceAllMapped(regex, (match) {
+      nonVerbalInfos.add(capitalizeFirstLetter(match.group(1)!));
+      return '';
+    });
 
     // Building the widget with non-verbal information on a separate line and italicized
     return Container(
@@ -49,10 +47,10 @@ class TextMessage extends StatelessWidget {
                   : Theme.of(context).textTheme.bodyLarge!.color,
             ),
           ),
-          if (nonVerbalInfo
-              .isNotEmpty) // Conditionally render non-verbal info Text widget
+          // Conditionally render non-verbal info Text widgets
+          for (String info in nonVerbalInfos)
             Text(
-              nonVerbalInfo.trim(),
+              info.trim(),
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: message!.role == LocalMessageRole.user
@@ -63,5 +61,11 @@ class TextMessage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Utility function to capitalize the first letter of a string
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }
