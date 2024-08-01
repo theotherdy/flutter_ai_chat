@@ -11,6 +11,11 @@ class TextMessage extends StatelessWidget {
 
   final LocalMessage? message;
 
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Convert text to a UTF-8 string
@@ -48,9 +53,9 @@ class TextMessage extends StatelessWidget {
             ),
           ),
           // Conditionally render non-verbal info Text widgets
-          for (String info in nonVerbalInfos)
+          for (String nonVerbalInfo in nonVerbalInfos)
             Text(
-              info.trim(),
+              capitalizeFirstLetter(nonVerbalInfo.trim()),
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: message!.role == LocalMessageRole.user
@@ -61,11 +66,5 @@ class TextMessage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // Utility function to capitalize the first letter of a string
-  String capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
   }
 }
