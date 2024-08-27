@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dot_env package
 import 'package:http/http.dart' as http; // http package
 
+import 'package:hive/hive.dart';
+
 import '../models/assistant_message.dart';
 import '../models/local_message.dart';
+import 'package:flutter_ai_chat/models/attempt.dart';
 
 var openAIApiKey = dotenv.env[
     'OPEN_AI_API_KEY']; //access the OPEN_AI_API_KEY from the .env file in the root directory
@@ -503,10 +506,51 @@ class OpenAiService {
     }
   }
 
-  /*String removeTextInSquareBrackets(String text) {
-    RegExp exp = RegExp(r"\[.*?\]");
-    return text.replaceAll(exp, '');
-  }*/
+  /*
+  Saving messages to chatHistory Hive box - if attemptIndex = null then create a new attempt
+  */
+  Future<void> addMessageToAttempt(int chatId, LocalMessage message, {int? attemptIndex}) async {
+    final box = Hive.box<Attempt>('chatHistory');
+
+    if (attemptIndex == null) {
+      // If attemptIndex is null, create a new attempt
+      // Determine the next attempt index by counting existing attempts for this chat
+      attemptIndex = box.values
+          .where((attempt) => attempt.chatId == chatId)
+          .length;
+    }
+
+    // Find the key of the existing attempt if it exists
+    final existingKey = box.keys.firstWhere(
+      (key) {
+        final attempt = box.get(key);
+        return attempt?.chatId == chatId && attempt?.index == attemptIndex;
+      },
+      orElse: () => null, // Return null if no matching key is found
+    );
+
+    if (existingKey == null) {
+      // If no existing attempt, create a new one
+      Attempt newAttempt = Attempt(
+        index: attemptIndex,
+        date: DateTime.now(),
+        messages: [message],
+        chatId: chatId,
+      );
+
+      // Save the new attempt to Hive
+      await box.add(newAttempt);
+    } else {
+      // If the attempt exists, add the message to it
+      Attempt? existingAttempt = box.get(existingKey);
+      if (existingAttempt != null) {
+        existingAttempt.messages.add(message);
+
+        // Save the updated attempt back to Hive
+        await box.put(existingKey, existingAttempt);
+      }
+    }
+  }
 
   String _cleanText(String text) {
     // Remove any non-verbals in square brackets

@@ -17,22 +17,25 @@ class AttemptAdapter extends TypeAdapter<Attempt> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Attempt(
-      attemptId: fields[0] as String,
+      index: fields[0] as int,
       date: fields[1] as DateTime,
       messages: (fields[2] as List).cast<LocalMessage>(),
+      chatId: fields[3] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Attempt obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.attemptId)
+      ..write(obj.index)
       ..writeByte(1)
       ..write(obj.date)
       ..writeByte(2)
-      ..write(obj.messages);
+      ..write(obj.messages)
+      ..writeByte(3)
+      ..write(obj.chatId);
   }
 
   @override

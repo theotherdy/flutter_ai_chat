@@ -7,7 +7,7 @@ part 'attempt.g.dart'; // The adapter will be generated here by the build_runner
 @HiveType(typeId: 3)
 class Attempt {
   @HiveField(0)
-  final String attemptId; // Unique ID for this attempt
+  final int index; // Unique ID for this attempt
   
   @HiveField(1)
   final DateTime date; // Date when the attempt started
@@ -15,9 +15,13 @@ class Attempt {
   @HiveField(2)
   final List<LocalMessage> messages; // List of messages in this attempt
 
+  @HiveField(3)
+  int chatId; // The ID of the chat this attempt belongs to
+
   Attempt({
-    required this.attemptId,
+    required this.index,
     required this.date,
     required this.messages,
+    required this.chatId,
   });
 }

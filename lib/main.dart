@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
+
+//import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 //import 'home_page.dart';
@@ -11,7 +13,7 @@ import 'package:flutter_ai_chat/screens/chats/chats_screen.dart';
 import 'package:flutter_ai_chat/screens/messages/messages_screen.dart';
 
 // Import the generated adapter files
-import 'package:flutter_ai_chat/models/local_message.dart'; // Your LocalMessage class
+//import 'package:flutter_ai_chat/models/local_message.dart'; // Your LocalMessage class
 import 'package:flutter_ai_chat/models/attempt.dart'; // Your Attempt class
 import 'package:flutter_ai_chat/models/local_message_adapters.dart'; // Enum adapters
 
@@ -29,9 +31,19 @@ Future<void> main() async {
   Hive.registerAdapter(AttemptAdapter());
 
   // Open a box (or whatever your first operation is)
-  var box = await Hive.openBox('myBox');
+  //var box = await Hive.openBox('myBox');
 
-  runApp(const MyApp());
+  // Open a box
+  var hiveBox = await Hive.openBox('chatHistory');
+
+  runApp(
+    Provider<Box>.value(
+      value: hiveBox,  //to make hiveBox accessible wnyhwere else in the application.
+      child: const MyApp(),
+    ),
+  );
+
+  //runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
