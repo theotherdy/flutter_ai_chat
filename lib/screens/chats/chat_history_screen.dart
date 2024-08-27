@@ -25,7 +25,7 @@ class ChatHistoryScreen extends StatelessWidget {
                     final attempt = chatData.pastAttempts[index];
                     return ListTile(
                       title: Text('Attempt on ${attempt.date}'),
-                      subtitle: Text('Messages: ${attempt.numberOfMessages}'),
+                      //subtitle: Text('Messages: ${attempt.numberOfMessages}'),
                       onTap: () {
                         // Handle loading and displaying messages for this attempt
                         Navigator.pushNamed(

@@ -7,13 +7,13 @@ class ChatsData {
   String title;
   String subTitle;
   int difficulty;
-  //int attempts;
+  int attemptCount;
   String assistantId;
   String advisorId; //ie which will provide feedback on interaction
   String voice; //voice used by text to speech
   String instructions;
   String systemMessage;
-  //List<ChatAttempt> pastAttempts; // Store past attempts
+  List<Attempt> pastAttempts; // Store past attempts
 
   ChatsData(
       {required this.id,
@@ -21,13 +21,13 @@ class ChatsData {
       required this.title,
       required this.subTitle,
       required this.difficulty,
-      //required this.attempts,
+      this.attemptCount = 0,  //defaulkt value
       required this.assistantId,
       required this.advisorId,
       required this.voice,
       required this.instructions,
       required this.systemMessage,
-      //this.pastAttempts = const []
+      this.pastAttempts = const []
       });
 
   /// Load attempts for this chat from Hive
@@ -51,7 +51,6 @@ class ChatsData {
         title: '55yo with back pain',
         subTitle: 'History-taking',
         difficulty: 2,
-        //attempts: 0,
         assistantId:
             'asst_XNUzPh8YGHmLCpofeJJhyXQA', //'asst_oLP6zXce2HxRuR4dDPBDt3IM',
         advisorId: 'asst_uXAJviGjEc6AoJ8aAnVOmE7B',
@@ -84,7 +83,6 @@ class ChatsData {
         title: '50yo woman with chest pain',
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
-        //attempts: 0,
         assistantId: 'asst_MKo8uJHQx6kr56OgfiHYyHXK',
         advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
         voice: 'harper',
@@ -128,7 +126,6 @@ class ChatsData {
         title: '47yo woman with abdominal pain',
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
-        //attempts: 0,
         assistantId: 'asst_tH2URvo0blyaxzx38Gidn9eH',
         advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
         voice: 'carol', //'harper',
@@ -162,7 +159,6 @@ class ChatsData {
         title: '53yo man with abdominal pain',
         subTitle: 'Explanation and shared decision-making',
         difficulty: 2,
-        //attempts: 0,
         assistantId: 'asst_5tzHkOBLawxn8RRpqAeIFnop',
         advisorId: 'asst_CLp18vcToHK16EWWErOf3xM8',
         voice: 'freddie',
@@ -199,7 +195,6 @@ class ChatsData {
         title: '47yo woman with abdominal pain (angry)',
         subTitle: 'Listening and Patient-centred consulting',
         difficulty: 2,
-        //attempts: 0,
         assistantId: 'asst_tH2URvo0blyaxzx38Gidn9eH',
         advisorId: 'asst_oCtAFSIWDjlbnVTPbxIXChsJ',
         voice: 'carol', //'harper',

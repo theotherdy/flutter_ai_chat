@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:hive/hive.dart';
+
 import 'package:flutter_ai_chat/models/chats_data.dart';
 
 import 'package:flutter_ai_chat/screens/messages/messages_screen.dart'; // Import MessagesScreen
 //import 'package:flutter_ai_chat/services/chat_history_service.dart.old';
 import 'package:flutter_ai_chat/screens/chats/widgets/difficulty_indicator.dart';
 import 'package:flutter_ai_chat/screens/chats/chat_history_screen.dart'; // Import ChatHistoryScreen
+
+import 'package:flutter_ai_chat/models/attempt.dart'; 
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
@@ -30,10 +34,34 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
   /// Increment the attempts property of chats[index]
   ///
-  void incrementAttempts(int index) {
+  /*void incrementAttempts(int index) {
     setState(() {
       chats[index].attempts++;
     });
+  }*/
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttemptsForChats(); // Load attempts for each chat
+  }
+
+  Future<void> _loadAttemptsForChats() async {
+    final box = Hive.box<Attempt>('chatHistory'); // Open the box for attempts
+
+    for (var chat in chats) {
+      // Count attempts for this specific chatId
+      int attemptCount = box.values
+          .where((attempt) => attempt.chatId == chat.id)
+          .length;
+
+      setState(() {
+        chat.attemptCount = attemptCount; // Update the attempts count in the UI
+        chat.pastAttempts = box.values
+            .where((attempt) => attempt.chatId == chat.id)
+            .toList(); // Store past attempts if needed later
+      });
+    }
   }
 
   @override
@@ -49,9 +77,9 @@ class _ChatsScreenState extends State<ChatsScreen> {
         case SortOption.difficultyDescending:
           return b.difficulty.compareTo(a.difficulty);
         case SortOption.attemptsAscending:
-          return a.attempts.compareTo(b.attempts);
+          return a.attemptCount.compareTo(b.attemptCount);
         case SortOption.attemptsDescending:
-          return b.attempts.compareTo(a.attempts);
+          return b.attemptCount.compareTo(a.attemptCount);
       }
     });
 
@@ -116,11 +144,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
                       DifficultyIndicator(difficulty: chats[index].difficulty),
                   trailing: () {
                     //todo extract to a widget
-                    if (chats[index].attempts == 1) {
+                    if (chats[index].attemptCount == 1) {
                       return const Icon(Icons.check, color: Colors.green);
-                    } else if (chats[index].attempts > 1) {
+                    } else if (chats[index].attemptCount > 1) {
                       return Badge.count(
-                        count: chats[index].attempts,
+                        count: chats[index].attemptCount,
                         backgroundColor: Colors.blue,
                         child: const Icon(Icons.check, color: Colors.green),
                       );
@@ -135,8 +163,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         'chatData': chats[index],
                         'chat_index':
                             index, // Pass the index as needed when calling back to incrementAttempts
-                        'incrementAttempts':
-                            incrementAttempts, // Pass the callback function},
+                        /*'incrementAttempts':
+                            incrementAttempts, // Pass the callback function},*/
                       }
 
                           /*MaterialPageRoute(
@@ -158,8 +186,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                           'title': chats[index].title,
                           'chat_index':
                               index, // Pass the index as needed when calling back to incrementAttempts
-                          'incrementAttempts':
-                              incrementAttempts, // Pass the callback function
+                          /*'incrementAttempts':
+                              incrementAttempts, // Pass the callback function*/
                           'attempt_index': 0,
                           'systemMessage': chats[index].systemMessage,
                         },
