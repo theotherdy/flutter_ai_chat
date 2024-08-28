@@ -31,7 +31,7 @@ class MessagesBody extends StatefulWidget {
   final String avatar;
   final String voice;
   final int chat_index; // Receive the index
-  final Function(int) incrementAttempts; // Receive the callback function
+  //final Function(int) incrementAttempts; // Receive the callback function
   final int attempt_index;
   final String systemMessage;
 
@@ -42,7 +42,7 @@ class MessagesBody extends StatefulWidget {
     required this.avatar,
     required this.voice,
     required this.chat_index, // Receive the index
-    required this.incrementAttempts, // Receive the callback function
+    //required this.incrementAttempts, // Receive the callback function
     required this.attempt_index,
     required this.systemMessage,
   });
@@ -62,8 +62,8 @@ class _MessagesBodyState extends State<MessagesBody> {
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
   String _lastAdvisorResponse = ''; //to hold last respnse from advisor
-  bool _attemptsIncremented =
-      false; //so that we only increment attempts once per load
+  /*bool _attemptsIncremented =
+      false; //so that we only increment attempts once per load*/
 
   late AudioPlayer _audioPlayer;
 
@@ -418,11 +418,11 @@ class _MessagesBodyState extends State<MessagesBody> {
         _showAdvisorModal(context, advisorResponse);
       });
 
-      if (!_attemptsIncremented) {
+      /*if (!_attemptsIncremented) {
         widget.incrementAttempts(widget
             .chat_index); // Call the callback function to increment attempts
         _attemptsIncremented = true;
-      }
+      }*/
     }
   }
 

@@ -34,10 +34,10 @@ Future<void> main() async {
   //var box = await Hive.openBox('myBox');
 
   // Open a box
-  var hiveBox = await Hive.openBox('chatHistory');
+  var hiveBox = await Hive.openBox<Attempt>('chatHistory');
 
   runApp(
-    Provider<Box>.value(
+    Provider<Box<Attempt>>.value(
       value: hiveBox,  //to make hiveBox accessible wnyhwere else in the application.
       child: const MyApp(),
     ),

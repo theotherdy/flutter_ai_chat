@@ -19,7 +19,10 @@ class TextMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Convert text to a UTF-8 string
-    String text = utf8.decode(message!.text!.runes.toList());
+
+    //debugPrint('Text: $tempPath');
+
+    String text = utf8.decode(message!.text!.runes.toList(), allowMalformed: true);
 
     // Extracting all non-verbal information wrapped in square brackets
     final RegExp regex = RegExp(r'\[([^\]]+)\]');

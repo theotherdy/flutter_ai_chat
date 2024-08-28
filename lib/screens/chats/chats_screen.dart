@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:hive/hive.dart';
 
+import 'package:provider/provider.dart';
 import 'package:flutter_ai_chat/models/chats_data.dart';
 
 import 'package:flutter_ai_chat/screens/messages/messages_screen.dart'; // Import MessagesScreen
@@ -32,28 +33,33 @@ class _ChatsScreenState extends State<ChatsScreen> {
   List<ChatsData> chats = ChatsData.getChats();
   SortOption sortOption = SortOption.titleAscending;
 
-  /// Increment the attempts property of chats[index]
-  ///
-  /*void incrementAttempts(int index) {
-    setState(() {
-      chats[index].attempts++;
-    });
-  }*/
-
   @override
   void initState() {
     super.initState();
-    _loadAttemptsForChats(); // Load attempts for each chat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Registering the pop callback using the registerPopEntry
+      ModalRoute.of(context)?.navigator?.registerPopEntry(
+        PopEntry(onPop: _loadAttemptsForChats),
+      );
+    });
+    //_loadAttemptsForChats(); // Load attempts for each chat
   }
 
   Future<void> _loadAttemptsForChats() async {
-    final box = Hive.box<Attempt>('chatHistory'); // Open the box for attempts
+    // Access the Hive box using Provider
+    final box = Provider.of<Box<Attempt>>(context, listen: false);
+
+    debugPrint('Hello');
 
     for (var chat in chats) {
+
+      debugPrint('Chat id: $chat.id');
       // Count attempts for this specific chatId
       int attemptCount = box.values
           .where((attempt) => attempt.chatId == chat.id)
           .length;
+
+      debugPrint('Text: $attemptCount');
 
       setState(() {
         chat.attemptCount = attemptCount; // Update the attempts count in the UI
@@ -66,6 +72,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _loadAttemptsForChats(); // This will call every time build is called
     chats.sort((a, b) {
       switch (sortOption) {
         case SortOption.titleAscending:
