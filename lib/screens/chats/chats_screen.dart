@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:provider/provider.dart';
 import 'package:flutter_ai_chat/models/chats_data.dart';
@@ -33,46 +34,58 @@ class _ChatsScreenState extends State<ChatsScreen> {
   List<ChatsData> chats = ChatsData.getChats();
   SortOption sortOption = SortOption.titleAscending;
 
+  //this is for updating UI when values in hive box change
+  Box<Attempt>? _attemptBox;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Registering the pop callback using the registerPopEntry
-      ModalRoute.of(context)?.navigator?.registerPopEntry(
-        PopEntry(onPop: _loadAttemptsForChats),
-      );
-    });
-    //_loadAttemptsForChats(); // Load attempts for each chat
+    // Get the Hive box using Provider
+    _attemptBox = Provider.of<Box<Attempt>>(context, listen: false);
+    _updateAttempts(); // Load attempts for each chat
   }
 
-  Future<void> _loadAttemptsForChats() async {
-    // Access the Hive box using Provider
-    final box = Provider.of<Box<Attempt>>(context, listen: false);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    debugPrint('Hello');
+    
 
+    // Trigger a rebuild whenever the box changes using ValueListenableBuilder
+    if (_attemptBox != null) {
+      debugPrint('Added listener $_attemptBox');
+      _attemptBox!.listenable().addListener(_updateAttempts);
+    }
+  }
+
+  void _updateAttempts() {
+    debugPrint('updating _attemptBox $_attemptBox');
+    if (_attemptBox == null) return;
+
+    // Iterate over chats and update their attempt counts
     for (var chat in chats) {
-
       debugPrint('Chat id: $chat.id');
-      // Count attempts for this specific chatId
-      int attemptCount = box.values
+      final attemptsForChat = _attemptBox!.values
           .where((attempt) => attempt.chatId == chat.id)
-          .length;
-
-      debugPrint('Text: $attemptCount');
+          .toList();
 
       setState(() {
-        chat.attemptCount = attemptCount; // Update the attempts count in the UI
-        chat.pastAttempts = box.values
-            .where((attempt) => attempt.chatId == chat.id)
-            .toList(); // Store past attempts if needed later
+        chat.attemptCount = attemptsForChat.length; // Update the attempt count
+        chat.pastAttempts = attemptsForChat; // Update the list of past attempts
       });
     }
   }
 
   @override
+  void dispose() {
+    // Clean up the listener when the widget is disposed
+    _attemptBox?.listenable().removeListener(_updateAttempts);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _loadAttemptsForChats(); // This will call every time build is called
+    //_loadAttemptsForChats(); // This will call every time build is called
     chats.sort((a, b) {
       switch (sortOption) {
         case SortOption.titleAscending:
@@ -90,123 +103,121 @@ class _ChatsScreenState extends State<ChatsScreen> {
       }
     });
 
+    /*return PopScope(
+      canPop: true, // Allow the route to be popped
+      onPopInvokedWithResult: _handlePopAttempt, 
+      child:*/ 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Patient Chats'),
-      ),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DropdownButton<SortOption>(
-                  value: sortOption,
-                  items: const [
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.titleAscending,
-                      child: Text('Sort by Title (Ascending)'),
-                    ),
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.titleDescending,
-                      child: Text('Sort by Title (Descending)'),
-                    ),
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.difficultyAscending,
-                      child: Text('Sort by Difficulty (Ascending)'),
-                    ),
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.difficultyDescending,
-                      child: Text('Sort by Difficulty (Descending)'),
-                    ),
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.attemptsAscending,
-                      child: Text('Sort by Attempts (Ascending)'),
-                    ),
-                    DropdownMenuItem<SortOption>(
-                      value: SortOption.attemptsDescending,
-                      child: Text('Sort by Attempts (Descending)'),
-                    )
-                  ],
-                  onChanged: (SortOption? newValue) {
-                    setState(() {
-                      sortOption = newValue!;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: chats.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: AssetImage(chats[index].avatar),
+        appBar: AppBar(
+          title: const Text('Patient Chats'),
+        ),
+        body: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownButton<SortOption>(
+                    value: sortOption,
+                    items: const [
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.titleAscending,
+                        child: Text('Sort by Title (Ascending)'),
+                      ),
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.titleDescending,
+                        child: Text('Sort by Title (Descending)'),
+                      ),
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.difficultyAscending,
+                        child: Text('Sort by Difficulty (Ascending)'),
+                      ),
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.difficultyDescending,
+                        child: Text('Sort by Difficulty (Descending)'),
+                      ),
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.attemptsAscending,
+                        child: Text('Sort by Attempts (Ascending)'),
+                      ),
+                      DropdownMenuItem<SortOption>(
+                        value: SortOption.attemptsDescending,
+                        child: Text('Sort by Attempts (Descending)'),
+                      )
+                    ],
+                    onChanged: (SortOption? newValue) {
+                      setState(() {
+                        sortOption = newValue!;
+                      });
+                    },
                   ),
-                  title: Text(chats[index].title),
-                  subtitle:
-                      DifficultyIndicator(difficulty: chats[index].difficulty),
-                  trailing: () {
-                    //todo extract to a widget
-                    if (chats[index].attemptCount == 1) {
-                      return const Icon(Icons.check, color: Colors.green);
-                    } else if (chats[index].attemptCount > 1) {
-                      return Badge.count(
-                        count: chats[index].attemptCount,
-                        backgroundColor: Colors.blue,
-                        child: const Icon(Icons.check, color: Colors.green),
-                      );
-                    } else {
-                      return const Icon(Icons.check, color: Colors.grey);
-                    }
-                  }(),
-                  onTap: () {
-                    if (chats[index].pastAttempts.length > 0) {
-                      //navigate intermediate ChatHistoryScreen
-                      Navigator.pushNamed(context, '/chat_history', arguments: {
-                        'chatData': chats[index],
-                        'chat_index':
-                            index, // Pass the index as needed when calling back to incrementAttempts
-                        /*'incrementAttempts':
-                            incrementAttempts, // Pass the callback function},*/
-                      }
-
-                          /*MaterialPageRoute(
-                          builder: (context) =>
-                              ChatHistoryScreen(chatData: chats[index]),
-                        ),*/
-                          );
-                    } else {
-                      //navigate straight to MessagesScreen
-                      Navigator.pushNamed(
-                        context,
-                        '/messages',
-                        arguments: {
-                          'assistantId': chats[index].assistantId,
-                          'advisorId': chats[index].advisorId,
-                          'instructions': chats[index].instructions,
-                          'avatar': chats[index].avatar,
-                          'voice': chats[index].voice,
-                          'title': chats[index].title,
-                          'chat_index':
-                              index, // Pass the index as needed when calling back to incrementAttempts
-                          /*'incrementAttempts':
-                              incrementAttempts, // Pass the callback function*/
-                          'attempt_index': 0,
-                          'systemMessage': chats[index].systemMessage,
-                        },
-                      );
-                    }
-                  },
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+            Expanded(
+              child: ListView.builder(
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage(chats[index].avatar),
+                    ),
+                    title: Text(chats[index].title),
+                    subtitle:
+                        DifficultyIndicator(difficulty: chats[index].difficulty),
+                    trailing: () {
+                      //todo extract to a widget
+                      if (chats[index].attemptCount == 1) {
+                        return const Icon(Icons.check, color: Colors.green);
+                      } else if (chats[index].attemptCount > 1) {
+                        return Badge.count(
+                          count: chats[index].attemptCount,
+                          backgroundColor: Colors.blue,
+                          child: const Icon(Icons.check, color: Colors.green),
+                        );
+                      } else {
+                        return const Icon(Icons.check, color: Colors.grey);
+                      }
+                    }(),
+                    onTap: () {
+                      if (chats[index].pastAttempts.length > 0) {
+                        //navigate intermediate ChatHistoryScreen
+                        Navigator.pushNamed(context, '/chat_history', arguments: {
+                          'chatData': chats[index],
+                          'chat_index':
+                              chats[index].id, 
+                          'attempt_index': null, //going to choose an attempt
+                        });
+                      } else {
+                        //navigate straight to MessagesScreen
+                        Navigator.pushNamed(
+                          context,
+                          '/messages',
+                          arguments: {
+                            'assistantId': chats[index].assistantId,
+                            'advisorId': chats[index].advisorId,
+                            'instructions': chats[index].instructions,
+                            'avatar': chats[index].avatar,
+                            'voice': chats[index].voice,
+                            'title': chats[index].title,
+                            'chat_index':
+                                chats[index].id, // Pass the index as needed when calling back to incrementAttempts
+                            /*'incrementAttempts':
+                                incrementAttempts, // Pass the callback function*/
+                            'attempt_index': null, //starting a new attempt
+                            'systemMessage': chats[index].systemMessage,
+                          },
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    //);
   }
 }

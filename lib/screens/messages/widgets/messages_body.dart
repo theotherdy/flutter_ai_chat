@@ -30,9 +30,9 @@ class MessagesBody extends StatefulWidget {
   final String advisorId;
   final String avatar;
   final String voice;
-  final int chat_index; // Receive the index
+  final int chatIndex; // Receive the index
   //final Function(int) incrementAttempts; // Receive the callback function
-  final int attempt_index;
+  final int? attemptIndex;
   final String systemMessage;
 
   MessagesBody({
@@ -41,9 +41,9 @@ class MessagesBody extends StatefulWidget {
     required this.advisorId,
     required this.avatar,
     required this.voice,
-    required this.chat_index, // Receive the index
+    required this.chatIndex, // Receive the index
     //required this.incrementAttempts, // Receive the callback function
-    required this.attempt_index,
+    required this.attemptIndex,
     required this.systemMessage,
   });
 
@@ -297,12 +297,15 @@ class _MessagesBodyState extends State<MessagesBody> {
     _showLoadingMessage(LocalMessageRole.ai);
 
     List<LocalMessage> updatedConversationHistory = List.from(_chatHistory);
-    updatedConversationHistory.add(LocalMessage(
+    LocalMessage messageToAdd = LocalMessage(
       time: DateTime.now(),
       role: LocalMessageRole.user,
       type: LocalMessageType.text,
       text: text,
-    ));
+    );
+    updatedConversationHistory.add(messageToAdd);
+
+    openAiService.addMessageToAttempt(widget.chatIndex, messageToAdd, attemptIndex: widget.attemptIndex);
 
     openAiService
         .getChatResponseFromMessage(
@@ -329,6 +332,7 @@ class _MessagesBodyState extends State<MessagesBody> {
 
       // Strip SSML tags from AI responses
       aiResponses = aiResponses.map((msg) {
+        debugPrint(msg.toString());
         msg.text = msg.text != null ? stripSSMLTags(msg.text!) : null;
         return msg;
       }).toList();
@@ -342,41 +346,6 @@ class _MessagesBodyState extends State<MessagesBody> {
       _scrollToBottom();
     });
   }
-
-  /*void _sendTextMessageAndShowTextResponse(String text) {
-    _showLoadingMessage(LocalMessageRole.ai);
-    openAiService
-        .getAssistantResponseFromMessage(text, widget.assistantId)
-        .then((aiResponses) async {
-      _chatHistory.removeLast(); //remove our loading message
-      //collate text from multiple messages to send to the speech_to_text
-      String textToSend = '';
-      for (var aiResponse in aiResponses) {
-        //_showTextMessage(LocalMessageRole.ai, aiResponse.text);
-        textToSend += aiResponse.text;
-      }
-
-      // Set a timeout duration of 5 seconds for generating audio
-      final audioFuture = openAiService.generateAudio(
-        text: textToSend,
-        voice: widget.voice, // Specify the voice here
-      );
-
-      try {
-        final audioBytes = await audioFuture.timeout(Duration(seconds: 3));
-        if (audioBytes != null) {
-          _playAudio(audioBytes);
-        }
-      } catch (e) {
-        // Handle timeout exception
-        debugPrint(
-            'Audio generation timed out, showing text messages instead.');
-      }
-      for (var aiResponse in aiResponses) {
-        _showTextMessage(LocalMessageRole.ai, aiResponse.text);
-      }
-    });
-  }*/
 
   void _sendConversationAndShowAdvisorFeedback() {
     //check if we have a _lastAdvisorResponse - if so, then no new messages have been posted/received so just redisplay that
@@ -400,11 +369,6 @@ class _MessagesBodyState extends State<MessagesBody> {
         }
       }
 
-      //debugPrint(textToSend);
-
-      //String _advisorId =
-      //    "asst_YEv4v9UdwtTd4NoJzh3iwHw7"; //assistant set up to give feedback on the user's interaction with the ai patient
-
       openAiService
           .getAssistantResponseFromMessage(textToSend, widget.advisorId)
           .then((aiResponses) {
@@ -417,12 +381,6 @@ class _MessagesBodyState extends State<MessagesBody> {
         _lastAdvisorResponse = advisorResponse;
         _showAdvisorModal(context, advisorResponse);
       });
-
-      /*if (!_attemptsIncremented) {
-        widget.incrementAttempts(widget
-            .chat_index); // Call the callback function to increment attempts
-        _attemptsIncremented = true;
-      }*/
     }
   }
 
@@ -439,28 +397,13 @@ class _MessagesBodyState extends State<MessagesBody> {
   }*/
 
   void _playAudio(Uint8List audioBytes) async {
-    /*Directory downloadsDir = Directory('/storage/emulated/0/Download');
-    String downloadsPath = '${downloadsDir.path}/temp.mp3';
-    File downloadsFile = File(downloadsPath);*/
+    
 
     Directory tempDir = await getTemporaryDirectory();
     String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
 
-    // Ensure the Downloads directory exists
-    //if (!await downloadsDir.exists()) {
-    //  await downloadsDir.create(recursive: true);
-    //}
-
     await tempFile.writeAsBytes(audioBytes); // Asynchronous write
-
-    // Log the path to manually check the file
-    //debugPrint('Audio file saved at: $tempPath');
-
-    // Notify the user to check the file
-    /*ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Audio file saved at: $tempPath')),
-    );*/
 
     // Test playing the audio
     try {

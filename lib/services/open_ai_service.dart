@@ -515,6 +515,7 @@ class OpenAiService {
     if (attemptIndex == null) {
       // If attemptIndex is null, create a new attempt
       // Determine the next attempt index by counting existing attempts for this chat
+      debugPrint('Find new attemptIndex for $chatId');
       attemptIndex = box.values
           .where((attempt) => attempt.chatId == chatId)
           .length;
@@ -531,6 +532,7 @@ class OpenAiService {
 
     if (existingKey == null) {
       // If no existing attempt, create a new one
+      debugPrint('Create new attempt with index $attemptIndex and chatId $chatId');
       Attempt newAttempt = Attempt(
         index: attemptIndex,
         date: DateTime.now(),
@@ -542,6 +544,7 @@ class OpenAiService {
       await box.add(newAttempt);
     } else {
       // If the attempt exists, add the message to it
+      debugPrint('Add message to existing attmpt');
       Attempt? existingAttempt = box.get(existingKey);
       if (existingAttempt != null) {
         existingAttempt.messages.add(message);

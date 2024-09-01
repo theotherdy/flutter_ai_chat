@@ -19,9 +19,9 @@ class MessagesScreen extends StatelessWidget {
     String avatar = args['avatar'];
     String voice = args['voice'];
     String title = args['title'];
-    int chat_index = args['chat_index'];
+    int chatIndex = args['chat_index'];
     //Function(int) incrementAttempts = args['incrementAttempts'];
-    int attempt_index = args['attempt_index'];
+    int? attemptIndex = args['attempt_index'];
     String systemMessage = args['systemMessage'];
     //String title = args['title'];
 
@@ -40,9 +40,9 @@ class MessagesScreen extends StatelessWidget {
           advisorId: advisorId,
           avatar: avatar,
           voice: voice,
-          chat_index: chat_index, // Pass the index
+          chatIndex: chatIndex, // Pass the index
           //incrementAttempts: incrementAttempts, // Pass the callback function),
-          attempt_index: attempt_index,
+          attemptIndex: attemptIndex,
           systemMessage: systemMessage,
         ));
   }
