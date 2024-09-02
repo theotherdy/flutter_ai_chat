@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'theme.dart';
 
 import 'package:flutter_ai_chat/screens/chats/chats_screen.dart';
+import 'package:flutter_ai_chat/screens/chats/chat_history_screen.dart';
 import 'package:flutter_ai_chat/screens/messages/messages_screen.dart';
 
 // Import the generated adapter files
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
       initialRoute: ChatsScreen.routeName,
       routes: {
         ChatsScreen.routeName: (context) => const ChatsScreen(),
+        ChatHistoryScreen.routeName: (context) => ChatHistoryScreen(),
         MessagesScreen.routeName: (context) => MessagesScreen(),
       },
     );

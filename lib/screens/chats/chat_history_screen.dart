@@ -10,8 +10,9 @@ class ChatHistoryScreen extends StatelessWidget {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     ChatsData chatData = args['chatData'];
-    int chat_index = args['chat_index'];
-    Function(int) incrementAttempts = args['incrementAttempts'];
+    int chatIndex = args['chat_index'];
+    //int? attemptIndex = args['attempt_index'];
+    //Function(int) incrementAttempts = args['incrementAttempts'];
 
     return Scaffold(
       appBar: AppBar(title: Text('Chat History - ${chatData.title}')),
@@ -39,10 +40,9 @@ class ChatHistoryScreen extends StatelessWidget {
                             'voice': chatData.voice,
                             'title': chatData.title,
                             'chat_index':
-                                chat_index, // Pass the index as needed when calling back to incrementAttempts
-                            'incrementAttempts':
-                                incrementAttempts, // Pass the callback function
-                            'attempt_index': index
+                                chatIndex, // Pass the index as needed when calling back to incrementAttempts
+                            'attempt_index': attempt.index,
+                            'messages': attempt.messages,
                           },
                         );
                       },
@@ -65,10 +65,8 @@ class ChatHistoryScreen extends StatelessWidget {
                       'voice': chatData.voice,
                       'title': chatData.title,
                       'chat_index':
-                          chat_index, // Pass the index as needed when calling back to incrementAttempts
-                      'incrementAttempts':
-                          incrementAttempts, // Pass the callback function
-                      'attempt_index': chatData.pastAttempts.length  //ie start a new one with new attempt index
+                          chatIndex, // Pass the index as needed when calling back to incrementAttempts
+                      'attempt_index': null  //ie start a new one with new attempt index
                     },
                   );
               },

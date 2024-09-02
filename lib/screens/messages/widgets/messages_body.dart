@@ -33,6 +33,7 @@ class MessagesBody extends StatefulWidget {
   final int chatIndex; // Receive the index
   //final Function(int) incrementAttempts; // Receive the callback function
   final int? attemptIndex;
+  final List<LocalMessage>? attemptMessages;
   final String systemMessage;
 
   MessagesBody({
@@ -44,6 +45,7 @@ class MessagesBody extends StatefulWidget {
     required this.chatIndex, // Receive the index
     //required this.incrementAttempts, // Receive the callback function
     required this.attemptIndex,
+    required this.attemptMessages,
     required this.systemMessage,
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ai_chat/constants.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/messages_body.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/information_modal.dart';
+import 'package:flutter_ai_chat/models/local_message.dart'; // Your LocalMessage class
 
 class MessagesScreen extends StatelessWidget {
   MessagesScreen({super.key});
@@ -22,6 +23,7 @@ class MessagesScreen extends StatelessWidget {
     int chatIndex = args['chat_index'];
     //Function(int) incrementAttempts = args['incrementAttempts'];
     int? attemptIndex = args['attempt_index'];
+    List<LocalMessage>? attemptMessages = args['attempt_messages'];
     String systemMessage = args['systemMessage'];
     //String title = args['title'];
 
@@ -43,6 +45,7 @@ class MessagesScreen extends StatelessWidget {
           chatIndex: chatIndex, // Pass the index
           //incrementAttempts: incrementAttempts, // Pass the callback function),
           attemptIndex: attemptIndex,
+          attemptMessages: attemptMessages,
           systemMessage: systemMessage,
         ));
   }
