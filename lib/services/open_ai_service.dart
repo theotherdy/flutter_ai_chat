@@ -506,19 +506,26 @@ class OpenAiService {
     }
   }
 
-  /*
-  Saving messages to chatHistory Hive box - if attemptIndex = null then create a new attempt
-  */
-  Future<void> addMessageToAttempt(int chatId, LocalMessage message, {int? attemptIndex}) async {
+  Future<int> addMessageToAttempt(int chatId, LocalMessage message, {int? attemptIndex}) async {
     final box = Hive.box<Attempt>('chatHistory');
 
     if (attemptIndex == null) {
-      // If attemptIndex is null, create a new attempt
-      // Determine the next attempt index by counting existing attempts for this chat
-      debugPrint('Find new attemptIndex for $chatId');
-      attemptIndex = box.values
+      // If attemptIndex is null, find the maximum existing index for this chat and increment it
+      final attemptsForChat = box.values
           .where((attempt) => attempt.chatId == chatId)
-          .length;
+          .toList();
+      
+      if (attemptsForChat.isEmpty) {
+        // If no previous attempts, start with index 0
+        attemptIndex = 0;
+      } else {
+        // Get the maximum index from the existing attempts
+        attemptIndex = attemptsForChat
+            .map((attempt) => attempt.index)
+            .reduce((curr, next) => curr > next ? curr : next) + 1;
+      }
+
+      debugPrint('New attemptIndex for chatId $chatId: $attemptIndex');
     }
 
     // Find the key of the existing attempt if it exists
@@ -532,7 +539,6 @@ class OpenAiService {
 
     if (existingKey == null) {
       // If no existing attempt, create a new one
-      debugPrint('Create new attempt with index $attemptIndex and chatId $chatId');
       Attempt newAttempt = Attempt(
         index: attemptIndex,
         date: DateTime.now(),
@@ -544,16 +550,19 @@ class OpenAiService {
       await box.add(newAttempt);
     } else {
       // If the attempt exists, add the message to it
-      debugPrint('Add message to existing attmpt');
       Attempt? existingAttempt = box.get(existingKey);
       if (existingAttempt != null) {
         existingAttempt.messages.add(message);
+        existingAttempt.date = DateTime.now(); // Update the date to the current date
 
         // Save the updated attempt back to Hive
         await box.put(existingKey, existingAttempt);
       }
     }
-  }
+
+    // Return the attemptIndex used
+    return attemptIndex;
+}
 
   String _cleanText(String text) {
     // Remove any non-verbals in square brackets

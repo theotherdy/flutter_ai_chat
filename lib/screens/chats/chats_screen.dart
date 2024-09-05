@@ -24,8 +24,8 @@ class ChatsScreen extends StatefulWidget {
 enum SortOption {
   titleAscending,
   titleDescending,
-  difficultyAscending,
-  difficultyDescending,
+  //difficultyAscending,
+  //difficultyDescending,
   attemptsAscending,
   attemptsDescending,
 }
@@ -64,10 +64,13 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
     // Iterate over chats and update their attempt counts
     for (var chat in chats) {
-      debugPrint('Chat id: $chat.id');
+      //debugPrint('Chat id: ${chat.id}');
       final attemptsForChat = _attemptBox!.values
           .where((attempt) => attempt.chatId == chat.id)
           .toList();
+
+      // Sort the attempts by date in reverse order (most recent first)
+      //attemptsForChat.sort((a, b) => a.date.compareTo(b.date));
 
       setState(() {
         chat.attemptCount = attemptsForChat.length; // Update the attempt count
@@ -92,10 +95,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
           return a.title.compareTo(b.title);
         case SortOption.titleDescending:
           return b.title.compareTo(a.title);
-        case SortOption.difficultyAscending:
+        /*case SortOption.difficultyAscending:
           return a.difficulty.compareTo(b.difficulty);
         case SortOption.difficultyDescending:
-          return b.difficulty.compareTo(a.difficulty);
+          return b.difficulty.compareTo(a.difficulty);*/
         case SortOption.attemptsAscending:
           return a.attemptCount.compareTo(b.attemptCount);
         case SortOption.attemptsDescending:
@@ -129,14 +132,14 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         value: SortOption.titleDescending,
                         child: Text('Sort by Title (Descending)'),
                       ),
-                      DropdownMenuItem<SortOption>(
+                      /*DropdownMenuItem<SortOption>(
                         value: SortOption.difficultyAscending,
                         child: Text('Sort by Difficulty (Ascending)'),
                       ),
                       DropdownMenuItem<SortOption>(
                         value: SortOption.difficultyDescending,
                         child: Text('Sort by Difficulty (Descending)'),
-                      ),
+                      ),*/
                       DropdownMenuItem<SortOption>(
                         value: SortOption.attemptsAscending,
                         child: Text('Sort by Attempts (Ascending)'),
@@ -177,18 +180,25 @@ class _ChatsScreenState extends State<ChatsScreen> {
                           child: const Icon(Icons.check, color: Colors.green),
                         );
                       } else {
-                        return const Icon(Icons.check, color: Colors.grey);
+                        // No attempts yet - reserve space with an invisible icon
+                        return const SizedBox(
+                          width: 24, // Set width equal to the icon's width to reserve space
+                          child: Icon(Icons.check, color: Colors.transparent),
+                        );
                       }
                     }(),
                     onTap: () {
                       if (chats[index].pastAttempts.length > 0) {
                         //navigate intermediate ChatHistoryScreen
-                        Navigator.pushNamed(context, '/chat_history', arguments: {
-                          'chatData': chats[index],
-                          'chat_index':
-                              chats[index].id, 
-                          'attempt_index': null, //going to choose an attempt
-                        });
+                        Navigator.pushNamed(
+                          context,
+                          ChatHistoryScreen.routeName,
+                          arguments: {
+                            'chatData': chats[index],
+                            'chatIndex': chats[index].id,
+                            'updateAttemptsCallback': _updateAttempts, // Pass the callback here
+                          },
+                        );
                       } else {
                         //navigate straight to MessagesScreen
                         Navigator.pushNamed(
@@ -201,11 +211,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
                             'avatar': chats[index].avatar,
                             'voice': chats[index].voice,
                             'title': chats[index].title,
-                            'chat_index':
+                            'chatIndex':
                                 chats[index].id, // Pass the index as needed when calling back to incrementAttempts
                             /*'incrementAttempts':
                                 incrementAttempts, // Pass the callback function*/
-                            'attempt_index': null, //starting a new attempt
+                            'attemptIndex': null, //starting a new attempt
                             'systemMessage': chats[index].systemMessage,
                           },
                         );

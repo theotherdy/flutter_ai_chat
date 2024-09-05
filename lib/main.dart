@@ -52,18 +52,42 @@ class MyApp extends StatelessWidget {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Comm Skills Chatbot',
-      theme: lightThemeData(context),
-      darkTheme: darkThemeData(context),
-      themeMode: ThemeMode.light,
-      initialRoute: ChatsScreen.routeName,
-      routes: {
-        ChatsScreen.routeName: (context) => const ChatsScreen(),
-        ChatHistoryScreen.routeName: (context) => ChatHistoryScreen(),
-        MessagesScreen.routeName: (context) => MessagesScreen(),
-      },
-    );
-  }
+Widget build(BuildContext context) {
+  return MaterialApp(
+    title: 'Comm Skills Chatbot',
+    theme: lightThemeData(context),
+    darkTheme: darkThemeData(context),
+    themeMode: ThemeMode.light,
+    initialRoute: ChatsScreen.routeName,
+    onGenerateRoute: (settings) {
+      if (settings.name == ChatsScreen.routeName) {
+        return MaterialPageRoute(builder: (context) => const ChatsScreen());
+      } else if (settings.name == ChatHistoryScreen.routeName) {
+        final args = settings.arguments as Map<String, dynamic>;
+        final updateAttemptsCallback = args['updateAttemptsCallback'];
+        final chatData = args['chatData'];
+        final chatIndex = args['chatIndex'];
+
+        return MaterialPageRoute(
+          builder: (context) => ChatHistoryScreen(),
+          settings: RouteSettings(arguments: {
+            'chatData': chatData,
+            'chatIndex': chatIndex,
+          }),
+        );
+      } else if (settings.name == MessagesScreen.routeName) {
+        // Handle MessagesScreen similarly
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (context) => MessagesScreen(), 
+          settings: RouteSettings(arguments: args),
+        );
+      }
+
+      // If no route matches, throw an error or return null
+      //assert(false, 'Need to implement ${settings.name}');
+      return null;
+    },
+  );
+}
 }

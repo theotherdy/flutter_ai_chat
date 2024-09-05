@@ -22,7 +22,11 @@ class TextMessage extends StatelessWidget {
 
     //debugPrint('Text: $tempPath');
 
-    String text = utf8.decode(message!.text!.runes.toList(), allowMalformed: true);
+    String text = message!.text ?? '';
+    // Replace smart quotes with standard apostrophes if necessary
+    text = text.replaceAll('’', "'");
+
+    text = utf8.decode(text.runes.toList(), allowMalformed: true);
 
     // Extracting all non-verbal information wrapped in square brackets
     final RegExp regex = RegExp(r'\[([^\]]+)\]');

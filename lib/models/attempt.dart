@@ -10,7 +10,7 @@ class Attempt {
   final int index; // Unique ID for this attempt
   
   @HiveField(1)
-  final DateTime date; // Date when the attempt started
+  DateTime date; // Date when the attempt started
   
   @HiveField(2)
   final List<LocalMessage> messages; // List of messages in this attempt

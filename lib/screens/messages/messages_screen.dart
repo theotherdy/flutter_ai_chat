@@ -20,21 +20,23 @@ class MessagesScreen extends StatelessWidget {
     String avatar = args['avatar'];
     String voice = args['voice'];
     String title = args['title'];
-    int chatIndex = args['chat_index'];
+    int chatIndex = args['chatIndex'];
     //Function(int) incrementAttempts = args['incrementAttempts'];
-    int? attemptIndex = args['attempt_index'];
-    List<LocalMessage>? attemptMessages = args['attempt_messages'];
+    int? attemptIndex = args['attemptIndex'];
+    List<LocalMessage>? attemptMessages = args['attemptMessages'];
     String systemMessage = args['systemMessage'];
     //String title = args['title'];
 
     // Show the dialog on initial load
-    if (_isFirstLoad) {
+    if (_isFirstLoad && attemptMessages == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _isFirstLoad = false; // Make sure it only shows once
         _showInstructionsDialog(context, instructions);
       });
     }
 
+    debugPrint('Coming in to MessagesScreen attemptIndex = $attemptIndex');
+    
     return Scaffold(
         appBar: buildAppBar(title, avatar, context, instructions),
         body: MessagesBody(

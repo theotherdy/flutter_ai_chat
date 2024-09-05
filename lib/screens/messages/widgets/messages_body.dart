@@ -68,11 +68,26 @@ class _MessagesBodyState extends State<MessagesBody> {
       false; //so that we only increment attempts once per load*/
 
   late AudioPlayer _audioPlayer;
+  // Define a state variable to hold the attempt index
+  int? _currentAttemptIndex;
 
   @override
   void initState() {
     super.initState();
+    debugPrint('Coming in to MessagesBody attemptIndex = ${widget.attemptIndex}');
     _audioPlayer = AudioPlayer();
+    // Initialize _currentAttemptIndex with the initial value passed from the widget
+    _currentAttemptIndex = widget.attemptIndex;
+    debugPrint('Init _currentAttemptIndex $_currentAttemptIndex');
+    // Load attemptMessages into _chatHistory if they exist
+    if (widget.attemptMessages != null && widget.attemptMessages!.isNotEmpty) {
+      debugPrint('I have some messages');
+      setState(() {
+        _chatHistory.addAll(widget.attemptMessages!);
+      });
+      _scrollToBottom(); // Scroll to bottom after loading messages
+    }
+    
   }
 
   @override
@@ -131,12 +146,7 @@ class _MessagesBodyState extends State<MessagesBody> {
             padding: const EdgeInsets.all(0),
             child: CameraModal(onVideoRecorded: (filePath) async {
               // Callback function when file is selected in CameraModal
-              //debugPrint('I have file path in MessagesBody $filePath');
               _lastAdvisorResponse = ''; //new message so can't reuse
-
-              //now show a loading message whiole awaiting transcript
-              //_showLoadingMessage(LocalMessageRole.user);
-
               // Audio Extraction with ffmpeg_kit_flutter and path_provider
               final tempDirectory =
                   await getTemporaryDirectory(); // Get temporary directory
@@ -144,17 +154,8 @@ class _MessagesBodyState extends State<MessagesBody> {
                   '${tempDirectory.path}/extracted_audio.mp3'; // Use a suitable extension
               await _extractAudio(filePath, audioOutputPath);
 
-              //debugPrint(audioOutputPath);
-
-              //final filePath = '/path/to/your/video/file.mp4';
-              //final transcription =
-              //await whisperTranscriptionService.transcribeVideo(filePath);
               final transcription = await whisperTranscriptionService
                   .transcribeVideo(audioOutputPath);
-
-              //setState(() {
-              //  _chatHistory.removeLast(); //our loading message
-              //});
 
               String transcribedText = '';
 
@@ -162,8 +163,6 @@ class _MessagesBodyState extends State<MessagesBody> {
                   transcription.text != '' &&
                   transcription.text.toLowerCase() != 'you') {
                 //for some reason, it seems to hallucinate 'you' if no sound!
-                //_showTextMessage(LocalMessageRole.user,
-                //    transcription.text); //show user what video transcript says
                 transcribedText = transcription.text;
                 setState(() {
                   //add video message to list of messages
@@ -173,7 +172,6 @@ class _MessagesBodyState extends State<MessagesBody> {
                       role: LocalMessageRole.user,
                       text: transcribedText,
                       filePath: filePath));
-                  //_cameraFilePath = path;
                 });
                 _scrollToBottom();
                 _sendTextMessageAndShowTextResponse(
@@ -294,6 +292,26 @@ class _MessagesBodyState extends State<MessagesBody> {
     return text.replaceAll(ssmlRegExp, '');
   }
 
+  // Function to handle adding a message to an attempt
+  Future<void> _addMessageToAttempt(LocalMessage messageToAdd) async {
+    debugPrint('Just before adding $_currentAttemptIndex');
+    debugPrint('widget.chatIndex ${widget.chatIndex}');
+    debugPrint('messageToAdd ${messageToAdd}');
+    debugPrint('attemptIndex ${_currentAttemptIndex}');
+    // Await the result of addMessageToAttempt
+    int returnedAttemptIndex = await openAiService.addMessageToAttempt(
+      widget.chatIndex, 
+      messageToAdd, 
+      attemptIndex: _currentAttemptIndex, // Use the current attempt index
+    );
+
+    // Update the state with the returned attempt index
+    setState(() {
+      _currentAttemptIndex = returnedAttemptIndex;
+      debugPrint('returnedAttemptIndex = $returnedAttemptIndex');
+    });
+  }
+
   // Updated function to handle sending a text message and showing the AI response using the Chat API
   void _sendTextMessageAndShowTextResponse(String text) {
     _showLoadingMessage(LocalMessageRole.ai);
@@ -307,7 +325,7 @@ class _MessagesBodyState extends State<MessagesBody> {
     );
     updatedConversationHistory.add(messageToAdd);
 
-    openAiService.addMessageToAttempt(widget.chatIndex, messageToAdd, attemptIndex: widget.attemptIndex);
+    _addMessageToAttempt(messageToAdd);
 
     openAiService
         .getChatResponseFromMessage(
@@ -334,10 +352,13 @@ class _MessagesBodyState extends State<MessagesBody> {
 
       // Strip SSML tags from AI responses
       aiResponses = aiResponses.map((msg) {
-        debugPrint(msg.toString());
+        //debugPrint(msg.toString());
+        _addMessageToAttempt(msg);
         msg.text = msg.text != null ? stripSSMLTags(msg.text!) : null;
         return msg;
       }).toList();
+
+
 
       setState(() {
         _chatHistory.removeLast(); // Remove the loading message

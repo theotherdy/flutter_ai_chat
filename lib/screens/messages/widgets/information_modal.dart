@@ -58,9 +58,10 @@ class _InformationModalState extends State<InformationModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(16.0), // Adjust to fit full screen
+      insetPadding: EdgeInsets.all(16.0),
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false, // This removes the back button
           title: Text(widget.title),
           actions: [
             IconButton(
@@ -81,7 +82,7 @@ class _InformationModalState extends State<InformationModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MarkdownBody(
-                      data: utf8.decode(widget.information!.runes.toList())),
+                      data: utf8.decode(widget.information!.runes.toList(), allowMalformed: true)),
                   SizedBox(height: 20),
                 ],
               ),
