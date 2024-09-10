@@ -5,12 +5,15 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:just_audio/just_audio.dart';
+//import 'package:flutter_sound/flutter_sound.dart';
 
 import 'package:jumping_dot/jumping_dot.dart';
 
 //import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
+
+
 
 import 'package:flutter_ai_chat/constants.dart';
 
@@ -22,6 +25,7 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 //import 'package:chat/models/ChatMessage.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/camera_modal.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/audio_recorder.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/information_modal.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/input_bar.dart';
 
@@ -31,7 +35,6 @@ class MessagesBody extends StatefulWidget {
   final String avatar;
   final String voice;
   final int chatIndex; // Receive the index
-  //final Function(int) incrementAttempts; // Receive the callback function
   final int? attemptIndex;
   final List<LocalMessage>? attemptMessages;
   final String systemMessage;
@@ -43,7 +46,6 @@ class MessagesBody extends StatefulWidget {
     required this.avatar,
     required this.voice,
     required this.chatIndex, // Receive the index
-    //required this.incrementAttempts, // Receive the callback function
     required this.attemptIndex,
     required this.attemptMessages,
     required this.systemMessage,
@@ -54,7 +56,6 @@ class MessagesBody extends StatefulWidget {
 }
 
 class _MessagesBodyState extends State<MessagesBody> {
-  //final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final OpenAiService openAiService =
       OpenAiService(); //todo NEW INSTANCE of service (ie new thread) every time we come to this page - may want to do this explictly to allow people to continue a conversation?
@@ -64,10 +65,9 @@ class _MessagesBodyState extends State<MessagesBody> {
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
   String _lastAdvisorResponse = ''; //to hold last respnse from advisor
-  /*bool _attemptsIncremented =
-      false; //so that we only increment attempts once per load*/
-
+  
   late AudioPlayer _audioPlayer;
+  //late FlutterSoundPlayer _flutterSoundPlayer;
   // Define a state variable to hold the attempt index
   int? _currentAttemptIndex;
 
@@ -76,6 +76,12 @@ class _MessagesBodyState extends State<MessagesBody> {
     super.initState();
     debugPrint('Coming in to MessagesBody attemptIndex = ${widget.attemptIndex}');
     _audioPlayer = AudioPlayer();
+    //_flutterSoundPlayer = FlutterSoundPlayer(); // Initialize FlutterSoundPlayer
+    /*_flutterSoundPlayer.openPlayer().then((value) {
+      debugPrint('FlutterSoundPlayer initialized');
+    }).catchError((e) {
+      debugPrint('Error initializing player: $e');
+    });*/
     // Initialize _currentAttemptIndex with the initial value passed from the widget
     _currentAttemptIndex = widget.attemptIndex;
     debugPrint('Init _currentAttemptIndex $_currentAttemptIndex');
@@ -93,6 +99,7 @@ class _MessagesBodyState extends State<MessagesBody> {
   @override
   void dispose() {
     _audioPlayer.dispose();
+    //_flutterSoundPlayer.closePlayer(); // Close the player when done
     super.dispose();
   }
 
@@ -232,6 +239,31 @@ class _MessagesBodyState extends State<MessagesBody> {
       });
     });
   }
+
+  void _showAudioModal(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return AudioRecorder(onRecordingComplete: (filePath) async {
+        final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
+        String transcribedText = transcription?.text ?? '';
+
+        setState(() {
+          _chatHistory.add(LocalMessage(
+            time: DateTime.now(),
+            type: LocalMessageType.audio,
+            role: LocalMessageRole.user,
+            text: transcribedText,
+            filePath: filePath,
+          ));
+        });
+        
+        _scrollToBottom();
+        _sendTextMessageAndShowTextResponse(transcribedText);
+      });
+    },
+  );
+}
 
   void _showAdvisorSpinnerModal(BuildContext context) {
     showDialog(
@@ -409,6 +441,26 @@ class _MessagesBodyState extends State<MessagesBody> {
 
   /*void _playAudio(Uint8List audioBytes) async {
     Directory tempDir = await getTemporaryDirectory();
+    String tempPath = '${tempDir.path}/temp.mp4'; // Using m4a for FlutterSound compatibility
+    File tempFile = File(tempPath);
+
+    await tempFile.writeAsBytes(audioBytes);
+
+    try {
+      await _flutterSoundPlayer.startPlayer(
+        fromURI: tempFile.path,
+        codec: Codec.aacMP4, // Ensure the codec is set correctly
+        whenFinished: () {
+          debugPrint("AI audio playback finished");
+        },
+      );
+    } catch (e) {
+      debugPrint('Error playing AI audio: $e');
+    }
+  }*/
+
+  /*void _playAudio(Uint8List audioBytes) async {
+    Directory tempDir = await getTemporaryDirectory();
     String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
     debugPrint('File created at: $tempPath');
@@ -453,7 +505,9 @@ class _MessagesBodyState extends State<MessagesBody> {
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) => Message(
-                    message: _chatHistory[index], avatar: widget.avatar),
+                    message: _chatHistory[index], 
+                    avatar: widget.avatar,
+                    audioPlayer: _audioPlayer),
               ),
             ),
             Visibility(
@@ -491,16 +545,18 @@ class _MessagesBodyState extends State<MessagesBody> {
             ],
           ),
           child: SafeArea(
-              child: InputBar(onBtnSendPressed: (textOfMessage) {
-            // Callback function when message is sent in InputBar
-            tempChatHistoryContent =
-                textOfMessage; //hold on to this even afetr we've cleared input
-            _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
-            _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-          }, onBtnVideoPressed: () {
+            child: InputBar(onBtnSendPressed: (textOfMessage) {
+              // Callback function when message is sent in InputBar
+              tempChatHistoryContent =
+                  textOfMessage; //hold on to this even afetr we've cleared input
+              _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
+              _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
+            }, onBtnVideoPressed: () {
             // Callback function when video button pressed is selected in InputBar
             _showCameraModal(context);
-          })),
+          }, onBtnAudioPressed: () {
+            _showAudioModal(context);
+          },)),
         )
       ],
     );

@@ -4,11 +4,13 @@ import 'package:flutter_ai_chat/constants.dart';
 class InputBar extends StatefulWidget {
   final Function(String) onBtnSendPressed;
   final Function() onBtnVideoPressed;
+  final Function() onBtnAudioPressed;
 
   const InputBar(
       {super.key,
       required this.onBtnSendPressed,
-      required this.onBtnVideoPressed});
+      required this.onBtnVideoPressed,
+      required this.onBtnAudioPressed,});
 
   @override
   State<InputBar> createState() => _InputBarState();
@@ -29,6 +31,18 @@ class _InputBarState extends State<InputBar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 0.0, right:0.0), // Reduce space to the left
+          child: IconButton(
+            icon: const Icon(
+              Icons.mic_outlined,
+              color: kPrimaryColor,
+            ),
+            onPressed: () {
+              widget.onBtnAudioPressed();
+            },
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.only(left: 0.0, right:0.0), // Reduce space to the left
           child: IconButton(

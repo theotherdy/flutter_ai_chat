@@ -83,6 +83,8 @@ class MessagesScreen extends StatelessWidget {
         return InformationModal(
             information: instructions, title: 'Instructions');
       },
+      
+    barrierDismissible: true,
     );
   }
 }

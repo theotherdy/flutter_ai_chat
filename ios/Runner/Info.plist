@@ -27,9 +27,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to your phone's camera.</string>
+	<string>This app requires access to your camera.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires access to your phone's microphone.</string>
+	<string>This app requires access to your microphone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to save audio files.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

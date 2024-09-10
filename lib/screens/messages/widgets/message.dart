@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../constants.dart';
 
 import 'package:flutter_ai_chat/models/local_message.dart';
+import 'package:just_audio/just_audio.dart'; // Import just_audio
+//import 'package:flutter_sound/flutter_sound.dart';
 
 //import 'audio_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/text_message.dart';
+import 'package:flutter_ai_chat/screens/messages/widgets/audio_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/video_message.dart';
 import 'package:flutter_ai_chat/screens/messages/widgets/loading_message.dart';
 //import 'video_message.dart';
@@ -15,10 +18,13 @@ class Message extends StatelessWidget {
     super.key,
     required this.message,
     required this.avatar,
+    required this.audioPlayer, // Add the AudioPlayer here
   });
 
   final LocalMessage message;
   final String avatar;
+  final AudioPlayer audioPlayer; // AudioPlayer instance
+  //final FlutterSoundPlayer flutterSoundPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +34,8 @@ class Message extends StatelessWidget {
           return TextMessage(message: message);
         case LocalMessageType.loading:
           return LoadingMessage(message: message);
-        /*case LocalMessageType.audio:
-          return AudioMessage(message: message);*/
+        case LocalMessageType.audio:
+          return AudioMessage(message: message, audioPlayer: audioPlayer); // Pass the AudioPlayer instance here
         case LocalMessageType.video:
           //debugPrint(message.filePath.toString());
           return VideoMessage(message: message);
@@ -59,39 +65,3 @@ class Message extends StatelessWidget {
     );
   }
 }
-
-/*class MessageStatusDot extends StatelessWidget {
-  final MessageStatus? status;
-
-  const MessageStatusDot({Key? key, this.status}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    Color dotColor(MessageStatus status) {
-      switch (status) {
-        case MessageStatus.not_sent:
-          return kErrorColor;
-        case MessageStatus.not_view:
-          return Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.1);
-        case MessageStatus.viewed:
-          return kPrimaryColor;
-        default:
-          return Colors.transparent;
-      }
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(left: kDefaultPadding / 2),
-      height: 12,
-      width: 12,
-      decoration: BoxDecoration(
-        color: dotColor(status!),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        status == MessageStatus.not_sent ? Icons.close : Icons.done,
-        size: 8,
-        color: Theme.of(context).scaffoldBackgroundColor,
-      ),
-    );
-  }
-}*/

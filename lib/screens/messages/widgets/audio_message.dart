@@ -1,76 +1,105 @@
+import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
-
-import 'package:flutter_ai_chat/constants.dart';
 
 import 'package:flutter_ai_chat/models/local_message.dart';
 
-class AudioMessage extends StatelessWidget {
-  final LocalMessage? message;
+class AudioMessage extends StatefulWidget {
+  final LocalMessage message;
+  final AudioPlayer audioPlayer; // AudioPlayer instance passed from Message
 
-  const AudioMessage({super.key, this.message});
+  const AudioMessage({
+    Key? key,
+    required this.message,
+    required this.audioPlayer,
+  }) : super(key: key);
+
+  @override
+  _AudioMessageState createState() => _AudioMessageState();
+}
+
+class _AudioMessageState extends State<AudioMessage> {
+  bool _isPlaying = false;
+  Duration _audioDuration = Duration.zero;
+  Duration _currentPosition = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Set up listeners to update UI based on audio playback state
+    widget.audioPlayer.playerStateStream.listen((state) {
+      setState(() {
+        _isPlaying = state.playing;
+      });
+    });
+
+    widget.audioPlayer.durationStream.listen((duration) {
+      setState(() {
+        _audioDuration = duration ?? Duration.zero;
+      });
+    });
+
+    widget.audioPlayer.positionStream.listen((position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.audioPlayer.stop(); // Stop playback when the widget is disposed
+    super.dispose();
+  }
+
+  // Toggle play/pause functionality
+  void _togglePlayPause() async {
+    if (_isPlaying) {
+      await widget.audioPlayer.pause();
+    } else {
+      // Set file path and play if not already playing
+      if (widget.audioPlayer.processingState != ProcessingState.ready) {
+        await widget.audioPlayer.setFilePath(widget.message.filePath!);
+      }
+      await widget.audioPlayer.play();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.55,
-      padding: const EdgeInsets.symmetric(
-        horizontal: kDefaultPadding * 0.75,
-        vertical: kDefaultPadding / 2.5,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: kPrimaryColor
-            .withOpacity(message!.role == LocalMessageRole.user ? 1 : 0.1),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.play_arrow,
-            color: message!.role == LocalMessageRole.user
-                ? Colors.white
-                : kPrimaryColor,
-          ),
-          Expanded(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: kDefaultPadding / 2),
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 2,
-                    color: message!.role == LocalMessageRole.user
-                        ? Colors.white
-                        : kPrimaryColor.withOpacity(0.4),
-                  ),
-                  Positioned(
-                    left: 0,
-                    child: Container(
-                      height: 8,
-                      width: 8,
-                      decoration: BoxDecoration(
-                        color: message!.role == LocalMessageRole.user
-                            ? Colors.white
-                            : kPrimaryColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  )
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.blue,
+              ),
+              onPressed: _togglePlayPause,
+            ),
+            Expanded(
+              child: Slider(
+                value: _currentPosition.inSeconds.toDouble(),
+                max: _audioDuration.inSeconds.toDouble(),
+                onChanged: (value) async {
+                  final position = Duration(seconds: value.toInt());
+                  await widget.audioPlayer.seek(position);
+                },
               ),
             ),
-          ),
-          Text(
-            "0.37",
-            style: TextStyle(
-                fontSize: 12,
-                color: message!.role == LocalMessageRole.user
-                    ? Colors.white
-                    : null),
-          ),
-        ],
-      ),
+            Text(
+              '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(color: Colors.black54),
+            ),
+          ],
+        ),
+        Text(
+          widget.message.text ?? '', // Transcription or text message
+          style: const TextStyle(color: Colors.black54),
+        ),
+      ],
     );
   }
 }

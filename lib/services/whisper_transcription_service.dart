@@ -70,12 +70,12 @@ class WhisperTranscriptionService {
         final Map<String, dynamic> data = jsonDecode(response.body);
         return TranscriptionText.fromJson(data);
       } else {
-        debugPrint('Error: ${response.statusCode}');
+        debugPrint('Error from Whisper: ${response.statusCode}');
         debugPrint(response.body);
         return null;
       }
     } catch (error) {
-      debugPrint('Error: $error');
+      debugPrint('Error from Whisper: $error');
       return null;
     }
   }
