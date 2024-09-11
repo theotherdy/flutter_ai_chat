@@ -498,6 +498,7 @@ class _MessagesBodyState extends State<MessagesBody> {
         Expanded(
           child: Stack(children: [
             Container(
+              color: Colors.grey[100],
               padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
               child: ListView.builder(
                 itemCount: _chatHistory.length,
@@ -531,11 +532,11 @@ class _MessagesBodyState extends State<MessagesBody> {
         //todo - move this out into a separate chat_input widget
         Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding * 0.2,
-            vertical: kDefaultPadding / 2,
+            horizontal: kDefaultPadding * 0.1,
+            vertical: kDefaultPadding * 0.1,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Colors.grey[200], //Theme.of(context).scaffoldBackgroundColor,
             boxShadow: [
               BoxShadow(
                 offset: const Offset(0, 4),

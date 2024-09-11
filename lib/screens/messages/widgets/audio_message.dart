@@ -1,11 +1,11 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_ai_chat/constants.dart';
 import 'package:flutter_ai_chat/models/local_message.dart';
 
 class AudioMessage extends StatefulWidget {
   final LocalMessage message;
-  final AudioPlayer audioPlayer; // AudioPlayer instance passed from Message
+  final AudioPlayer audioPlayer;
 
   const AudioMessage({
     Key? key,
@@ -26,7 +26,6 @@ class _AudioMessageState extends State<AudioMessage> {
   void initState() {
     super.initState();
 
-    // Set up listeners to update UI based on audio playback state
     widget.audioPlayer.playerStateStream.listen((state) {
       setState(() {
         _isPlaying = state.playing;
@@ -48,16 +47,14 @@ class _AudioMessageState extends State<AudioMessage> {
 
   @override
   void dispose() {
-    widget.audioPlayer.stop(); // Stop playback when the widget is disposed
+    widget.audioPlayer.stop();
     super.dispose();
   }
 
-  // Toggle play/pause functionality
   void _togglePlayPause() async {
     if (_isPlaying) {
       await widget.audioPlayer.pause();
     } else {
-      // Set file path and play if not already playing
       if (widget.audioPlayer.processingState != ProcessingState.ready) {
         await widget.audioPlayer.setFilePath(widget.message.filePath!);
       }
@@ -67,39 +64,52 @@ class _AudioMessageState extends State<AudioMessage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.blue,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kDefaultPadding * 0.75,
+        vertical: kDefaultPadding / 2,
+      ),
+      decoration: BoxDecoration(
+        color: kPrimaryColor.withOpacity(
+            widget.message.role == LocalMessageRole.user ? 1 : 0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                ),
+                onPressed: _togglePlayPause,
               ),
-              onPressed: _togglePlayPause,
-            ),
-            Expanded(
-              child: Slider(
-                value: _currentPosition.inSeconds.toDouble(),
-                max: _audioDuration.inSeconds.toDouble(),
-                onChanged: (value) async {
-                  final position = Duration(seconds: value.toInt());
-                  await widget.audioPlayer.seek(position);
-                },
+              Expanded(
+                child: Slider(
+                  value: _currentPosition.inSeconds.toDouble(),
+                  max: _audioDuration.inSeconds.toDouble(),
+                  activeColor: Colors.white,
+                  inactiveColor: Colors.white54,
+                  onChanged: (value) async {
+                    final position = Duration(seconds: value.toInt());
+                    await widget.audioPlayer.seek(position);
+                  },
+                ),
               ),
-            ),
-            Text(
-              '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')}',
-              style: const TextStyle(color: Colors.black54),
-            ),
-          ],
-        ),
-        Text(
-          widget.message.text ?? '', // Transcription or text message
-          style: const TextStyle(color: Colors.black54),
-        ),
-      ],
+              Text(
+                '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')}',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          Text(
+            widget.message.text ?? '', // Transcription or text
+            style: const TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }

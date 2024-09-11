@@ -18,17 +18,10 @@ class TextMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Convert text to a UTF-8 string
-
-    //debugPrint('Text: $tempPath');
-
     String text = message!.text ?? '';
-    // Replace smart quotes with standard apostrophes if necessary
     text = text.replaceAll('’', "'");
-
     text = utf8.decode(text.runes.toList(), allowMalformed: true);
 
-    // Extracting all non-verbal information wrapped in square brackets
     final RegExp regex = RegExp(r'\[([^\]]+)\]');
     final List<String> nonVerbalInfos = [];
 
@@ -37,16 +30,19 @@ class TextMessage extends StatelessWidget {
       return '';
     });
 
-    // Building the widget with non-verbal information on a separate line and italicized
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: kDefaultPadding * 0.75,
         vertical: kDefaultPadding / 2,
       ),
       decoration: BoxDecoration(
-        color: kPrimaryColor
-            .withOpacity(message!.role == LocalMessageRole.user ? 1 : 0.1),
+        color: message!.role == LocalMessageRole.user
+            ? kSecondaryColor // Light green for user
+            : Colors.white, // White for assistant
         borderRadius: BorderRadius.circular(10),
+        /*border: message!.role == LocalMessageRole.ai
+            ? Border.all(color: kPrimaryColor.withOpacity(0.1), width: 2) // Thin green border for assistant
+            : null,*/
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,19 +51,18 @@ class TextMessage extends StatelessWidget {
             text.trim(),
             style: TextStyle(
               color: message!.role == LocalMessageRole.user
-                  ? Colors.white
-                  : Theme.of(context).textTheme.bodyLarge!.color,
+                  ? Colors.black // Dark text on light-green for user
+                  : Colors.black, // Dark text on white for assistant
             ),
           ),
-          // Conditionally render non-verbal info Text widgets
           for (String nonVerbalInfo in nonVerbalInfos)
             Text(
               capitalizeFirstLetter(nonVerbalInfo.trim()),
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: message!.role == LocalMessageRole.user
-                    ? Colors.white
-                    : Theme.of(context).textTheme.bodyLarge!.color,
+                    ? Colors.black
+                    : Colors.black,
               ),
             ),
         ],

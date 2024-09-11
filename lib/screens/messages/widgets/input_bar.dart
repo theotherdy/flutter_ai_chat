@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ai_chat/constants.dart';
 
 class InputBar extends StatefulWidget {
   final Function(String) onBtnSendPressed;
@@ -18,84 +17,79 @@ class InputBar extends StatefulWidget {
 
 class _InputBarState extends State<InputBar> {
   final TextEditingController _chatController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  bool _isSendButtonActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _chatController.addListener(_toggleSendButton);
+  }
+
+  void _toggleSendButton() {
+    setState(() {
+      _isSendButtonActive = _chatController.text.isNotEmpty;
+    });
+  }
 
   @override
   void dispose() {
     _chatController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 0.0, right:0.0), // Reduce space to the left
-          child: IconButton(
+    return Container(
+      color: Colors.grey[200], // Light grey background for the InputBar
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        children: [
+          IconButton(
             icon: const Icon(
               Icons.mic_outlined,
-              color: kPrimaryColor,
+              color: Colors.green,
             ),
-            onPressed: () {
-              widget.onBtnAudioPressed();
-            },
+            onPressed: widget.onBtnAudioPressed,
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 0.0, right:0.0), // Reduce space to the left
-          child: IconButton(
+          IconButton(
             icon: const Icon(
               Icons.videocam,
-              color: kPrimaryColor,
+              color: Colors.green,
             ),
-            onPressed: () {
-              widget.onBtnVideoPressed();
-            },
+            onPressed: widget.onBtnVideoPressed,
           ),
-        ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(left: kDefaultPadding * 0.8, right:0.0), // Reduce space to the left
-            decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    maxLines: 4, // Set max lines to 4
-                    minLines: 1, // Set min lines to 1
-                    decoration: const InputDecoration(
-                      hintText: "Type message",
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(left: 8.0), // Reduce space inside the text field
-                    ),
-                    controller: _chatController,
-                    scrollController: _scrollController,
-                    keyboardType: TextInputType.multiline, // Enable multiline input
-                  ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                color: Colors.white, // White background for the input field
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: _chatController,
+                decoration: const InputDecoration(
+                  hintText: "Type message",
+                  border: InputBorder.none,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 0.0), // Reduce space to the right
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.64),
-                    ),
-                    onPressed: () {
-                      widget.onBtnSendPressed(_chatController.text);
-                      _chatController.clear();
-                    },
-                  ),
-                ),
-              ],
+                minLines: 1,
+                maxLines: 4,
+              ),
             ),
           ),
-        ),
-      ],
+          IconButton(
+            icon: Icon(
+              Icons.send,
+              color: _isSendButtonActive ? Colors.green : Colors.grey, // Toggle button color
+            ),
+            onPressed: _isSendButtonActive
+                ? () {
+                    widget.onBtnSendPressed(_chatController.text);
+                    _chatController.clear();
+                  }
+                : null, // Disable the button when there's no text
+          ),
+        ],
+      ),
     );
   }
 }
