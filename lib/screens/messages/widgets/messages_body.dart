@@ -241,6 +241,33 @@ class _MessagesBodyState extends State<MessagesBody> {
   void _showAudioModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return AudioRecorderModal(
+          onRecordingComplete: (filePath) async {
+            final transcription =
+                await whisperTranscriptionService.transcribeVideo(filePath);
+            String transcribedText = transcription?.text ?? '';
+
+            setState(() {
+              _chatHistory.add(LocalMessage(
+                time: DateTime.now(),
+                type: LocalMessageType.audio,
+                role: LocalMessageRole.user,
+                text: transcribedText,
+                filePath: filePath,
+              ));
+            });
+
+            _scrollToBottom();
+            _sendTextMessageAndShowTextResponse(transcribedText);
+          },
+        );
+      },
+    );
+
+    /*showModalBottomSheet(
+      context: context,
       builder: (BuildContext context) {
         return AudioRecorder(onRecordingComplete: (filePath) async {
           final transcription =
@@ -261,7 +288,7 @@ class _MessagesBodyState extends State<MessagesBody> {
           _sendTextMessageAndShowTextResponse(transcribedText);
         });
       },
-    );
+    );*/
   }
 
   void _showAdvisorSpinnerModal(BuildContext context) {

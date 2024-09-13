@@ -2,15 +2,14 @@ import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ai_chat/constants.dart';
 import 'package:flutter_ai_chat/models/local_message.dart';
+import 'dart:async';
 
 class AudioMessage extends StatefulWidget {
   final LocalMessage message;
-  //final AudioPlayer audioPlayer;
 
   const AudioMessage({
     Key? key,
     required this.message,
-    //required this.audioPlayer,
   }) : super(key: key);
 
   @override
@@ -18,51 +17,66 @@ class AudioMessage extends StatefulWidget {
 }
 
 class _AudioMessageState extends State<AudioMessage> {
-  late AudioPlayer _audioPlayer; // Create a separate instance
-
+  late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
   Duration _audioDuration = Duration.zero;
   Duration _currentPosition = Duration.zero;
+
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  StreamSubscription<Duration?>? _durationSubscription;
+  StreamSubscription<Duration>? _positionSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    _audioPlayer = AudioPlayer(); // Initialize new player for each message
+    _audioPlayer = AudioPlayer();
 
-    _audioPlayer.playerStateStream.listen((state) {
+    // Subscribing to player state stream
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen((state) {
+      if (!mounted) return; // Check if the widget is still in the tree
       setState(() {
         _isPlaying = state.playing;
       });
     });
 
-    _audioPlayer.durationStream.listen((duration) {
+    // Subscribing to duration stream
+    _durationSubscription = _audioPlayer.durationStream.listen((duration) {
+      if (!mounted) return; // Check if the widget is still in the tree
       setState(() {
         _audioDuration = duration ?? Duration.zero;
       });
     });
 
-    _audioPlayer.positionStream.listen((position) {
+    // Subscribing to position stream
+    _positionSubscription = _audioPlayer.positionStream.listen((position) {
+      if (!mounted) return; // Check if the widget is still in the tree
       setState(() {
         _currentPosition = position;
       });
     });
 
-    // Listen to processing state to detect when audio finishes playing
-    _audioPlayer.processingStateStream.listen((state) {
+    // Listen for when the audio is completed
+    _audioPlayer.processingStateStream.listen((state) async {
       if (state == ProcessingState.completed) {
+        await _audioPlayer.pause();
+        await _audioPlayer.seek(Duration.zero);
+        if (!mounted) return; // Check before calling setState
         setState(() {
-          _currentPosition = Duration.zero; // Reset to zero
-          _isPlaying = false; // Reset play button to pause state
+          _currentPosition = Duration.zero;
+          _isPlaying = false;
         });
-        _audioPlayer
-            .seek(Duration.zero); // Optional: Ensure playback position is reset
       }
     });
   }
 
   @override
   void dispose() {
+    // Cancel the stream subscriptions to avoid memory leaks
+    _playerStateSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _positionSubscription?.cancel();
+
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -87,8 +101,8 @@ class _AudioMessageState extends State<AudioMessage> {
       ),
       decoration: BoxDecoration(
         color: widget.message!.role == LocalMessageRole.user
-            ? kSecondaryColor // Light green for user
-            : Colors.white, // White for assistant
+            ? kSecondaryColor
+            : Colors.white,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -123,7 +137,7 @@ class _AudioMessageState extends State<AudioMessage> {
             ],
           ),
           Text(
-            widget.message.text ?? '', // Transcription or text
+            widget.message.text ?? '',
             style: const TextStyle(color: Colors.black),
           ),
         ],
