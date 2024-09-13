@@ -5,12 +5,12 @@ import 'package:flutter_ai_chat/models/local_message.dart';
 
 class AudioMessage extends StatefulWidget {
   final LocalMessage message;
-  final AudioPlayer audioPlayer;
+  //final AudioPlayer audioPlayer;
 
   const AudioMessage({
     Key? key,
     required this.message,
-    required this.audioPlayer,
+    //required this.audioPlayer,
   }) : super(key: key);
 
   @override
@@ -18,6 +18,8 @@ class AudioMessage extends StatefulWidget {
 }
 
 class _AudioMessageState extends State<AudioMessage> {
+  late AudioPlayer _audioPlayer; // Create a separate instance
+
   bool _isPlaying = false;
   Duration _audioDuration = Duration.zero;
   Duration _currentPosition = Duration.zero;
@@ -26,39 +28,53 @@ class _AudioMessageState extends State<AudioMessage> {
   void initState() {
     super.initState();
 
-    widget.audioPlayer.playerStateStream.listen((state) {
+    _audioPlayer = AudioPlayer(); // Initialize new player for each message
+
+    _audioPlayer.playerStateStream.listen((state) {
       setState(() {
         _isPlaying = state.playing;
       });
     });
 
-    widget.audioPlayer.durationStream.listen((duration) {
+    _audioPlayer.durationStream.listen((duration) {
       setState(() {
         _audioDuration = duration ?? Duration.zero;
       });
     });
 
-    widget.audioPlayer.positionStream.listen((position) {
+    _audioPlayer.positionStream.listen((position) {
       setState(() {
         _currentPosition = position;
       });
+    });
+
+    // Listen to processing state to detect when audio finishes playing
+    _audioPlayer.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        setState(() {
+          _currentPosition = Duration.zero; // Reset to zero
+          _isPlaying = false; // Reset play button to pause state
+        });
+        _audioPlayer
+            .seek(Duration.zero); // Optional: Ensure playback position is reset
+      }
     });
   }
 
   @override
   void dispose() {
-    widget.audioPlayer.stop();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   void _togglePlayPause() async {
     if (_isPlaying) {
-      await widget.audioPlayer.pause();
+      await _audioPlayer.pause();
     } else {
-      if (widget.audioPlayer.processingState != ProcessingState.ready) {
-        await widget.audioPlayer.setFilePath(widget.message.filePath!);
+      if (_audioPlayer.processingState != ProcessingState.ready) {
+        await _audioPlayer.setFilePath(widget.message.filePath!);
       }
-      await widget.audioPlayer.play();
+      await _audioPlayer.play();
     }
   }
 
@@ -70,8 +86,9 @@ class _AudioMessageState extends State<AudioMessage> {
         vertical: kDefaultPadding / 2,
       ),
       decoration: BoxDecoration(
-        color: kPrimaryColor.withOpacity(
-            widget.message.role == LocalMessageRole.user ? 1 : 0.1),
+        color: widget.message!.role == LocalMessageRole.user
+            ? kSecondaryColor // Light green for user
+            : Colors.white, // White for assistant
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -82,7 +99,7 @@ class _AudioMessageState extends State<AudioMessage> {
               IconButton(
                 icon: Icon(
                   _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
+                  color: kPrimaryColor,
                 ),
                 onPressed: _togglePlayPause,
               ),
@@ -91,22 +108,23 @@ class _AudioMessageState extends State<AudioMessage> {
                   value: _currentPosition.inSeconds.toDouble(),
                   max: _audioDuration.inSeconds.toDouble(),
                   activeColor: Colors.white,
+                  thumbColor: kPrimaryColor,
                   inactiveColor: Colors.white54,
                   onChanged: (value) async {
                     final position = Duration(seconds: value.toInt());
-                    await widget.audioPlayer.seek(position);
+                    await _audioPlayer.seek(position);
                   },
                 ),
               ),
               Text(
                 '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')}',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black),
               ),
             ],
           ),
           Text(
             widget.message.text ?? '', // Transcription or text
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.black),
           ),
         ],
       ),

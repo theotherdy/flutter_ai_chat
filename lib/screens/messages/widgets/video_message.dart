@@ -28,8 +28,9 @@ class VideoMessage extends StatelessWidget {
                 vertical: kDefaultPadding / 2,
               ),
               decoration: BoxDecoration(
-                color: kPrimaryColor.withOpacity(
-                    message!.role == LocalMessageRole.user ? 1 : 0.1),
+                color: message!.role == LocalMessageRole.user
+                    ? kSecondaryColor // Light green for user
+                    : Colors.white, // White for assistant
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(children: [
@@ -63,7 +64,7 @@ class VideoMessage extends StatelessWidget {
                 Text(
                   message!.text
                       .toString(), //need to cast to string as .text is Strng? (optional)
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                 ),
               ]));
         } else {

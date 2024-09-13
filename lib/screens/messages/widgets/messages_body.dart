@@ -13,8 +13,6 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 
-
-
 import 'package:flutter_ai_chat/constants.dart';
 
 import 'package:flutter_ai_chat/services/open_ai_service.dart';
@@ -65,7 +63,7 @@ class _MessagesBodyState extends State<MessagesBody> {
   String tempChatHistoryContent = '';
   final List<LocalMessage> _chatHistory = [];
   String _lastAdvisorResponse = ''; //to hold last respnse from advisor
-  
+
   late AudioPlayer _audioPlayer;
   //late FlutterSoundPlayer _flutterSoundPlayer;
   // Define a state variable to hold the attempt index
@@ -74,7 +72,8 @@ class _MessagesBodyState extends State<MessagesBody> {
   @override
   void initState() {
     super.initState();
-    debugPrint('Coming in to MessagesBody attemptIndex = ${widget.attemptIndex}');
+    debugPrint(
+        'Coming in to MessagesBody attemptIndex = ${widget.attemptIndex}');
     _audioPlayer = AudioPlayer();
     //_flutterSoundPlayer = FlutterSoundPlayer(); // Initialize FlutterSoundPlayer
     /*_flutterSoundPlayer.openPlayer().then((value) {
@@ -93,7 +92,6 @@ class _MessagesBodyState extends State<MessagesBody> {
       });
       _scrollToBottom(); // Scroll to bottom after loading messages
     }
-    
   }
 
   @override
@@ -241,29 +239,30 @@ class _MessagesBodyState extends State<MessagesBody> {
   }
 
   void _showAudioModal(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return AudioRecorder(onRecordingComplete: (filePath) async {
-        final transcription = await whisperTranscriptionService.transcribeVideo(filePath);
-        String transcribedText = transcription?.text ?? '';
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return AudioRecorder(onRecordingComplete: (filePath) async {
+          final transcription =
+              await whisperTranscriptionService.transcribeVideo(filePath);
+          String transcribedText = transcription?.text ?? '';
 
-        setState(() {
-          _chatHistory.add(LocalMessage(
-            time: DateTime.now(),
-            type: LocalMessageType.audio,
-            role: LocalMessageRole.user,
-            text: transcribedText,
-            filePath: filePath,
-          ));
+          setState(() {
+            _chatHistory.add(LocalMessage(
+              time: DateTime.now(),
+              type: LocalMessageType.audio,
+              role: LocalMessageRole.user,
+              text: transcribedText,
+              filePath: filePath,
+            ));
+          });
+
+          _scrollToBottom();
+          _sendTextMessageAndShowTextResponse(transcribedText);
         });
-        
-        _scrollToBottom();
-        _sendTextMessageAndShowTextResponse(transcribedText);
-      });
-    },
-  );
-}
+      },
+    );
+  }
 
   void _showAdvisorSpinnerModal(BuildContext context) {
     showDialog(
@@ -332,8 +331,8 @@ class _MessagesBodyState extends State<MessagesBody> {
     debugPrint('attemptIndex ${_currentAttemptIndex}');
     // Await the result of addMessageToAttempt
     int returnedAttemptIndex = await openAiService.addMessageToAttempt(
-      widget.chatIndex, 
-      messageToAdd, 
+      widget.chatIndex,
+      messageToAdd,
       attemptIndex: _currentAttemptIndex, // Use the current attempt index
     );
 
@@ -389,8 +388,6 @@ class _MessagesBodyState extends State<MessagesBody> {
         msg.text = msg.text != null ? stripSSMLTags(msg.text!) : null;
         return msg;
       }).toList();
-
-
 
       setState(() {
         _chatHistory.removeLast(); // Remove the loading message
@@ -472,8 +469,6 @@ class _MessagesBodyState extends State<MessagesBody> {
   }*/
 
   void _playAudio(Uint8List audioBytes) async {
-    
-
     Directory tempDir = await getTemporaryDirectory();
     String tempPath = '${tempDir.path}/temp.mp3'; // Change to 'temp.aac'?
     File tempFile = File(tempPath);
@@ -506,9 +501,8 @@ class _MessagesBodyState extends State<MessagesBody> {
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) => Message(
-                    message: _chatHistory[index], 
-                    avatar: widget.avatar,
-                    audioPlayer: _audioPlayer),
+                    message: _chatHistory[index], avatar: widget.avatar),
+                //audioPlayer: _audioPlayer),
               ),
             ),
             Visibility(
@@ -536,7 +530,8 @@ class _MessagesBodyState extends State<MessagesBody> {
             vertical: kDefaultPadding * 0.1,
           ),
           decoration: BoxDecoration(
-            color: Colors.grey[200], //Theme.of(context).scaffoldBackgroundColor,
+            color:
+                Colors.grey[200], //Theme.of(context).scaffoldBackgroundColor,
             boxShadow: [
               BoxShadow(
                 offset: const Offset(0, 4),
@@ -546,18 +541,22 @@ class _MessagesBodyState extends State<MessagesBody> {
             ],
           ),
           child: SafeArea(
-            child: InputBar(onBtnSendPressed: (textOfMessage) {
+              child: InputBar(
+            onBtnSendPressed: (textOfMessage) {
               // Callback function when message is sent in InputBar
               tempChatHistoryContent =
                   textOfMessage; //hold on to this even afetr we've cleared input
               _showTextMessage(LocalMessageRole.user, tempChatHistoryContent);
               _sendTextMessageAndShowTextResponse(tempChatHistoryContent);
-            }, onBtnVideoPressed: () {
-            // Callback function when video button pressed is selected in InputBar
-            _showCameraModal(context);
-          }, onBtnAudioPressed: () {
-            _showAudioModal(context);
-          },)),
+            },
+            onBtnVideoPressed: () {
+              // Callback function when video button pressed is selected in InputBar
+              _showCameraModal(context);
+            },
+            onBtnAudioPressed: () {
+              _showAudioModal(context);
+            },
+          )),
         )
       ],
     );

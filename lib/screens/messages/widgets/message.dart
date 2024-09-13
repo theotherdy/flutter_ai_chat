@@ -18,12 +18,12 @@ class Message extends StatelessWidget {
     super.key,
     required this.message,
     required this.avatar,
-    required this.audioPlayer, // Add the AudioPlayer here
+    //required this.audioPlayer, // Add the AudioPlayer here
   });
 
   final LocalMessage message;
   final String avatar;
-  final AudioPlayer audioPlayer; // AudioPlayer instance
+  //final AudioPlayer audioPlayer; // AudioPlayer instance
   //final FlutterSoundPlayer flutterSoundPlayer;
 
   @override
@@ -35,7 +35,9 @@ class Message extends StatelessWidget {
         case LocalMessageType.loading:
           return LoadingMessage(message: message);
         case LocalMessageType.audio:
-          return AudioMessage(message: message, audioPlayer: audioPlayer); // Pass the AudioPlayer instance here
+          return AudioMessage(
+              message:
+                  message); //, audioPlayer: audioPlayer); // Pass the AudioPlayer instance here
         case LocalMessageType.video:
           //debugPrint(message.filePath.toString());
           return VideoMessage(message: message);

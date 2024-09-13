@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_ai_chat/constants.dart';
+
 class InputBar extends StatefulWidget {
   final Function(String) onBtnSendPressed;
   final Function() onBtnVideoPressed;
   final Function() onBtnAudioPressed;
 
-  const InputBar(
-      {super.key,
-      required this.onBtnSendPressed,
-      required this.onBtnVideoPressed,
-      required this.onBtnAudioPressed,});
+  const InputBar({
+    super.key,
+    required this.onBtnSendPressed,
+    required this.onBtnVideoPressed,
+    required this.onBtnAudioPressed,
+  });
 
   @override
   State<InputBar> createState() => _InputBarState();
@@ -47,14 +50,14 @@ class _InputBarState extends State<InputBar> {
           IconButton(
             icon: const Icon(
               Icons.mic_outlined,
-              color: Colors.green,
+              color: kPrimaryColor,
             ),
             onPressed: widget.onBtnAudioPressed,
           ),
           IconButton(
             icon: const Icon(
               Icons.videocam,
-              color: Colors.green,
+              color: kPrimaryColor,
             ),
             onPressed: widget.onBtnVideoPressed,
           ),
@@ -79,7 +82,9 @@ class _InputBarState extends State<InputBar> {
           IconButton(
             icon: Icon(
               Icons.send,
-              color: _isSendButtonActive ? Colors.green : Colors.grey, // Toggle button color
+              color: _isSendButtonActive
+                  ? kPrimaryColor
+                  : Colors.grey, // Toggle button color
             ),
             onPressed: _isSendButtonActive
                 ? () {

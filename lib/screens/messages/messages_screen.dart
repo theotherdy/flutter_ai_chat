@@ -36,9 +36,10 @@ class MessagesScreen extends StatelessWidget {
     }
 
     debugPrint('Coming in to MessagesScreen attemptIndex = $attemptIndex');
-    
+
     return Scaffold(
         appBar: buildAppBar(title, avatar, context, instructions),
+        backgroundColor: Colors.grey[100],
         body: MessagesBody(
           assistantId: assistantId,
           advisorId: advisorId,
@@ -83,8 +84,7 @@ class MessagesScreen extends StatelessWidget {
         return InformationModal(
             information: instructions, title: 'Instructions');
       },
-      
-    barrierDismissible: true,
+      barrierDismissible: true,
     );
   }
 }

@@ -37,7 +37,7 @@ class VideoThumbnail extends StatelessWidget {
       width: rectWidth,
       height: rectHeight,
       decoration: BoxDecoration(
-        color: kPrimaryColor.withOpacity(1),
+        color: kSecondaryColor.withOpacity(1),
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Stack(
@@ -70,4 +70,3 @@ class VideoThumbnail extends StatelessWidget {
     );
   }
 }
-

@@ -7,7 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 class AudioRecorder extends StatefulWidget {
   final Function(String filePath) onRecordingComplete;
 
-  const AudioRecorder({Key? key, required this.onRecordingComplete}) : super(key: key);
+  const AudioRecorder({Key? key, required this.onRecordingComplete})
+      : super(key: key);
 
   @override
   _AudioRecorderState createState() => _AudioRecorderState();
@@ -22,9 +23,11 @@ class _AudioRecorderState extends State<AudioRecorder> {
     // Request permission to access the microphone
     PermissionStatus status = await Permission.microphone.request();
     if (status.isGranted) {
-      debugPrint("Microphone permission granted");
+      //debugPrint("Microphone permission granted");
       Directory tempDir = await getTemporaryDirectory();
-      _audioPath = '${tempDir.path}/temp_audio.m4a';
+      // Generate a unique file name using a timestamp
+      String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _audioPath = '${tempDir.path}/$fileName';
 
       await _recorder.start(
         path: _audioPath,
@@ -37,9 +40,9 @@ class _AudioRecorderState extends State<AudioRecorder> {
         _isRecording = true;
       });
     } else if (status.isDenied) {
-      debugPrint('Microphone permission denied');
+      //debugPrint('Microphone permission denied');
     } else if (status.isPermanentlyDenied) {
-      debugPrint("Microphone permission permanently denied");
+      //debugPrint("Microphone permission permanently denied");
       openAppSettings(); // Opens the app settings for the user to manually allow the microphone permission
     }
   }
